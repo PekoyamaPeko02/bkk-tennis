@@ -6,6 +6,15 @@ using System.Text.Json;
 
 namespace BkkTennis.Api.Services;
 
+/// <summary>At most N bytes when UTF-8 encoded (bcrypt silently ignores everything after byte 72, so longer passwords must be refused).</summary>
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Parameter)]
+public sealed class MaxUtf8BytesAttribute(int maxBytes) : ValidationAttribute
+{
+    public override bool IsValid(object? value) => value is not string s || System.Text.Encoding.UTF8.GetByteCount(s) <= maxBytes;
+
+    public override string FormatErrorMessage(string name) => $"The {name} field must be at most {maxBytes} bytes (UTF-8).";
+}
+
 /// <summary>Not null, not an empty Guid / blank string / empty collection.</summary>
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Parameter)]
 public sealed class NotEmptyAttribute : ValidationAttribute

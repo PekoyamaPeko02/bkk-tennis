@@ -104,6 +104,8 @@ export interface VenueAvailability {
 export interface User {
   id: string;
   phone: string | null;
+  /** Set for partner staff (email + password login); null for OTP-only players. */
+  email: string | null;
   displayName: string | null;
   role: 'player' | 'partner_staff' | 'partner_owner' | 'platform_admin';
 }

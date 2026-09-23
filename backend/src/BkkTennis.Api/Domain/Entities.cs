@@ -32,6 +32,10 @@ public class User
     public string? DisplayName { get; set; }
     public string Locale { get; set; } = "th";
     public string Role { get; set; } = Roles.Player;
+    /// <summary>bcrypt; only partner staff have one (players use OTP). Never serialized.</summary>
+    public string? PasswordHash { get; set; }
+    public int FailedLogins { get; set; }
+    public DateTime? LockedUntil { get; set; }
     public DateTime CreatedAt { get; set; }
 }
 

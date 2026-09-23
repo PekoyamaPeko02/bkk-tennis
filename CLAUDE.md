@@ -16,6 +16,7 @@ Architecture plan: Claude Docs "ระบบจองคอร์ทเทนน
 ```bash
 pnpm install
 pnpm db:up          # first run applies db/init/*.sql; reset with: pnpm db:reset
+                    # existing volume + new db/init files (003/004…)? apply by hand: docker compose exec -T db psql -U bkktennis -d bkktennis -v ON_ERROR_STOP=1 < db/init/00X_….sql
 pnpm api            # terminal 1 → http://localhost:5080/swagger
 cd apps/player && pnpm dev:api   # terminal 2 → http://localhost:9000 (real API)
 pnpm dev:player     # alternative: mock API only, OTP = 123456
@@ -46,7 +47,7 @@ pnpm e2e            # Playwright (mock API, own dev server on :9100; first time:
 ## Status (Sprint 5 in progress, branch `feat/sprint-5-clubos`; Sprint 1 = PR #1)
 Done: monorepo, UI kit, player flow (discover → venue → OTP login → PromptPay QR → confirmed), .NET API, schema+seed, CI.
 Next (roadmap): Sprint 4 real gateway (Opn/GB Prime Pay/2C2P) + SMS OTP + LINE Login + notifications;
-Sprint 5 `/clubos` + `/admin` endpoints — DONE so far: walk-in + court blocks + check-in (`Features/ClubOs`; check-in window = `Booking:CheckInEarlyMinutes` (30) before first slot until last slot ends, idempotent, slots become `checked_in` and keep blocking), venue-member scoped; walk-ins are confirmed immediately with 0 commission; blocking over live bookings → 409 `block_conflict`); no-show (`Booking:NoShowGraceMinutes` 15 after first slot start; no refund, slots released; only from `confirmed`); prices (`/clubos/venues/{id}/prices` CRUD; read = staff, write = venue `owner` only; same court scope + same priority + overlapping time/day-type is rejected 409 `price_rule_ambiguous`; bookings keep the price they were sold at); TODO: onboarding, payouts, `/admin`, staff auth (staff log in via OTP for now);
+Sprint 5 `/clubos` + `/admin` endpoints — DONE so far: walk-in + court blocks + check-in (`Features/ClubOs`; check-in window = `Booking:CheckInEarlyMinutes` (30) before first slot until last slot ends, idempotent, slots become `checked_in` and keep blocking), venue-member scoped; walk-ins are confirmed immediately with 0 commission; blocking over live bookings → 409 `block_conflict`); no-show (`Booking:NoShowGraceMinutes` 15 after first slot start; no refund, slots released; only from `confirmed`); prices (`/clubos/venues/{id}/prices` CRUD; read = staff, write = venue `owner` only; same court scope + same priority + overlapping time/day-type is rejected 409 `price_rule_ambiguous`; bookings keep the price they were sold at); staff auth (C1: `POST /auth/staff/login` email+bcrypt password → same JWT; 5 wrong passwords lock the account 15 min; venue access = policies `VenueMember`/`VenueOwner` on `{venueId}`; dev accounts `owner@racquetclub.test` / `staff@racquetclub.test`, password `racquet-dev-2026`, seeded by `db/init/004`; ClubOS login page); TODO: onboarding, payouts, `/admin`;
 Sprint 6 payout job, load test, Capacitor store builds. Open question: platform collects money vs gateway split payment.
 
 ## Git

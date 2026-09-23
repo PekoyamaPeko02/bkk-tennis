@@ -1,12 +1,14 @@
 import { defineConfig, devices } from '@playwright/test';
 
-// Not 9000: a developer's own `pnpm dev:api` server usually lives there and must never be reused (it talks to the real DB).
-const PORT = 9100;
+// Not the usual 9000/9001: a developer's own `pnpm dev:api` servers usually live there and must never be reused
+// (they talk to the real DB). These are dedicated mock-mode servers.
+const PLAYER_PORT = 9100;
+const CLUBOS_PORT = 9101;
 
 /**
- * End-to-end tests run against the player app in mock-API mode (in-browser mock, OTP 123456), so they need no
- * backend or database. The mock keeps its state in memory: tests must navigate client-side (no page.goto after the
- * first load), otherwise bookings made earlier in the flow are lost.
+ * End-to-end tests run against the apps in mock-API mode (in-browser mock: player OTP 123456, ClubOS staff
+ * owner@racquetclub.test / racquet-dev-2026), so they need no backend or database. The mock keeps its state in memory:
+ * tests must navigate client-side (no page.goto after the first load), otherwise state made earlier in the flow is lost.
  */
 export default defineConfig({
   testDir: './tests',
@@ -17,18 +19,30 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['github'], ['list']] : 'list',
   use: {
-    baseURL: `http://localhost:${PORT}`,
     trace: 'retain-on-failure',
     locale: 'th-TH',
     timezoneId: 'Asia/Bangkok',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-  webServer: {
-    command: `pnpm --filter @bkk/player exec quasar dev --port ${PORT}`,
-    cwd: '..',
-    url: `http://localhost:${PORT}`,
-    reuseExistingServer: false,
-    timeout: 180_000,
-    env: { API_MOCK: 'true', API_BASE: '' },
-  },
+  projects: [
+    { name: 'player', testMatch: /booking-flow\.spec\.ts/, use: { ...devices['Desktop Chrome'], baseURL: `http://localhost:${PLAYER_PORT}` } },
+    { name: 'clubos', testMatch: /clubos-.*\.spec\.ts/, use: { ...devices['Desktop Chrome'], baseURL: `http://localhost:${CLUBOS_PORT}` } },
+  ],
+  webServer: [
+    {
+      command: `pnpm --filter @bkk/player exec quasar dev --port ${PLAYER_PORT}`,
+      cwd: '..',
+      url: `http://localhost:${PLAYER_PORT}`,
+      reuseExistingServer: false,
+      timeout: 180_000,
+      env: { API_MOCK: 'true', API_BASE: '' },
+    },
+    {
+      command: `pnpm --filter @bkk/clubos exec quasar dev --port ${CLUBOS_PORT}`,
+      cwd: '..',
+      url: `http://localhost:${CLUBOS_PORT}`,
+      reuseExistingServer: false,
+      timeout: 180_000,
+      env: { API_MOCK: 'true', API_BASE: '' },
+    },
+  ],
 });

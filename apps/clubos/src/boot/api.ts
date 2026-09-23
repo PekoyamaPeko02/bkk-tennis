@@ -1,14 +1,25 @@
 import { defineBoot } from '#q-app/wrappers';
 import { createHttpApi, createMockApi, type BkkApi } from '@bkk/api';
 import '@bkk/ui';
+import { useAuthStore } from 'stores/auth';
 
 export const isMockApi = process.env.API_MOCK === 'true';
 let api: BkkApi;
 export const useApi = () => api;
 
-// TODO(sprint 5): staff auth + /clubos and /admin endpoints. Until then this app reads the public API.
-export default defineBoot(() => {
+// Mock mode: owner@racquetclub.test / staff@racquetclub.test, password racquet-dev-2026 (same as db/init/004_seed_staff.sql).
+export default defineBoot(({ router }) => {
+  const auth = useAuthStore();
+  const getToken = () => auth.token;
   api = isMockApi
-    ? createMockApi({ getToken: () => null })
-    : createHttpApi({ baseUrl: `${process.env.API_BASE}/api/v1`, getToken: () => null });
+    ? createMockApi({ getToken })
+    : createHttpApi({
+        baseUrl: `${process.env.API_BASE}/api/v1`,
+        getToken,
+        // An expired/revoked token: drop the session and go back to the login form.
+        onUnauthorized: () => {
+          auth.logout();
+          void router.push({ name: 'login', query: { redirect: router.currentRoute.value.fullPath } });
+        },
+      });
 });

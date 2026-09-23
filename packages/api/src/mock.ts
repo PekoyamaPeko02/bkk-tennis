@@ -206,13 +206,21 @@ function publicBooking(b: MockBooking): Booking {
   return { ...rest, payment: rest.payment && { ...rest.payment, qrPayload: b.status === 'held' ? rest.payment.qrPayload : null } };
 }
 
+// ---------------------------------------------------------------- staff (ClubOS) — same accounts as db/init/004_seed_staff.sql
+const MOCK_STAFF_PASSWORD = 'racquet-dev-2026';
+const MOCK_STAFF: Record<string, User> = {
+  'owner@racquetclub.test': { id: 'u-owner', phone: '+66800000002', email: 'owner@racquetclub.test', displayName: 'Racquet Club Owner', role: 'partner_owner' },
+  'staff@racquetclub.test': { id: 'u-staff', phone: '+66800000004', email: 'staff@racquetclub.test', displayName: 'Racquet Club Front Desk', role: 'partner_staff' },
+};
+
 // ---------------------------------------------------------------- api
 export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
   const restoreUser = () => {
     const t = opts.getToken();
-    if (t?.startsWith('mock.') && !currentUser) {
+    if (t?.startsWith('mock.staff:') && !currentUser) currentUser = MOCK_STAFF[t.slice('mock.staff:'.length)] ?? null;
+    else if (t?.startsWith('mock.') && !currentUser) {
       const phone = t.slice(5);
-      currentUser = { id: 'u-' + phone, phone, displayName: null, role: 'player' };
+      currentUser = { id: 'u-' + phone, phone, email: null, displayName: null, role: 'player' };
     }
     if (!t) currentUser = null;
   };
@@ -256,8 +264,18 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
     async verifyOtp(phone, code, displayName) {
       await sleep(300);
       if (code !== '123456') throw new ApiError(400, 'otp_invalid', 'รหัสไม่ถูกต้อง (โหมดทดลองใช้ 123456)');
-      currentUser = { id: 'u-' + phone, phone, displayName: displayName ?? null, role: 'player' };
+      currentUser = { id: 'u-' + phone, phone, email: null, displayName: displayName ?? null, role: 'player' };
       return { accessToken: 'mock.' + phone, expiresAt: new Date(Date.now() + 7 * 86400_000).toISOString(), user: currentUser };
+    },
+
+    async staffLogin(email, password) {
+      await sleep(300);
+      const key = email.trim().toLowerCase();
+      const user = MOCK_STAFF[key];
+      if (!user || password !== MOCK_STAFF_PASSWORD)
+        throw new ApiError(400, 'invalid_credentials', `อีเมลหรือรหัสผ่านไม่ถูกต้อง (โหมดทดลอง: owner@racquetclub.test / ${MOCK_STAFF_PASSWORD})`);
+      currentUser = user;
+      return { accessToken: 'mock.staff:' + key, expiresAt: new Date(Date.now() + 7 * 86400_000).toISOString(), user };
     },
 
     async me() {

@@ -15,6 +15,8 @@ export interface BkkApi {
   getAvailability(venueId: string, date: string): Promise<VenueAvailability>;
   requestOtp(phone: string): Promise<OtpRequestResponse>;
   verifyOtp(phone: string, code: string, displayName?: string): Promise<AuthResponse>;
+  /** Partner staff (ClubOS). Wrong credentials → ApiError 400 `invalid_credentials` (never 401, which means "session expired"). */
+  staffLogin(email: string, password: string): Promise<AuthResponse>;
   me(): Promise<User>;
   createBooking(req: CreateBookingRequest, idempotencyKey: string): Promise<Booking>;
   myBookings(): Promise<Booking[]>;
@@ -71,6 +73,7 @@ export function createHttpApi(opt: HttpApiOptions): BkkApi {
     getAvailability: (id, date) => call('GET', `/venues/${id}/availability${qs({ date })}`),
     requestOtp: (phone) => call('POST', '/auth/otp/request', { phone }),
     verifyOtp: (phone, code, displayName) => call('POST', '/auth/otp/verify', { phone, code, displayName }),
+    staffLogin: (email, password) => call('POST', '/auth/staff/login', { email, password }),
     me: () => call('GET', '/auth/me'),
     createBooking: (req, key) => call('POST', '/bookings', req, { 'Idempotency-Key': key }),
     myBookings: () => call('GET', '/me/bookings'),

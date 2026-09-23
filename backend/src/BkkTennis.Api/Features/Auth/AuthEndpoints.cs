@@ -27,12 +27,17 @@ public record OtpVerify(
     [property: Required, MaxLength(12)] string Code,
     [property: MaxLength(80)] string? DisplayName);
 public record AuthResponse(string AccessToken, DateTime ExpiresAt, UserDto User);
-public record UserDto(Guid Id, string? Phone, string? DisplayName, string Role);
+public record UserDto(Guid Id, string? Phone, string? DisplayName, string Role, string? Email = null);
+public record StaffLogin([property: Required, MaxLength(254)] string Email, [property: Required, MaxLength(128), MaxUtf8Bytes(72)] string Password);
 
 public static class AuthEndpoints
 {
     private const int OtpTtlMinutes = 5;
     private const int MaxAttempts = 5;
+    private const int MaxFailedLogins = 5;
+    private const int LockMinutes = 15;
+    /// <summary>Verified when the account is unknown/ineligible so both paths cost the same bcrypt work.</summary>
+    private static readonly string DummyHash = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString(), workFactor: 10);
 
     public static RouteGroupBuilder MapAuth(this RouteGroupBuilder api)
     {
@@ -91,11 +96,46 @@ public static class AuthEndpoints
             return Results.Ok(Issue(user, jwt.Value, now));
         }).RequireRateLimiting("otp").WithValidation();
 
+        // Partner staff (ClubOS): email + password. Same JWT as the OTP flow; venue access is decided per venue by VenueAuthorization.
+        g.MapPost("/staff/login", async (StaffLogin req, AppDbContext db, IOptions<JwtOptions> jwt, TimeProvider clock, CancellationToken ct) =>
+        {
+            var email = req.Email.Trim().ToLowerInvariant();
+            var now = clock.GetUtcNow().UtcDateTime;
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Email == email, ct);
+
+            var eligible = user is { PasswordHash: not null } && user.Role is Roles.PartnerStaff or Roles.PartnerOwner;
+            var locked = user?.LockedUntil > now;
+            // Always run one bcrypt verify (against a dummy hash if need be) so timing doesn't reveal whether the email exists.
+            var passwordOk = BCrypt.Net.BCrypt.Verify(req.Password, eligible ? user!.PasswordHash! : DummyHash);
+
+            if (!eligible || locked || !passwordOk)
+            {
+                if (eligible && !locked)
+                {
+                    // Atomic, so parallel guesses can't slip past the limit: the 5th consecutive failure locks the account.
+                    var lockUntil = now.AddMinutes(LockMinutes);
+                    await db.Users.Where(u => u.Id == user!.Id).ExecuteUpdateAsync(s => s
+                        .SetProperty(u => u.LockedUntil, u => u.FailedLogins + 1 >= MaxFailedLogins ? lockUntil : u.LockedUntil)
+                        .SetProperty(u => u.FailedLogins, u => u.FailedLogins + 1 >= MaxFailedLogins ? 0 : u.FailedLogins + 1), ct);
+                }
+                // 400, not 401: the client signs the user out on any 401 (expired session), which would loop on the login form.
+                return Results.BadRequest(new { code = "invalid_credentials", message = "อีเมลหรือรหัสผ่านไม่ถูกต้อง (หรือบัญชีถูกล็อกชั่วคราว)" });
+            }
+
+            if (user!.FailedLogins != 0 || user.LockedUntil is not null)
+            {
+                user.FailedLogins = 0;
+                user.LockedUntil = null;
+                await db.SaveChangesAsync(ct);
+            }
+            return Results.Ok(Issue(user, jwt.Value, now));
+        }).RequireRateLimiting("otp").WithValidation();
+
         g.MapGet("/me", async (ClaimsPrincipal principal, AppDbContext db, CancellationToken ct) =>
         {
             var id = principal.UserId();
             var user = await db.Users.FindAsync([id], ct);
-            return user is null ? Results.NotFound() : Results.Ok(new UserDto(user.Id, user.Phone, user.DisplayName, user.Role));
+            return user is null ? Results.NotFound() : Results.Ok(new UserDto(user.Id, user.Phone, user.DisplayName, user.Role, user.Email));
         }).RequireAuthorization();
 
         return api;
@@ -113,7 +153,7 @@ public static class AuthEndpoints
         var creds = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(o.SigningKey)), SecurityAlgorithms.HmacSha256);
         var token = new JwtSecurityToken(o.Issuer, o.Audience, claims, nowUtc, expires, creds);
         return new AuthResponse(new JwtSecurityTokenHandler().WriteToken(token), expires,
-            new UserDto(user.Id, user.Phone, user.DisplayName, user.Role));
+            new UserDto(user.Id, user.Phone, user.DisplayName, user.Role, user.Email));
     }
 
     /// <summary>Accepts 0812345678 / +66812345678 / 66812345678 → +66812345678.</summary>
