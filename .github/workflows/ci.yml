@@ -31,6 +31,8 @@ jobs:
       - run: dotnet restore backend/BkkTennis.sln
       - run: dotnet build backend/BkkTennis.sln --no-restore -c Release
       - run: dotnet test backend/BkkTennis.sln --no-build -c Release --verbosity normal
+        env:
+          TEST_DB_PORT: 5432 # integration tests create their own database on the service container
 
   frontend:
     runs-on: ubuntu-latest
