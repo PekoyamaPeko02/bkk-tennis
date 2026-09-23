@@ -37,12 +37,13 @@ pnpm -r run typecheck && pnpm -r run build
 - Free cancel ≥ `venues.cancel_free_hours` (default 4h) before first slot.
 - Times stored UTC (timestamptz); venue local time via `VenueClock` (Asia/Bangkok).
 - Quasar tsconfig uses `exactOptionalPropertyTypes` — optional props need `| undefined`.
+- API forces InvariantCulture (Program.cs): the dev Mac is th-TH and would emit Buddhist-era years in `yyyy-MM-dd`.
 - UI copy is Thai-first with English labels, matching the Stitch design.
 
-## Status (end of Sprint 1, branch `feat/sprint-1-foundation`)
+## Status (Sprint 5 in progress, branch `feat/sprint-5-clubos`; Sprint 1 = PR #1)
 Done: monorepo, UI kit, player flow (discover → venue → OTP login → PromptPay QR → confirmed), .NET API, schema+seed, CI.
 Next (roadmap): Sprint 4 real gateway (Opn/GB Prime Pay/2C2P) + SMS OTP + LINE Login + notifications;
-Sprint 5 `/clubos` + `/admin` endpoints (walk-in, block, check-in, prices, onboarding, payouts) + staff auth;
+Sprint 5 `/clubos` + `/admin` endpoints — DONE so far: walk-in + court blocks (`Features/ClubOs`, venue-member scoped; walk-ins are confirmed immediately with 0 commission; blocking over live bookings → 409 `block_conflict`); TODO: check-in, prices, onboarding, payouts, `/admin`, staff auth (staff log in via OTP for now);
 Sprint 6 payout job, load test, Capacitor store builds. Open question: platform collects money vs gateway split payment.
 
 ## Git

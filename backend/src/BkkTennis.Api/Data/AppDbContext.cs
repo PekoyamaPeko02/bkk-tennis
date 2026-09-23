@@ -13,6 +13,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<OtpCode> OtpCodes => Set<OtpCode>();
     public DbSet<Partner> Partners => Set<Partner>();
     public DbSet<Venue> Venues => Set<Venue>();
+    public DbSet<VenueMember> VenueMembers => Set<VenueMember>();
     public DbSet<Court> Courts => Set<Court>();
     public DbSet<OperatingHours> OperatingHours => Set<OperatingHours>();
     public DbSet<PriceRule> PriceRules => Set<PriceRule>();
@@ -57,6 +58,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.HasMany(x => x.Addons).WithOne().HasForeignKey(x => x.VenueId);
         });
 
+        b.Entity<VenueMember>(e =>
+        {
+            e.ToTable("venue_members");
+            e.HasKey(x => new { x.VenueId, x.UserId });
+        });
+
         b.Entity<Court>().ToTable("courts");
 
         b.Entity<OperatingHours>(e =>
@@ -80,7 +87,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         b.Entity<Booking>(e =>
         {
             e.ToTable("bookings");
-            e.Property(x => x.Code).HasDefaultValueSql("('BT' || nextval('booking_code_seq'))").ValueGeneratedOnAdd();
+            // "" is the CLR default: tell EF it means "not set" so the DB default generates the code
+            // (otherwise the first booking is stored with code '' and the second violates the unique key).
+            e.Property(x => x.Code).HasDefaultValueSql("('BT' || nextval('booking_code_seq'))").HasSentinel("").ValueGeneratedOnAdd();
             e.Property(x => x.CreatedAt).HasDefaultValueSql("now()");
             e.Property(x => x.UpdatedAt).HasDefaultValueSql("now()");
             e.HasMany(x => x.Slots).WithOne().HasForeignKey(x => x.BookingId);

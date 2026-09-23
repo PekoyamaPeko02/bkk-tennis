@@ -218,3 +218,10 @@ public class Refund
     public string Status { get; set; } = "pending";
     public DateTime CreatedAt { get; set; }
 }
+
+public class VenueMember
+{
+    public Guid VenueId { get; set; }
+    public Guid UserId { get; set; }
+    public string Role { get; set; } = "staff";
+}

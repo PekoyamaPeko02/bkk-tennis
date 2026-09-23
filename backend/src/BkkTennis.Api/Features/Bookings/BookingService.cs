@@ -75,45 +75,8 @@ public class BookingService(
             throw new BookingException(409, "open_hold_exists", "คุณมีรายการที่รอชำระเงินอยู่ กรุณาชำระหรือยกเลิกก่อน");
 
         // ---- price every slot on the server; never trust client prices
-        var slots = new List<BookingSlot>();
-        foreach (var s in req.Slots.DistinctBy(s => (s.CourtId, s.Start)))
-        {
-            var court = venue.Courts.FirstOrDefault(c => c.Id == s.CourtId && c.IsActive)
-                ?? throw new BookingException(400, "court_not_found", "ไม่พบคอร์ท");
-            if (!TimeOnly.TryParse(s.Start, out var start))
-                throw new BookingException(400, "bad_time", $"รูปแบบเวลาไม่ถูกต้อง: {s.Start}");
-
-            var end = start.AddMinutes(hours.SlotMinutes);
-            var onGrid = (start - hours.OpenTime).TotalMinutes % hours.SlotMinutes == 0;
-            if (start < hours.OpenTime || end > hours.CloseTime || end <= start || !onGrid)
-                throw new BookingException(400, "outside_hours", $"{s.Start} อยู่นอกเวลาเปิดให้บริการ");
-
-            var startUtc = VenueClock.ToUtc(req.Date, start, venue.Timezone);
-            if (startUtc <= now)
-                throw new BookingException(400, "slot_in_past", $"{s.Start} เลยเวลาแล้ว");
-
-            var price = Pricing.PriceFor(venue.PriceRules, court.Id, req.Date, start, hours.SlotMinutes)
-                ?? throw new BookingException(400, "no_price", $"{s.Start} ยังไม่เปิดขาย");
-
-            slots.Add(new BookingSlot
-            {
-                Id = Guid.NewGuid(),
-                CourtId = court.Id,
-                StartAt = startUtc,
-                EndAt = startUtc.AddMinutes(hours.SlotMinutes),
-                Price = price.Price,
-                Label = price.Label,
-                Status = BookingStatus.Held,
-            });
-        }
-
-        // ---- maintenance blocks (bookings are guarded by the DB exclusion constraint)
-        foreach (var s in slots)
-        {
-            var blocked = await db.CourtBlocks.AnyAsync(b =>
-                b.CourtId == s.CourtId && b.StartAt < s.EndAt && b.EndAt > s.StartAt, ct);
-            if (blocked) throw new BookingException(409, "slot_blocked", "ช่วงเวลานี้ปิดปรับปรุง");
-        }
+        var slots = BuildSlots(venue, hours, req.Date, req.Slots, now, BookingStatus.Held, allowInProgress: false);
+        await EnsureNotBlockedAsync(slots, ct);
 
         // ---- add-ons
         var totalHours = slots.Sum(s => (decimal)(s.EndAt - s.StartAt).TotalHours);
@@ -183,6 +146,112 @@ public class BookingService(
         await notifier.ChangedAsync(venue.Id, [req.Date]);
         log.LogInformation("Booking {Code} held for user {User}, total {Total}", booking.Code, userId, total);
         return (booking, payment);
+    }
+
+    /// <summary>Validates requested slots against opening hours and prices them server-side.</summary>
+    /// <param name="allowInProgress">Walk-ins may start a slot that began earlier in the same slot window.</param>
+    public static List<BookingSlot> BuildSlots(
+        Venue venue, OperatingHours hours, DateOnly date, IEnumerable<SlotRequest> requested,
+        DateTime now, string status, bool allowInProgress)
+    {
+        var slots = new List<BookingSlot>();
+        foreach (var s in requested.DistinctBy(s => (s.CourtId, s.Start)))
+        {
+            var court = venue.Courts.FirstOrDefault(c => c.Id == s.CourtId && c.IsActive)
+                ?? throw new BookingException(400, "court_not_found", "ไม่พบคอร์ท");
+            if (!TimeOnly.TryParse(s.Start, out var start))
+                throw new BookingException(400, "bad_time", $"รูปแบบเวลาไม่ถูกต้อง: {s.Start}");
+
+            var end = start.AddMinutes(hours.SlotMinutes);
+            var onGrid = (start - hours.OpenTime).TotalMinutes % hours.SlotMinutes == 0;
+            if (start < hours.OpenTime || end > hours.CloseTime || end <= start || !onGrid)
+                throw new BookingException(400, "outside_hours", $"{s.Start} อยู่นอกเวลาเปิดให้บริการ");
+
+            var startUtc = VenueClock.ToUtc(date, start, venue.Timezone);
+            var endUtc = startUtc.AddMinutes(hours.SlotMinutes);
+            if (allowInProgress ? endUtc <= now : startUtc <= now)
+                throw new BookingException(400, "slot_in_past", $"{s.Start} เลยเวลาแล้ว");
+
+            var price = Pricing.PriceFor(venue.PriceRules, court.Id, date, start, hours.SlotMinutes)
+                ?? throw new BookingException(400, "no_price", $"{s.Start} ยังไม่เปิดขาย");
+
+            slots.Add(new BookingSlot
+            {
+                Id = Guid.NewGuid(),
+                CourtId = court.Id,
+                StartAt = startUtc,
+                EndAt = endUtc,
+                Price = price.Price,
+                Label = price.Label,
+                Status = status,
+            });
+        }
+        return slots;
+    }
+
+    /// <summary>Maintenance blocks are not covered by the DB exclusion constraint, so check them here.</summary>
+    public async Task EnsureNotBlockedAsync(IEnumerable<BookingSlot> slots, CancellationToken ct)
+    {
+        foreach (var s in slots)
+        {
+            var blocked = await db.CourtBlocks.AnyAsync(b =>
+                b.CourtId == s.CourtId && b.StartAt < s.EndAt && b.EndAt > s.StartAt, ct);
+            if (blocked) throw new BookingException(409, "slot_blocked", "ช่วงเวลานี้ปิดปรับปรุง");
+        }
+    }
+
+    /// <summary>
+    /// Front-desk booking created by venue staff: paid at the counter, so it is confirmed immediately
+    /// (no hold, no payment row) and carries no platform commission.
+    /// </summary>
+    public async Task<Booking> CreateWalkInAsync(
+        Guid staffUserId, Guid venueId, DateOnly date, List<SlotRequest> requested, string? customerName, CancellationToken ct)
+    {
+        if (requested is not { Count: > 0 })
+            throw new BookingException(400, "no_slots", "เลือกอย่างน้อย 1 ช่วงเวลา");
+        if (requested.Count > Opt.MaxSlotsPerBooking)
+            throw new BookingException(400, "too_many_slots", $"จองได้สูงสุด {Opt.MaxSlotsPerBooking} ช่วงต่อครั้ง");
+
+        var venue = await db.Venues.AsNoTracking()
+            .Include(v => v.Courts).Include(v => v.OperatingHours).Include(v => v.PriceRules)
+            .FirstOrDefaultAsync(v => v.Id == venueId, ct)
+            ?? throw new BookingException(404, "venue_not_found", "ไม่พบสนาม");
+
+        var now = clock.GetUtcNow().UtcDateTime;
+        var hours = venue.OperatingHours.FirstOrDefault(h => h.DayOfWeek == (short)date.DayOfWeek)
+            ?? throw new BookingException(400, "closed", "สนามปิดในวันที่เลือก");
+
+        var slots = BuildSlots(venue, hours, date, requested, now, BookingStatus.Confirmed, allowInProgress: true);
+        await EnsureNotBlockedAsync(slots, ct);
+
+        var subtotal = slots.Sum(s => s.Price);
+        var booking = new Booking
+        {
+            Id = Guid.NewGuid(),
+            UserId = null,
+            VenueId = venue.Id,
+            Status = BookingStatus.Confirmed,
+            Source = "walk_in",
+            CustomerName = string.IsNullOrWhiteSpace(customerName) ? null : customerName.Trim(),
+            Subtotal = subtotal,
+            Total = subtotal,
+            Commission = 0,
+            Slots = slots,
+        };
+        db.Bookings.Add(booking);
+        try
+        {
+            await db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.ExclusionViolation })
+        {
+            throw new BookingException(409, "slot_taken", "มีผู้จองช่วงเวลานี้แล้ว");
+        }
+
+        await db.Entry(booking).ReloadAsync(ct);
+        await notifier.ChangedAsync(venue.Id, [date]);
+        log.LogInformation("Walk-in {Code} created by staff {Staff}, total {Total}", booking.Code, staffUserId, subtotal);
+        return booking;
     }
 
     /// <summary>Called from the payment webhook. Idempotent.</summary>

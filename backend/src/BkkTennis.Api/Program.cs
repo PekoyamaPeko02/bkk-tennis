@@ -1,7 +1,9 @@
+using System.Globalization;
 using System.Text;
 using BkkTennis.Api.Data;
 using BkkTennis.Api.Features.Auth;
 using BkkTennis.Api.Features.Bookings;
+using BkkTennis.Api.Features.ClubOs;
 using BkkTennis.Api.Features.Payments;
 using BkkTennis.Api.Features.Venues;
 using BkkTennis.Api.Hubs;
@@ -11,6 +13,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+
+// Wire formats (yyyy-MM-dd, HH:mm) must not depend on the host locale: a th-TH machine would emit Buddhist-era years.
+CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
+CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
 var builder = WebApplication.CreateBuilder(args);
 var cfg = builder.Configuration;
@@ -101,6 +108,7 @@ var api = app.MapGroup("/api/v1");
 api.MapAuth();
 api.MapVenues();
 api.MapBookings();
+api.MapClubOs();
 api.MapPayments(app.Environment);
 
 app.MapHub<AvailabilityHub>("/hubs/availability");
