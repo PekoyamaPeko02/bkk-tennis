@@ -4,7 +4,8 @@ Worked top-down by `/next` (see `.claude/commands/next.md`). One item = one or m
 Mark done with `- [x]` + one note line. Items needing a human decision/credentials → `BLOCKED: <reason>`.
 
 ## Sprint 2 — Test foundation & hardening
-- [ ] **T1 API integration test harness** — `BkkTennis.IntegrationTests` project (WebApplicationFactory, per-run test DB on :5433 built from `db/init/*.sql`, fake TimeProvider, OTP login helper). Added to sln and CI (CI service DB on 5432 → make port configurable via env `TEST_DB_PORT`).
+- [x] **T1 API integration test harness** — `BkkTennis.IntegrationTests` project (WebApplicationFactory, per-run test DB on :5433 built from `db/init/*.sql`, fake TimeProvider, OTP login helper). Added to sln and CI (CI service DB on 5432 → make port configurable via env `TEST_DB_PORT`).
+  - Done 1d8108f: `ApiFactory` (Development env, FakeTimeProvider starting at real now — forward-only, `HoldExpiryJob` removed so tests call `BookingService.ExpireHoldsAsync`), `TestDatabase` (env `TEST_DB_HOST/PORT/USER/PASSWORD`), `LoginAsync`/`NewPhone` helpers, `[Collection("api")]`. Follow-up: unreachable-DB error message not verified; a killed test process leaves a `bkktennis_test_*` DB behind.
 - [ ] **T2 Booking flow integration tests** — hold → 201 with QR; overlapping hold by another user → 409 `slot_taken`; open-hold rule → 409; hold expiry frees the slot; simulate-payment confirms; late payment after expiry: re-confirm if free / refund if taken; cancel ≥4h refunds 100%, <4h refunds 0; idempotency key returns same booking.
 - [ ] **T3 Venue search tests** — radius filter via PostGIS, surface/indoor filters, sort orders, time-window free slots, 404 for unknown slug.
 - [ ] **T4 Playwright e2e (mock mode)** — root `e2e/` package + `pnpm e2e` script + CI job: discover → venue (tomorrow) → select 2 slots + add-on → login (123456) → QR page → simulate → confirmed → appears in "การจองของฉัน" → cancel.
