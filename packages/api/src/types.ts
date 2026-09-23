@@ -84,6 +84,74 @@ export interface Slot {
   status: SlotStatus;
 }
 
+// ---------------------------------------------------------------- ClubOS schedule (GET /clubos/venues/{id}/schedule)
+/** A cell shows its booking even in the past; `past` only describes empty cells. */
+export type ScheduleSlotStatus =
+  | 'available' | 'held' | 'booked' | 'checked_in' | 'completed' | 'no_show' | 'blocked' | 'past' | 'closed';
+/** counter = walk-in paid at the desk (no payment row). */
+export type PaymentState = 'paid' | 'pending' | 'failed' | 'refunded' | 'counter' | 'none';
+
+export interface ScheduleSlot extends Omit<Slot, 'status'> {
+  status: ScheduleSlotStatus;
+  bookingId: string | null;
+  blockId: string | null;
+}
+
+export interface ScheduleCourt extends Omit<CourtAvailability, 'slots'> {
+  slots: ScheduleSlot[];
+}
+
+export interface ScheduleBooking {
+  id: string;
+  code: string;
+  status: BookingStatus;
+  source: 'app' | 'walk_in';
+  customerName: string | null;
+  /** Masked by the server (081-***-5678); the full number never reaches the portal. */
+  customerPhone: string | null;
+  paymentState: PaymentState;
+  total: number;
+  addonTotal: number;
+  holdExpiresAt: string | null;
+  createdAt: string;
+  slots: { courtId: string; courtName: string; start: string; end: string; price: number }[];
+  addons: { addonId: string; name: string; qty: number; lineTotal: number }[];
+}
+
+export interface ScheduleBlock {
+  id: string;
+  courtId: string;
+  reason: 'maintenance' | 'cleaning' | 'event' | 'other';
+  note: string | null;
+  start: string;
+  end: string;
+  startAt: string;
+  endAt: string;
+}
+
+export interface ScheduleKpis {
+  sellableSlots: number;
+  occupiedSlots: number;
+  heldSlots: number;
+  occupancyPct: number;
+  revenue: number;
+  onlineRevenue: number;
+  walkInRevenue: number;
+  onlineBookings: number;
+  walkInBookings: number;
+  pendingBookings: number;
+}
+
+export interface Schedule {
+  venueId: string;
+  date: string;
+  slotMinutes: number;
+  courts: ScheduleCourt[];
+  bookings: ScheduleBooking[];
+  blocks: ScheduleBlock[];
+  kpis: ScheduleKpis;
+}
+
 export interface CourtAvailability {
   courtId: string;
   name: string;

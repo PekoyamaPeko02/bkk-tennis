@@ -41,6 +41,10 @@ public static class ClubOsEndpoints
         g.MapGet("/availability", async (Guid venueId, DateOnly date, AvailabilityService availability, CancellationToken ct) =>
             await availability.ForVenueAsync(venueId, date, ct) is { } dto ? Results.Ok(dto) : Results.NotFound());
 
+        // The portal's day view: grid + booking/block details + KPIs in one call (date defaults to today at the venue).
+        g.MapGet("/schedule", async (Guid venueId, DateOnly? date, ScheduleService schedule, CancellationToken ct) =>
+            await schedule.BuildAsync(venueId, date, ct) is { } dto ? Results.Ok(dto) : Results.NotFound());
+
         g.MapGet("/bookings", async (Guid venueId, DateOnly date, AppDbContext db, CancellationToken ct) =>
         {
             var tz = await db.Venues.Where(v => v.Id == venueId).Select(v => v.Timezone).FirstAsync(ct);

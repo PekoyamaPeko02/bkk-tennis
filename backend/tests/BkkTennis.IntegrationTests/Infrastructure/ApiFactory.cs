@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Time.Testing;
 
 namespace BkkTennis.IntegrationTests.Infrastructure;
@@ -50,6 +51,28 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         }
     }
 
+    private int _sqlCommands;
+
+    /// <summary>Number of SQL commands EF has executed so far (all requests). Diff it around one request when nothing else runs.</summary>
+    public int SqlCommands => Volatile.Read(ref _sqlCommands);
+
+    private sealed class CommandCounter(ApiFactory owner) : Microsoft.Extensions.Logging.ILoggerProvider
+    {
+        public Microsoft.Extensions.Logging.ILogger CreateLogger(string categoryName) => new Counter(owner);
+        public void Dispose() { }
+
+        private sealed class Counter(ApiFactory owner) : Microsoft.Extensions.Logging.ILogger
+        {
+            public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+            public bool IsEnabled(Microsoft.Extensions.Logging.LogLevel level) => level >= Microsoft.Extensions.Logging.LogLevel.Information;
+            public void Log<TState>(Microsoft.Extensions.Logging.LogLevel level, Microsoft.Extensions.Logging.EventId id, TState state,
+                Exception? exception, Func<TState, Exception?, string> formatter)
+            {
+                if (id.Id == Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.CommandExecuted.Id) Interlocked.Increment(ref owner._sqlCommands);
+            }
+        }
+    }
+
     async Task IAsyncLifetime.DisposeAsync()
     {
         await base.DisposeAsync();
@@ -64,8 +87,11 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         // Every test logs in through OTP from the same (null) client IP: keep the per-IP limiter out of the way
         // unless a test lowers it on purpose (see HardeningTests).
         builder.UseSetting("RateLimit:Otp:PermitLimit", "1000000");
+        // Count executed SQL commands (EF logs them at Information; appsettings.json mutes that category to Warning).
+        builder.ConfigureLogging(l => l.AddFilter<CommandCounter>("Microsoft.EntityFrameworkCore.Database.Command", Microsoft.Extensions.Logging.LogLevel.Information));
         builder.ConfigureServices(services =>
         {
+            services.AddSingleton<Microsoft.Extensions.Logging.ILoggerProvider>(new CommandCounter(this));
             services.AddSingleton<Microsoft.Extensions.Logging.ILoggerProvider>(new ErrorCapture(ServerErrors));
             services.RemoveAll<TimeProvider>();
             services.AddSingleton<TimeProvider>(Clock);

@@ -35,6 +35,7 @@ public class ClubOsAuthorizationTests(ApiFactory api)
     public static IEnumerable<object[]> Operations() =>
     [
         ["GET", "/availability?date=" + Day, false],
+        ["GET", "/schedule?date=" + Day, false],
         ["GET", "/bookings?date=" + Day, false],
         ["GET", "/blocks?date=" + Day, false],
         ["GET", "/prices", false],

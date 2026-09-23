@@ -2,7 +2,7 @@
 // Data mirrors db/init/002_seed.sql. Logic mirrors Pricing/AvailabilityService/BookingService.
 import { ApiError, type BkkApi } from './client';
 import type {
-  Addon, Booking, BookingStatus, Court, CreateBookingRequest, Slot, User,
+  Addon, Booking, BookingStatus, Court, CreateBookingRequest, Schedule, ScheduleBooking, ScheduleCourt, ScheduleSlot, Slot, User,
   VenueAvailability, VenueDetail, VenueSummary,
 } from './types';
 
@@ -169,6 +169,59 @@ function availability(v: MockVenue, date: string): VenueAvailability {
   };
 }
 
+const MOCK_CUSTOMERS = ['สมชาย ก.', 'Nicha P.', 'คุณวีระ', 'Alex T.', 'ปิยะ ม.', 'Mali S.'];
+
+/** ClubOS day view built from the public availability: pre-booked cells become fake bookings, real mock bookings keep their own data. */
+function schedule(v: MockVenue, date: string): Schedule {
+  const av = availability(v, date);
+  const found = new Map<string, ScheduleBooking>();
+  const courts: ScheduleCourt[] = av.courts.map((c) => ({
+    ...c,
+    slots: c.slots.map((s): ScheduleSlot => {
+      const empty = { bookingId: null, blockId: null };
+      if (s.status !== 'booked' && s.status !== 'held') return { ...s, status: s.status, ...empty };
+      const real = slotTaken(c.courtId, s.startAt);
+      const id = real?.id ?? `mock-${c.courtId}-${date}-${s.start}`;
+      if (!found.has(id)) {
+        const n = Math.abs([...id].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) | 0, 0));
+        const walkIn = !real && n % 3 === 0;
+        found.set(id, {
+          id,
+          code: real?.code ?? `BT${10000 + (n % 90000)}`,
+          status: s.status === 'held' ? 'held' : 'confirmed',
+          source: walkIn ? 'walk_in' : 'app',
+          customerName: real ? (currentUser?.displayName ?? 'ลูกค้าแอป') : MOCK_CUSTOMERS[n % MOCK_CUSTOMERS.length]!,
+          customerPhone: walkIn ? null : `08${n % 10}-***-${String(1000 + (n % 9000))}`,
+          paymentState: walkIn ? 'counter' : s.status === 'held' ? 'pending' : 'paid',
+          total: real?.total ?? s.price ?? 0,
+          addonTotal: real?.addonTotal ?? 0,
+          holdExpiresAt: real?.holdExpiresAt ?? null,
+          createdAt: real?.createdAt ?? new Date().toISOString(),
+          slots: [{ courtId: c.courtId, courtName: c.name, start: s.start, end: s.end, price: s.price ?? 0 }],
+          addons: [],
+        });
+      }
+      return { ...s, status: s.status === 'held' ? 'held' : 'booked', bookingId: id, blockId: null };
+    }),
+  }));
+
+  const cells = courts.flatMap((c) => c.slots);
+  const occupied = cells.filter((s) => s.status === 'booked').length;
+  const sellable = cells.filter((s) => s.price !== null || s.bookingId).length;
+  const sold = [...found.values()].filter((b) => b.status === 'confirmed');
+  const sum = (xs: ScheduleBooking[]) => xs.reduce((t, b) => t + b.total, 0);
+  return {
+    venueId: v.s.id, date, slotMinutes: av.slotMinutes, courts, bookings: [...found.values()], blocks: [],
+    kpis: {
+      sellableSlots: sellable, occupiedSlots: occupied, heldSlots: cells.filter((s) => s.status === 'held').length,
+      occupancyPct: sellable ? Math.round((100 * occupied) / sellable) : 0,
+      revenue: sum(sold), onlineRevenue: sum(sold.filter((b) => b.source === 'app')), walkInRevenue: sum(sold.filter((b) => b.source === 'walk_in')),
+      onlineBookings: sold.filter((b) => b.source === 'app').length, walkInBookings: sold.filter((b) => b.source === 'walk_in').length,
+      pendingBookings: [...found.values()].filter((b) => b.status === 'held').length,
+    },
+  };
+}
+
 function summary(v: MockVenue, loc?: { lat: number; lng: number }, date?: string, from = '00:00', to = '99:99'): VenueSummary {
   const prices = v.rules.map((r) => r.price);
   const free = date
@@ -254,6 +307,14 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
     async getAvailability(id, date) {
       await sleep(150);
       return availability(findVenue(id), date);
+    },
+
+    async getSchedule(venueId, date) {
+      await sleep(200);
+      restoreUser();
+      const user = requireUser();
+      if (user.role !== 'partner_staff' && user.role !== 'partner_owner') throw new ApiError(403, 'forbidden', 'ไม่มีสิทธิ์เข้าถึง');
+      return schedule(findVenue(venueId), date ?? bangkokToday());
     },
 
     async requestOtp(phone) {

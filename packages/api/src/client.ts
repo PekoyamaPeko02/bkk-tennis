@@ -1,5 +1,5 @@
 import type {
-  AuthResponse, Booking, CreateBookingRequest, OtpRequestResponse, User,
+  AuthResponse, Booking, CreateBookingRequest, OtpRequestResponse, Schedule, User,
   VenueAvailability, VenueDetail, VenueSearchParams, VenueSearchResult,
 } from './types';
 
@@ -22,6 +22,8 @@ export interface BkkApi {
   myBookings(): Promise<Booking[]>;
   getBooking(id: string): Promise<Booking>;
   cancelBooking(id: string): Promise<{ booking: Booking; refund: number }>;
+  /** ClubOS (staff of the venue): the day grid with bookings, blocks and KPIs. Date defaults to today at the venue. */
+  getSchedule(venueId: string, date?: string): Promise<Schedule>;
   /** Development only — pretends the PromptPay QR was paid. */
   simulatePayment(id: string): Promise<Booking>;
 }
@@ -79,6 +81,7 @@ export function createHttpApi(opt: HttpApiOptions): BkkApi {
     myBookings: () => call('GET', '/me/bookings'),
     getBooking: (id) => call('GET', `/me/bookings/${id}`),
     cancelBooking: (id) => call('POST', `/me/bookings/${id}/cancel`),
+    getSchedule: (venueId, date) => call('GET', `/clubos/venues/${venueId}/schedule${qs({ date })}`),
     simulatePayment: (id) => call('POST', `/dev/bookings/${id}/simulate-payment`),
   };
 }
