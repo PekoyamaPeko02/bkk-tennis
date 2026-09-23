@@ -1,9 +1,11 @@
+using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using BkkTennis.Api.Data;
 using BkkTennis.Api.Domain;
+using BkkTennis.Api.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -19,8 +21,11 @@ public class JwtOptions
     public int AccessTokenDays { get; set; } = 7;
 }
 
-public record OtpRequest(string Phone);
-public record OtpVerify(string Phone, string Code, string? DisplayName);
+public record OtpRequest([property: Required, MaxLength(20)] string Phone);
+public record OtpVerify(
+    [property: Required, MaxLength(20)] string Phone,
+    [property: Required, MaxLength(12)] string Code,
+    [property: MaxLength(80)] string? DisplayName);
 public record AuthResponse(string AccessToken, DateTime ExpiresAt, UserDto User);
 public record UserDto(Guid Id, string? Phone, string? DisplayName, string Role);
 
@@ -50,7 +55,7 @@ public static class AuthEndpoints
             // TODO(sprint 4): send via SMS provider. In Development the code is returned for convenience.
             lf.CreateLogger("Otp").LogInformation("OTP for {Phone}: {Code}", phone, env.IsDevelopment() ? code : "******");
             return Results.Ok(new { phone, expiresInSeconds = OtpTtlMinutes * 60, devCode = env.IsDevelopment() ? code : null });
-        });
+        }).RequireRateLimiting("otp").WithValidation();
 
         g.MapPost("/otp/verify", async (OtpVerify req, AppDbContext db, IOptions<JwtOptions> jwt,
             TimeProvider clock, CancellationToken ct) =>
@@ -84,7 +89,7 @@ public static class AuthEndpoints
             await db.SaveChangesAsync(ct);
 
             return Results.Ok(Issue(user, jwt.Value, now));
-        });
+        }).RequireRateLimiting("otp").WithValidation();
 
         g.MapGet("/me", async (ClaimsPrincipal principal, AppDbContext db, CancellationToken ct) =>
         {

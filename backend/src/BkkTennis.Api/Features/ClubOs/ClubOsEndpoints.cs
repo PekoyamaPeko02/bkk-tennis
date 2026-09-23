@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using BkkTennis.Api.Data;
 using BkkTennis.Api.Domain;
@@ -9,11 +10,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BkkTennis.Api.Features.ClubOs;
 
-public record WalkInRequest(DateOnly Date, List<SlotRequest> Slots, string? CustomerName);
-public record CreateBlockRequest(Guid CourtId, DateTimeOffset StartAt, DateTimeOffset EndAt, string? Reason, string? Note);
+public record WalkInRequest(
+    DateOnly Date, [property: MaxLength(50)] List<SlotRequest> Slots, [property: MaxLength(100)] string? CustomerName);
+public record CreateBlockRequest(
+    [property: NotEmpty] Guid CourtId, DateTimeOffset StartAt, DateTimeOffset EndAt,
+    [property: MaxLength(40)] string? Reason, [property: MaxLength(500)] string? Note);
 
 public record WalkInDto(Guid Id, string Code, string Status, string? CustomerName, decimal Total, List<BookingSlotDto> Slots);
-public record PriceRuleRequest(Guid? CourtId, string DayType, string Start, string End, decimal PricePerHour, string? Label, int Priority);
+public record PriceRuleRequest(
+    Guid? CourtId, [property: Required, MaxLength(20)] string DayType, [property: Required, MaxLength(8)] string Start,
+    [property: Required, MaxLength(8)] string End, decimal PricePerHour, [property: MaxLength(80)] string? Label, int Priority);
 public record PriceRuleDto(
     Guid Id, Guid? CourtId, string? CourtName, string DayType, string Start, string End, decimal PricePerHour, string? Label, int Priority);
 public record CourtBlockDto(Guid Id, Guid CourtId, string CourtName, DateTime StartAt, DateTime EndAt, string Reason, string? Note);
@@ -92,7 +98,7 @@ public static class ClubOsEndpoints
                 .FirstAsync(b => b.Id == booking.Id, ct);
             return Results.Created($"/api/v1/clubos/venues/{venueId}/bookings?date={req.Date:yyyy-MM-dd}",
                 new WalkInDto(full.Id, full.Code, full.Status, full.CustomerName, full.Total, ToSlotDtos(full, tz)));
-        });
+        }).WithValidation();
 
         g.MapGet("/blocks", async (Guid venueId, DateOnly date, AppDbContext db, CancellationToken ct) =>
         {
@@ -153,7 +159,7 @@ public static class ClubOsEndpoints
             await NotifyRangeAsync(db, notifier, venueId, start, end);
             return Results.Created($"/api/v1/clubos/venues/{venueId}/blocks/{block.Id}",
                 new CourtBlockDto(block.Id, court.Id, court.Name, start, end, reason, block.Note));
-        });
+        }).WithValidation();
 
         g.MapDelete("/blocks/{blockId:guid}", async (
             Guid venueId, Guid blockId, AppDbContext db, AvailabilityNotifier notifier, CancellationToken ct) =>
@@ -188,7 +194,7 @@ public static class ClubOsEndpoints
             await db.SaveChangesAsync(ct);
             var courts = await db.Courts.AsNoTracking().Where(c => c.VenueId == venueId).ToDictionaryAsync(c => c.Id, c => c.Name, ct);
             return Results.Created($"/api/v1/clubos/venues/{venueId}/prices/{rule.Id}", ToDto(rule, courts));
-        }).AddEndpointFilter(RequireVenueOwner);
+        }).AddEndpointFilter(RequireVenueOwner).WithValidation();
 
         g.MapPut("/prices/{ruleId:guid}", async (Guid venueId, Guid ruleId, PriceRuleRequest req, AppDbContext db, CancellationToken ct) =>
         {
@@ -198,7 +204,7 @@ public static class ClubOsEndpoints
             await db.SaveChangesAsync(ct);
             var courts = await db.Courts.AsNoTracking().Where(c => c.VenueId == venueId).ToDictionaryAsync(c => c.Id, c => c.Name, ct);
             return Results.Ok(ToDto(rule, courts));
-        }).AddEndpointFilter(RequireVenueOwner);
+        }).AddEndpointFilter(RequireVenueOwner).WithValidation();
 
         g.MapDelete("/prices/{ruleId:guid}", async (Guid venueId, Guid ruleId, AppDbContext db, CancellationToken ct) =>
         {

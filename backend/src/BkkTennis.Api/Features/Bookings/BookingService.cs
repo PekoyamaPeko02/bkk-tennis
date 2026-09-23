@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using BkkTennis.Api.Data;
 using BkkTennis.Api.Domain;
 using BkkTennis.Api.Features.Payments;
@@ -9,9 +10,13 @@ using Npgsql;
 
 namespace BkkTennis.Api.Features.Bookings;
 
-public record SlotRequest(Guid CourtId, string Start);
-public record AddonRequest(Guid AddonId, int Qty = 1);
-public record CreateBookingRequest(Guid VenueId, DateOnly Date, List<SlotRequest> Slots, List<AddonRequest>? Addons);
+public record SlotRequest([property: NotEmpty] Guid CourtId, [property: Required, MaxLength(8)] string Start);
+public record AddonRequest([property: NotEmpty] Guid AddonId, [property: Range(0, 50)] int Qty = 1);
+public record CreateBookingRequest(
+    [property: NotEmpty] Guid VenueId,
+    DateOnly Date,
+    [property: MaxLength(50)] List<SlotRequest> Slots, // emptiness is a domain rule (no_slots), the cap only bounds abuse
+    [property: MaxLength(50)] List<AddonRequest>? Addons);
 
 public class BookingOptions
 {

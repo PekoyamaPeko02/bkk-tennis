@@ -26,7 +26,7 @@ public static class BookingEndpoints
             var key = http.Headers["Idempotency-Key"].FirstOrDefault();
             var (booking, _) = await bookings.CreateHoldAsync(user.UserId(), req, key, ct);
             return Results.Created($"/api/v1/me/bookings/{booking.Id}", await LoadDtoAsync(db, booking.Id, ct));
-        }).RequireAuthorization().WithTags("Bookings");
+        }).RequireAuthorization().WithValidation().WithTags("Bookings");
 
         var me = api.MapGroup("/me/bookings").RequireAuthorization().WithTags("Bookings");
 

@@ -60,6 +60,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         // Development: the OTP endpoint returns `devCode`, which the login helper relies on.
         builder.UseEnvironment("Development");
         builder.UseSetting("ConnectionStrings:Default", _db.ConnectionString);
+        // Every test logs in through OTP from the same (null) client IP: keep the per-IP limiter out of the way
+        // unless a test lowers it on purpose (see HardeningTests).
+        builder.UseSetting("RateLimit:Otp:PermitLimit", "1000000");
         builder.ConfigureServices(services =>
         {
             services.AddSingleton<Microsoft.Extensions.Logging.ILoggerProvider>(new ErrorCapture(ServerErrors));

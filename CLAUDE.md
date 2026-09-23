@@ -39,6 +39,8 @@ pnpm e2e            # Playwright (mock API, own dev server on :9100; first time:
 - Times stored UTC (timestamptz); venue local time via `VenueClock` (Asia/Bangkok).
 - Quasar tsconfig uses `exactOptionalPropertyTypes` — optional props need `| undefined`.
 - API forces InvariantCulture (Program.cs): the dev Mac is th-TH and would emit Buddhist-era years in `yyyy-MM-dd`.
+- API errors are always JSON `{ code, message }` (validation adds `errors`): domain rules throw `BookingException`; bodiless 401/403/404/405 are filled in by `UseStatusCodePages`. Request DTOs are validated with DataAnnotations via `.WithValidation()` — add it AFTER any auth filters on the endpoint (else callers get 400 instead of 403).
+- OTP endpoints are rate limited per client IP (`RateLimit:Otp:PermitLimit`/`WindowSeconds`, default 10/60 s). Behind a proxy this needs forwarded-headers config first. `/health` checks the DB (503 when down).
 - UI copy is Thai-first with English labels, matching the Stitch design.
 
 ## Status (Sprint 5 in progress, branch `feat/sprint-5-clubos`; Sprint 1 = PR #1)

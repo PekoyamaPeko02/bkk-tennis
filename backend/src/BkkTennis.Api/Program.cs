@@ -10,7 +10,6 @@ using BkkTennis.Api.Hubs;
 using BkkTennis.Api.Jobs;
 using BkkTennis.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -26,6 +25,7 @@ var cfg = builder.Configuration;
 builder.Services.Configure<JwtOptions>(cfg.GetSection("Jwt"));
 builder.Services.Configure<PaymentOptions>(cfg.GetSection("Payments"));
 builder.Services.Configure<BookingOptions>(cfg.GetSection("Booking"));
+builder.Services.Configure<RateLimitOptions>(cfg.GetSection("RateLimit"));
 var jwt = cfg.GetSection("Jwt").Get<JwtOptions>() ?? new JwtOptions();
 
 // ---------------------------------------------------------------- data
@@ -73,25 +73,23 @@ builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
     p.WithOrigins(origins).AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(o => o.CustomSchemaIds(t => t.FullName?.Replace('+', '.') ?? t.Name));
-builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<ApiExceptionHandler>();
+builder.Services.AddApiRateLimiting();
 
 var app = builder.Build();
 
 // CORS first so error responses (500 etc.) still carry CORS headers and the browser can read them.
 app.UseCors();
 
+// Expected failures (BookingException, malformed requests) are answered by ApiExceptionHandler; anything else is a 500.
 app.UseExceptionHandler(errorApp => errorApp.Run(async ctx =>
 {
-    var ex = ctx.Features.Get<IExceptionHandlerFeature>()?.Error;
-    if (ex is BookingException be)
-    {
-        ctx.Response.StatusCode = be.Status;
-        await ctx.Response.WriteAsJsonAsync(new { code = be.Code, message = be.Message });
-        return;
-    }
     ctx.Response.StatusCode = StatusCodes.Status500InternalServerError;
-    await ctx.Response.WriteAsJsonAsync(new { code = "server_error", message = "เกิดข้อผิดพลาด กรุณาลองใหม่" });
+    var (code, message) = ApiErrors.For(StatusCodes.Status500InternalServerError);
+    await ctx.Response.WriteAsJsonAsync(new { code, message });
 }));
+// Bodiless 401/403/404/405 … get the same { code, message } JSON.
+app.UseStatusCodePages(ApiErrors.WriteStatusPageAsync);
 
 if (app.Environment.IsDevelopment())
 {
@@ -99,10 +97,22 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+// Liveness + database reachability (503 when Postgres is down, so orchestrators stop routing to this instance).
+app.MapGet("/health", async (AppDbContext db, CancellationToken ct) =>
+{
+    using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
+    timeout.CancelAfter(TimeSpan.FromSeconds(3));
+    var up = false;
+    try { up = await db.Database.CanConnectAsync(timeout.Token); }
+    catch (OperationCanceledException) when (!ct.IsCancellationRequested) { }
+    return up
+        ? Results.Ok(new { status = "ok", db = "up" })
+        : Results.Json(new { status = "degraded", db = "down" }, statusCode: StatusCodes.Status503ServiceUnavailable);
+});
 
 var api = app.MapGroup("/api/v1");
 api.MapAuth();
