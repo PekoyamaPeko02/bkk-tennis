@@ -5,6 +5,8 @@
 services:
   db:
     image: postgis/postgis:16-3.4
+    # postgis/postgis has no arm64 build; on Apple Silicon it runs under Rosetta emulation (fine for dev)
+    platform: linux/amd64
     environment:
       POSTGRES_DB: bkktennis
       POSTGRES_USER: bkktennis
