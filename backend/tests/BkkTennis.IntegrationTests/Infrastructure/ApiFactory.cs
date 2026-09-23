@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using BkkTennis.Api.Data;
 using BkkTennis.Api.Jobs;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,6 +41,14 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         {
             services.RemoveAll<TimeProvider>();
             services.AddSingleton<TimeProvider>(Clock);
+            // Tokens are minted with fake-clock timestamps, so validate their lifetime against the same clock —
+            // otherwise advancing the clock would make freshly issued tokens "not yet valid" for the real-time validator.
+            services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, o =>
+                o.TokenValidationParameters.LifetimeValidator = (notBefore, expires, _, p) =>
+                {
+                    var now = Clock.GetUtcNow().UtcDateTime;
+                    return (notBefore is null || notBefore <= now + p.ClockSkew) && (expires is null || expires > now - p.ClockSkew);
+                });
             // Tests drive expiry explicitly via BookingService.ExpireHoldsAsync instead of a 30 s timer.
             foreach (var d in services.Where(d => d.ImplementationType == typeof(HoldExpiryJob)).ToList())
                 services.Remove(d);
