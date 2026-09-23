@@ -14,9 +14,9 @@ Mark done with `- [x]` + one note line. Items needing a human decision/credentia
 ## Sprint 3 — ClubOS (partner portal) backend + UI
 - [ ] **C1 Staff auth** — staff login (email+password, BCrypt) for `partner_staff/partner_owner`; policy that checks `venue_members` for the venue in the route. Seed a staff user for the Racquet Club. ClubOS app gets login page + token storage.
 - [ ] **C2 Schedule API** — `GET /api/v1/clubos/venues/{id}/schedule?date=` returning grid with booking code, customer name/phone (masked), status, source, paid state + KPIs (occupancy, revenue, online vs walk-in). Wire ClubOS grid to it; click a cell → side panel with booking detail.
-- [ ] **C3 Walk-in & block** — `POST /clubos/bookings/walk-in` (confirmed immediately, source walk_in, payment method cash/transfer), `POST /clubos/blocks`, `DELETE /clubos/blocks/{id}`; enable the two buttons in ClubOS with dialogs; realtime refresh via SignalR.
-- [ ] **C4 Check-in & no-show** — `POST /clubos/bookings/{id}/check-in` (scan QR `BKKTENNIS:<code>` or type code); background job marks `no_show` 15 min after start if not checked in; `completed` after end.
-- [ ] **C5 Venue settings** — CRUD for courts, operating hours, price rules (with preview of a day's prices), add-ons, cancel_free_hours. ClubOS settings pages.
+- [ ] **C3 Walk-in & block** — _API done in 51f2f55 (`/walk-ins`, `/blocks` GET/POST/DELETE). Remaining: ClubOS dialogs + SignalR refresh + tests._ — `POST /clubos/bookings/walk-in` (confirmed immediately, source walk_in, payment method cash/transfer), `POST /clubos/blocks`, `DELETE /clubos/blocks/{id}`; enable the two buttons in ClubOS with dialogs; realtime refresh via SignalR.
+- [ ] **C4 Check-in & no-show** — _API done in e2b0fc6/105b10b (check-in, by-code lookup, manual no-show). Remaining: auto no-show/completed job, ClubOS scan/type-code UI, tests._ — `POST /clubos/bookings/{id}/check-in` (scan QR `BKKTENNIS:<code>` or type code); background job marks `no_show` 15 min after start if not checked in; `completed` after end.
+- [ ] **C5 Venue settings** — _price-rule CRUD in progress on `feat/sprint-5-prices` (uncommitted when autopilot was set up). Remaining: courts/hours/add-ons CRUD + UI._ — CRUD for courts, operating hours, price rules (with preview of a day's prices), add-ons, cancel_free_hours. ClubOS settings pages.
 
 ## Sprint 4 — Admin
 - [ ] **A1 Admin auth + overview API** — platform_admin role; `GET /admin/overview` (GBV, bookings count, take revenue, active partners/courts, last-30-days series). Wire Admin overview (use a chart).

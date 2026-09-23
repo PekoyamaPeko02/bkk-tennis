@@ -13,6 +13,9 @@ MAX_ROUNDS="${1:-100}"
 LOG_DIR=".claude/logs"; mkdir -p "$LOG_DIR"
 docker compose up -d db >/dev/null 2>&1 || echo "warn: could not start db (is Docker running?)"
 
+if [[ -n "$(git status --porcelain)" ]]; then
+  echo "❌ Working tree has uncommitted changes — commit or stash them first."; exit 1
+fi
 git switch dev/autopilot 2>/dev/null || git switch -c dev/autopilot
 
 for ((i = 1; i <= MAX_ROUNDS; i++)); do
