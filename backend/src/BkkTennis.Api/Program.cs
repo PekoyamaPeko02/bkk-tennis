@@ -70,6 +70,9 @@ builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 
+// CORS first so error responses (500 etc.) still carry CORS headers and the browser can read them.
+app.UseCors();
+
 app.UseExceptionHandler(errorApp => errorApp.Run(async ctx =>
 {
     var ex = ctx.Features.Get<IExceptionHandlerFeature>()?.Error;
@@ -89,7 +92,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
