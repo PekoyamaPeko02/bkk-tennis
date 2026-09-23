@@ -19,6 +19,7 @@ public class BookingOptions
     public int MaxSlotsPerBooking { get; set; } = 4;
     public int MaxAdvanceDays { get; set; } = 14;
     public int CheckInEarlyMinutes { get; set; } = 30;
+    public int NoShowGraceMinutes { get; set; } = 15;
 }
 
 public class BookingException(int status, string code, string message) : Exception(message)
@@ -374,6 +375,34 @@ public class BookingService(
         booking.Status = BookingStatus.CheckedIn;
         booking.UpdatedAt = now;
         foreach (var s in booking.Slots) s.Status = BookingStatus.CheckedIn;
+        await db.SaveChangesAsync(ct);
+
+        await NotifyAsync(booking);
+        return booking;
+    }
+
+    /// <summary>
+    /// Staff marks a confirmed booking as no-show once <see cref="BookingOptions.NoShowGraceMinutes"/> have passed
+    /// since the first slot started. The customer keeps no refund (they already paid; the venue keeps the revenue),
+    /// and the slots are released so the court can be resold for the rest of the window. Idempotent.
+    /// </summary>
+    public async Task<Booking> MarkNoShowAsync(Guid venueId, Guid bookingId, CancellationToken ct)
+    {
+        var booking = await db.Bookings.Include(b => b.Slots).Include(b => b.Venue)
+            .FirstOrDefaultAsync(b => b.Id == bookingId && b.VenueId == venueId, ct)
+            ?? throw new BookingException(404, "booking_not_found", "ไม่พบการจอง");
+
+        if (booking.Status == BookingStatus.NoShow) return booking;
+        if (booking.Status != BookingStatus.Confirmed)
+            throw new BookingException(409, "not_no_show_able", "ทำเครื่องหมายไม่มาได้เฉพาะรายการที่ชำระแล้วและยังไม่เช็คอิน");
+
+        var now = clock.GetUtcNow().UtcDateTime;
+        if (now < booking.Slots.Min(s => s.StartAt).AddMinutes(Opt.NoShowGraceMinutes))
+            throw new BookingException(409, "too_early", $"ทำเครื่องหมายไม่มาได้หลังเวลาเริ่ม {Opt.NoShowGraceMinutes} นาที");
+
+        booking.Status = BookingStatus.NoShow;
+        booking.UpdatedAt = now;
+        foreach (var s in booking.Slots) s.Status = BookingStatus.NoShow;
         await db.SaveChangesAsync(ct);
 
         await NotifyAsync(booking);

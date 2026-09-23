@@ -59,6 +59,17 @@ public static class ClubOsEndpoints
                 full.Id, full.Code, full.Status, full.Source, full.CustomerName, full.Total, ToSlotDtos(full, tz)));
         });
 
+        g.MapPost("/bookings/{bookingId:guid}/no-show", async (
+            Guid venueId, Guid bookingId, BookingService bookings, AppDbContext db, CancellationToken ct) =>
+        {
+            var booking = await bookings.MarkNoShowAsync(venueId, bookingId, ct);
+            var tz = booking.Venue?.Timezone ?? "Asia/Bangkok";
+            var full = await db.Bookings.AsNoTracking().Include(b => b.Slots).ThenInclude(s => s.Court)
+                .FirstAsync(b => b.Id == booking.Id, ct);
+            return Results.Ok(new DayBookingDto(
+                full.Id, full.Code, full.Status, full.Source, full.CustomerName, full.Total, ToSlotDtos(full, tz)));
+        });
+
         // Front-desk lookup: staff type/scan the booking code shown in the player app.
         g.MapGet("/bookings/by-code/{code}", async (Guid venueId, string code, AppDbContext db, CancellationToken ct) =>
         {
