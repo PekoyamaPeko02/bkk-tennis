@@ -1,0 +1,38 @@
+# BKK Tennis — Autopilot backlog
+
+Worked top-down by `/next` (see `.claude/commands/next.md`). One item = one or more commits on `dev/autopilot`.
+Mark done with `- [x]` + one note line. Items needing a human decision/credentials → `BLOCKED: <reason>`.
+
+## Sprint 2 — Test foundation & hardening
+- [ ] **T1 API integration test harness** — `BkkTennis.IntegrationTests` project (WebApplicationFactory, per-run test DB on :5433 built from `db/init/*.sql`, fake TimeProvider, OTP login helper). Added to sln and CI (CI service DB on 5432 → make port configurable via env `TEST_DB_PORT`).
+- [ ] **T2 Booking flow integration tests** — hold → 201 with QR; overlapping hold by another user → 409 `slot_taken`; open-hold rule → 409; hold expiry frees the slot; simulate-payment confirms; late payment after expiry: re-confirm if free / refund if taken; cancel ≥4h refunds 100%, <4h refunds 0; idempotency key returns same booking.
+- [ ] **T3 Venue search tests** — radius filter via PostGIS, surface/indoor filters, sort orders, time-window free slots, 404 for unknown slug.
+- [ ] **T4 Playwright e2e (mock mode)** — root `e2e/` package + `pnpm e2e` script + CI job: discover → venue (tomorrow) → select 2 slots + add-on → login (123456) → QR page → simulate → confirmed → appears in "การจองของฉัน" → cancel.
+- [ ] **T5 Concurrency check** — test that N parallel hold requests for the same slot produce exactly 1 success.
+- [ ] **T6 API hardening** — rate-limit OTP endpoints (ASP.NET RateLimiter), validate request DTOs, consistent `{code,message}` errors for 400/404/409, `/health` checks DB.
+
+## Sprint 3 — ClubOS (partner portal) backend + UI
+- [ ] **C1 Staff auth** — staff login (email+password, BCrypt) for `partner_staff/partner_owner`; policy that checks `venue_members` for the venue in the route. Seed a staff user for the Racquet Club. ClubOS app gets login page + token storage.
+- [ ] **C2 Schedule API** — `GET /api/v1/clubos/venues/{id}/schedule?date=` returning grid with booking code, customer name/phone (masked), status, source, paid state + KPIs (occupancy, revenue, online vs walk-in). Wire ClubOS grid to it; click a cell → side panel with booking detail.
+- [ ] **C3 Walk-in & block** — `POST /clubos/bookings/walk-in` (confirmed immediately, source walk_in, payment method cash/transfer), `POST /clubos/blocks`, `DELETE /clubos/blocks/{id}`; enable the two buttons in ClubOS with dialogs; realtime refresh via SignalR.
+- [ ] **C4 Check-in & no-show** — `POST /clubos/bookings/{id}/check-in` (scan QR `BKKTENNIS:<code>` or type code); background job marks `no_show` 15 min after start if not checked in; `completed` after end.
+- [ ] **C5 Venue settings** — CRUD for courts, operating hours, price rules (with preview of a day's prices), add-ons, cancel_free_hours. ClubOS settings pages.
+
+## Sprint 4 — Admin
+- [ ] **A1 Admin auth + overview API** — platform_admin role; `GET /admin/overview` (GBV, bookings count, take revenue, active partners/courts, last-30-days series). Wire Admin overview (use a chart).
+- [ ] **A2 Partner onboarding** — partners list with status, create partner + venue (draft), approve/suspend; venues in `draft` hidden from search.
+- [ ] **A3 Bookings explorer** — filter by venue/date/status, CSV export.
+- [ ] **A4 Payouts** — weekly (Friday) job computing gross/commission/net per partner from `completed` bookings; admin payouts page with mark-as-paid + transfer ref.
+
+## Sprint 5 — Player polish
+- [ ] **P1 Favorites** — heart on venue page/cards, `favorites` API, "สนามที่ชอบ" in profile.
+- [ ] **P2 Booking push to user** — SignalR per-user group so the QR page flips to confirmed without polling.
+- [ ] **P3 i18n** — vue-i18n TH/EN toggle for the player app (Thai default), strings moved out of components.
+- [ ] **P4 PWA** — manifest, icons, offline shell; Lighthouse PWA pass.
+- [ ] **P5 Capacitor** — `quasar mode add capacitor`, appId `com.bkktennis.app`, geolocation permission strings; verify `quasar build -m capacitor -T android` compiles web assets (native build is manual).
+
+## Needs a human
+- [ ] BLOCKED: choose payment gateway (Opn / GB Prime Pay / 2C2P) + sandbox keys → implement real `IPaymentProvider` + webhook signature.
+- [ ] BLOCKED: choose SMS OTP provider + keys (e.g. Thaibulksms) → replace dev OTP.
+- [ ] BLOCKED: LINE Login channel ID/secret → LINE login for players.
+- [ ] BLOCKED: legal/finance decision — platform collects money vs gateway split payment.

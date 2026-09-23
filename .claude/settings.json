@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Read", "Edit", "Write", "Glob", "Grep",
+      "Bash(dotnet:*)", "Bash(pnpm:*)", "Bash(npx:*)", "Bash(node:*)",
+      "Bash(docker compose:*)", "Bash(docker ps:*)", "Bash(docker exec:*)", "Bash(psql:*)",
+      "Bash(git status:*)", "Bash(git diff:*)", "Bash(git log:*)", "Bash(git add:*)", "Bash(git commit:*)",
+      "Bash(git checkout:*)", "Bash(git switch:*)", "Bash(git branch:*)", "Bash(git stash:*)", "Bash(git show:*)",
+      "Bash(ls:*)", "Bash(cat:*)", "Bash(mkdir:*)", "Bash(cp:*)", "Bash(mv:*)", "Bash(curl http://localhost:*)",
+      "Task"
+    ],
+    "deny": [
+      "Bash(git push:*)", "Bash(git reset --hard:*)", "Bash(git clean:*)", "Bash(rm -rf:*)",
+      "Bash(docker compose down -v:*)", "Bash(sudo:*)"
+    ]
+  }
+}

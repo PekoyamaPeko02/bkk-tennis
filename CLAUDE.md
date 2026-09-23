@@ -48,3 +48,8 @@ Sprint 6 payout job, load test, Capacitor store builds. Open question: platform 
 
 ## Git
 Author: `Luck <152171778+Luck0332@users.noreply.github.com>`. Remote: github.com/Luck0332/BKK_Tennis. Work on feature branches, PR into main.
+
+## Autopilot (multi-agent)
+- Backlog: `docs/BACKLOG.md` (ordered). Command: `/next` implements the next open item on branch `dev/autopilot`.
+- Subagent `test-engineer` (`.claude/agents/test-engineer.md`) writes/runs tests for every item; the lead fixes bugs it finds.
+- Headless loop until empty or usage limit: `./scripts/autopilot.sh` (logs in `.claude/logs/`). Never push; a human reviews and pushes.
