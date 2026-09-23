@@ -1,0 +1,18 @@
+{
+  "name": "bkk-tennis",
+  "private": true,
+  "packageManager": "pnpm@9.15.9",
+  "scripts": {
+    "dev:player": "pnpm --filter @bkk/player dev",
+    "dev:clubos": "pnpm --filter @bkk/clubos dev",
+    "dev:admin": "pnpm --filter @bkk/admin dev",
+    "build": "pnpm -r run build",
+    "typecheck": "pnpm -r run typecheck",
+    "db:up": "docker compose up -d db",
+    "db:reset": "docker compose down -v && docker compose up -d db",
+    "api": "dotnet run --project backend/src/BkkTennis.Api"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_DB: bkktennis
+          POSTGRES_USER: bkktennis
+          POSTGRES_PASSWORD: bkktennis
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U bkktennis" --health-interval 5s --health-timeout 3s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Apply schema + seed
+        env:
+          PGPASSWORD: bkktennis
+        run: |
+          for f in db/init/*.sql; do psql -h localhost -U bkktennis -d bkktennis -v ON_ERROR_STOP=1 -f "$f"; done
+      - run: dotnet restore backend/BkkTennis.sln
+      - run: dotnet build backend/BkkTennis.sln --no-restore -c Release
+      - run: dotnet test backend/BkkTennis.sln --no-build -c Release --verbosity normal
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm -r run typecheck
+      - run: pnpm -r run build

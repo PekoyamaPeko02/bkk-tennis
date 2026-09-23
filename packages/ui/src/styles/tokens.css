@@ -1,0 +1,73 @@
+/* BKK Tennis design tokens — from docs/design/bangkok_court_discovery_booking/DESIGN.md */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap');
+
+:root {
+  /* brand */
+  --bkk-forest: #064e3b;
+  --bkk-forest-deep: #04392b;
+  --bkk-forest-ink: #003527;
+  --bkk-volt: #84cc16;
+  --bkk-volt-bright: #a3e635;
+  --bkk-volt-surface: #acf847;
+  --bkk-clay: #ea580c;
+  --bkk-clay-ink: #c2410c;
+  --bkk-clay-surface: #ffedd5;
+  --bkk-slate: #0f172a;
+  --bkk-mint: #ecfdf5;
+
+  /* surfaces */
+  --bkk-bg: #faf8ff;
+  --bkk-surface: #ffffff;
+  --bkk-surface-2: #f8fafc;
+  --bkk-surface-3: #f1f5f9;
+  --bkk-line: #e2e8f0;
+  --bkk-line-strong: #cbd5e1;
+  --bkk-text: #131b2e;
+  --bkk-text-2: #475569;
+  --bkk-text-3: #94a3b8;
+  --bkk-error: #ba1a1a;
+
+  /* type */
+  --bkk-font-display: 'Space Grotesk', 'IBM Plex Sans Thai', system-ui, sans-serif;
+  --bkk-font-body: 'Plus Jakarta Sans', 'IBM Plex Sans Thai', system-ui, sans-serif;
+
+  /* shape & depth */
+  --bkk-r-sm: 0.5rem;
+  --bkk-r-lg: 1rem;
+  --bkk-r-xl: 1.5rem;
+  --bkk-shadow-1: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --bkk-shadow-2: 0 10px 25px -5px rgba(6, 78, 59, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.06);
+  --bkk-glow: 0 0 16px rgba(132, 204, 22, 0.45);
+}
+
+body {
+  font-family: var(--bkk-font-body);
+  background: var(--bkk-bg);
+  color: var(--bkk-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+.bkk-display { font-family: var(--bkk-font-display); letter-spacing: -0.02em; }
+.bkk-num { font-family: var(--bkk-font-display); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.bkk-h1 { font-family: var(--bkk-font-display); font-weight: 700; font-size: 28px; line-height: 36px; letter-spacing: -0.01em; }
+.bkk-h2 { font-family: var(--bkk-font-display); font-weight: 600; font-size: 22px; line-height: 28px; letter-spacing: -0.01em; }
+.bkk-h3 { font-family: var(--bkk-font-display); font-weight: 600; font-size: 18px; line-height: 24px; }
+.bkk-label { font-size: 12px; font-weight: 600; letter-spacing: 0.02em; }
+.bkk-muted { color: var(--bkk-text-2); }
+
+.bkk-card {
+  background: var(--bkk-surface);
+  border: 1px solid var(--bkk-line);
+  border-radius: var(--bkk-r-lg);
+  box-shadow: var(--bkk-shadow-1);
+}
+
+/* Buttons (use with q-btn unelevated no-caps) */
+.bkk-btn-volt { background: var(--bkk-volt) !important; color: var(--bkk-slate) !important; font-weight: 700; }
+.bkk-btn-volt:hover { box-shadow: var(--bkk-glow); }
+.bkk-btn-forest { background: var(--bkk-forest) !important; color: #fff !important; font-weight: 600; }
+.bkk-btn-ghost { background: #fff !important; border: 1.5px solid var(--bkk-line-strong); color: var(--bkk-text) !important; }
+.bkk-btn-ghost:hover { border-color: var(--bkk-forest); color: var(--bkk-forest) !important; }
+
+.bkk-page { max-width: 1200px; margin: 0 auto; padding: 16px; }
+@media (min-width: 1024px) { .bkk-page { padding: 24px 32px; } }
