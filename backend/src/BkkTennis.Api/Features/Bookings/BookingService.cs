@@ -18,6 +18,7 @@ public class BookingOptions
     public int HoldMinutes { get; set; } = 10;
     public int MaxSlotsPerBooking { get; set; } = 4;
     public int MaxAdvanceDays { get; set; } = 14;
+    public int CheckInEarlyMinutes { get; set; } = 30;
 }
 
 public class BookingException(int status, string code, string message) : Exception(message)
@@ -348,6 +349,35 @@ public class BookingService(
 
         await NotifyAsync(booking);
         return (booking, refund);
+    }
+
+    /// <summary>
+    /// Staff check-in at the venue. Allowed from <see cref="BookingOptions.CheckInEarlyMinutes"/> before the
+    /// first slot until the last slot ends. Idempotent for an already checked-in booking.
+    /// </summary>
+    public async Task<Booking> CheckInAsync(Guid venueId, Guid bookingId, CancellationToken ct)
+    {
+        var booking = await db.Bookings.Include(b => b.Slots).Include(b => b.Venue)
+            .FirstOrDefaultAsync(b => b.Id == bookingId && b.VenueId == venueId, ct)
+            ?? throw new BookingException(404, "booking_not_found", "ไม่พบการจอง");
+
+        if (booking.Status == BookingStatus.CheckedIn) return booking;
+        if (booking.Status != BookingStatus.Confirmed)
+            throw new BookingException(409, "not_checkin_able", "รายการนี้เช็คอินไม่ได้ (ต้องชำระเงินแล้วและยังไม่ยกเลิก)");
+
+        var now = clock.GetUtcNow().UtcDateTime;
+        if (now < booking.Slots.Min(s => s.StartAt).AddMinutes(-Opt.CheckInEarlyMinutes))
+            throw new BookingException(409, "too_early", $"เช็คอินได้ก่อนเวลาเริ่มไม่เกิน {Opt.CheckInEarlyMinutes} นาที");
+        if (now >= booking.Slots.Max(s => s.EndAt))
+            throw new BookingException(409, "too_late", "เลยเวลาการจองแล้ว");
+
+        booking.Status = BookingStatus.CheckedIn;
+        booking.UpdatedAt = now;
+        foreach (var s in booking.Slots) s.Status = BookingStatus.CheckedIn;
+        await db.SaveChangesAsync(ct);
+
+        await NotifyAsync(booking);
+        return booking;
     }
 
     /// <summary>Releases expired holds. Returns number of bookings expired.</summary>

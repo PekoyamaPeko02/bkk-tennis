@@ -48,6 +48,27 @@ public static class ClubOsEndpoints
                 b.Id, b.Code, b.Status, b.Source, b.CustomerName, b.Total, ToSlotDtos(b, tz))));
         });
 
+        g.MapPost("/bookings/{bookingId:guid}/check-in", async (
+            Guid venueId, Guid bookingId, BookingService bookings, AppDbContext db, CancellationToken ct) =>
+        {
+            var booking = await bookings.CheckInAsync(venueId, bookingId, ct);
+            var tz = booking.Venue?.Timezone ?? "Asia/Bangkok";
+            var full = await db.Bookings.AsNoTracking().Include(b => b.Slots).ThenInclude(s => s.Court)
+                .FirstAsync(b => b.Id == booking.Id, ct);
+            return Results.Ok(new DayBookingDto(
+                full.Id, full.Code, full.Status, full.Source, full.CustomerName, full.Total, ToSlotDtos(full, tz)));
+        });
+
+        // Front-desk lookup: staff type/scan the booking code shown in the player app.
+        g.MapGet("/bookings/by-code/{code}", async (Guid venueId, string code, AppDbContext db, CancellationToken ct) =>
+        {
+            var venue = await db.Venues.AsNoTracking().FirstAsync(v => v.Id == venueId, ct);
+            var b = await db.Bookings.AsNoTracking().Include(x => x.Slots).ThenInclude(s => s.Court)
+                .FirstOrDefaultAsync(x => x.VenueId == venueId && x.Code == code.Trim().ToUpperInvariant(), ct);
+            return b is null ? Results.NotFound()
+                : Results.Ok(new DayBookingDto(b.Id, b.Code, b.Status, b.Source, b.CustomerName, b.Total, ToSlotDtos(b, venue.Timezone)));
+        });
+
         g.MapPost("/walk-ins", async (
             Guid venueId, WalkInRequest req, ClaimsPrincipal user, BookingService bookings, AppDbContext db, CancellationToken ct) =>
         {
