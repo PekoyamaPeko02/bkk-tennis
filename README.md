@@ -32,7 +32,7 @@ pnpm install
 pnpm dev:player                  # http://localhost:9000  (OTP in mock mode = 123456)
 
 # 2) Full stack
-pnpm db:up                       # PostgreSQL + PostGIS; applies db/init/*.sql automatically
+pnpm db:up                       # PostgreSQL + PostGIS on localhost:5433; applies db/init/*.sql automatically
 pnpm api                         # http://localhost:5080/swagger
 cd apps/player && pnpm dev:api   # player app pointed at the real API
 ```

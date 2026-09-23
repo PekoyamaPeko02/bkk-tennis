@@ -287,6 +287,7 @@ public class BookingService(
         var now = clock.GetUtcNow().UtcDateTime;
         var expired = await db.Bookings.Include(b => b.Slots).Include(b => b.Venue)
             .Where(b => b.Status == BookingStatus.Held && b.HoldExpiresAt < now)
+            .OrderBy(b => b.HoldExpiresAt)
             .Take(200)
             .ToListAsync(ct);
         if (expired.Count == 0) return 0;
