@@ -27,6 +27,7 @@ Dev payment: `POST /api/v1/dev/bookings/{id}/simulate-payment` (button on the bo
 ```bash
 dotnet build backend/BkkTennis.sln && dotnet test backend/BkkTennis.sln
 pnpm -r run typecheck && pnpm -r run build
+pnpm e2e            # Playwright (mock API, own dev server on :9100; first time: pnpm --filter @bkk/e2e exec playwright install chromium)
 ```
 
 ## Invariants — don't break these

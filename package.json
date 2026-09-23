@@ -8,6 +8,7 @@
     "dev:admin": "pnpm --filter @bkk/admin dev",
     "build": "pnpm -r run build",
     "typecheck": "pnpm -r run typecheck",
+    "e2e": "pnpm --filter @bkk/e2e test",
     "db:up": "docker compose up -d db",
     "db:reset": "docker compose down -v && docker compose up -d db",
     "api": "dotnet run --project backend/src/BkkTennis.Api"
