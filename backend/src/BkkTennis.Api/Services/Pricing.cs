@@ -32,6 +32,17 @@ public static class Pricing
         return new SlotPrice(price, rule.Label);
     }
 
+    /// <summary>
+    /// True when <paramref name="a"/> and <paramref name="b"/> could both apply to the same slot with the
+    /// same specificity (same court scope) and the same priority — <see cref="PriceFor"/> would then pick
+    /// one arbitrarily, so we refuse to store such a pair.
+    /// </summary>
+    public static bool AreAmbiguous(PriceRule a, PriceRule b) =>
+        a.CourtId == b.CourtId
+        && a.Priority == b.Priority
+        && (a.DayType == "any" || b.DayType == "any" || a.DayType == b.DayType)
+        && a.StartTime < b.EndTime && b.StartTime < a.EndTime;
+
     public static decimal AddonLineTotal(Addon addon, int qty, decimal totalHours) =>
         addon.Unit == "per_hour"
             ? decimal.Round(addon.Price * qty * totalHours, 2, MidpointRounding.AwayFromZero)

@@ -13,6 +13,9 @@ public record WalkInRequest(DateOnly Date, List<SlotRequest> Slots, string? Cust
 public record CreateBlockRequest(Guid CourtId, DateTimeOffset StartAt, DateTimeOffset EndAt, string? Reason, string? Note);
 
 public record WalkInDto(Guid Id, string Code, string Status, string? CustomerName, decimal Total, List<BookingSlotDto> Slots);
+public record PriceRuleRequest(Guid? CourtId, string DayType, string Start, string End, decimal PricePerHour, string? Label, int Priority);
+public record PriceRuleDto(
+    Guid Id, Guid? CourtId, string? CourtName, string DayType, string Start, string End, decimal PricePerHour, string? Label, int Priority);
 public record CourtBlockDto(Guid Id, Guid CourtId, string CourtName, DateTime StartAt, DateTime EndAt, string Reason, string? Note);
 public record DayBookingDto(
     Guid Id, string Code, string Status, string Source, string? CustomerName, decimal Total, List<BookingSlotDto> Slots);
@@ -166,6 +169,46 @@ public static class ClubOsEndpoints
             return Results.NoContent();
         });
 
+        // ---- prices. Reading is open to staff; changing prices is owner-only.
+        // Existing bookings keep the price they were sold at (booking_slots.price is a snapshot).
+        g.MapGet("/prices", async (Guid venueId, AppDbContext db, CancellationToken ct) =>
+        {
+            var rules = await db.PriceRules.AsNoTracking().Where(r => r.VenueId == venueId).ToListAsync(ct);
+            var courts = await db.Courts.AsNoTracking().Where(c => c.VenueId == venueId).ToDictionaryAsync(c => c.Id, c => c.Name, ct);
+            return Results.Ok(rules
+                .OrderBy(r => r.CourtId.HasValue).ThenBy(r => r.StartTime).ThenByDescending(r => r.Priority)
+                .Select(r => ToDto(r, courts)));
+        });
+
+        g.MapPost("/prices", async (Guid venueId, PriceRuleRequest req, AppDbContext db, CancellationToken ct) =>
+        {
+            var rule = new PriceRule { Id = Guid.NewGuid(), VenueId = venueId };
+            await ApplyAsync(db, venueId, rule, req, ct);
+            db.PriceRules.Add(rule);
+            await db.SaveChangesAsync(ct);
+            var courts = await db.Courts.AsNoTracking().Where(c => c.VenueId == venueId).ToDictionaryAsync(c => c.Id, c => c.Name, ct);
+            return Results.Created($"/api/v1/clubos/venues/{venueId}/prices/{rule.Id}", ToDto(rule, courts));
+        }).AddEndpointFilter(RequireVenueOwner);
+
+        g.MapPut("/prices/{ruleId:guid}", async (Guid venueId, Guid ruleId, PriceRuleRequest req, AppDbContext db, CancellationToken ct) =>
+        {
+            var rule = await db.PriceRules.FirstOrDefaultAsync(r => r.Id == ruleId && r.VenueId == venueId, ct);
+            if (rule is null) return Results.NotFound();
+            await ApplyAsync(db, venueId, rule, req, ct);
+            await db.SaveChangesAsync(ct);
+            var courts = await db.Courts.AsNoTracking().Where(c => c.VenueId == venueId).ToDictionaryAsync(c => c.Id, c => c.Name, ct);
+            return Results.Ok(ToDto(rule, courts));
+        }).AddEndpointFilter(RequireVenueOwner);
+
+        g.MapDelete("/prices/{ruleId:guid}", async (Guid venueId, Guid ruleId, AppDbContext db, CancellationToken ct) =>
+        {
+            var rule = await db.PriceRules.FirstOrDefaultAsync(r => r.Id == ruleId && r.VenueId == venueId, ct);
+            if (rule is null) return Results.NotFound();
+            db.PriceRules.Remove(rule);
+            await db.SaveChangesAsync(ct);
+            return Results.NoContent();
+        }).AddEndpointFilter(RequireVenueOwner);
+
         return api;
     }
 
@@ -177,6 +220,51 @@ public static class ClubOsEndpoints
         var db = http.RequestServices.GetRequiredService<AppDbContext>();
         var isMember = await db.VenueMembers.AnyAsync(m => m.VenueId == venueId && m.UserId == uid, http.RequestAborted);
         return isMember ? await next(ctx) : Results.Forbid();
+    }
+
+    private static async ValueTask<object?> RequireVenueOwner(EndpointFilterInvocationContext ctx, EndpointFilterDelegate next)
+    {
+        var http = ctx.HttpContext;
+        var venueId = Guid.Parse((string)http.Request.RouteValues["venueId"]!);
+        var uid = http.User.UserId();
+        var db = http.RequestServices.GetRequiredService<AppDbContext>();
+        var isOwner = await db.VenueMembers.AnyAsync(m => m.VenueId == venueId && m.UserId == uid && m.Role == "owner", http.RequestAborted);
+        return isOwner ? await next(ctx) : Results.Forbid();
+    }
+
+    private static readonly string[] DayTypes = ["weekday", "weekend", "any"];
+
+    private static PriceRuleDto ToDto(PriceRule r, Dictionary<Guid, string> courts) =>
+        new(r.Id, r.CourtId, r.CourtId is { } c && courts.TryGetValue(c, out var n) ? n : null,
+            r.DayType, r.StartTime.ToString("HH:mm"), r.EndTime.ToString("HH:mm"), r.PricePerHour, r.Label, r.Priority);
+
+    /// <summary>Validates the request, copies it onto <paramref name="rule"/> and rejects ambiguous overlaps.</summary>
+    private static async Task ApplyAsync(AppDbContext db, Guid venueId, PriceRule rule, PriceRuleRequest req, CancellationToken ct)
+    {
+        if (!DayTypes.Contains(req.DayType))
+            throw new BookingException(400, "bad_day_type", "day_type ต้องเป็น weekday, weekend หรือ any");
+        if (!TimeOnly.TryParse(req.Start, out var start) || !TimeOnly.TryParse(req.End, out var end))
+            throw new BookingException(400, "bad_time", "รูปแบบเวลาไม่ถูกต้อง (HH:mm)");
+        if (end <= start)
+            throw new BookingException(400, "bad_range", "เวลาสิ้นสุดต้องหลังเวลาเริ่ม");
+        if (req.PricePerHour < 0 || req.PricePerHour > 100_000)
+            throw new BookingException(400, "bad_price", "ราคาไม่ถูกต้อง");
+        if (req.CourtId is { } courtId && !await db.Courts.AnyAsync(c => c.Id == courtId && c.VenueId == venueId, ct))
+            throw new BookingException(404, "court_not_found", "ไม่พบคอร์ท");
+
+        rule.CourtId = req.CourtId;
+        rule.DayType = req.DayType;
+        rule.StartTime = start;
+        rule.EndTime = end;
+        rule.PricePerHour = decimal.Round(req.PricePerHour, 2);
+        rule.Label = string.IsNullOrWhiteSpace(req.Label) ? null : req.Label.Trim();
+        rule.Priority = req.Priority;
+
+        var others = await db.PriceRules.AsNoTracking().Where(r => r.VenueId == venueId && r.Id != rule.Id).ToListAsync(ct);
+        var clash = others.FirstOrDefault(o => Pricing.AreAmbiguous(o, rule));
+        if (clash is not null)
+            throw new BookingException(409, "price_rule_ambiguous",
+                $"ทับกับกฎราคาเดิม ({clash.StartTime:HH:mm}-{clash.EndTime:HH:mm}) ที่ priority เท่ากัน กรุณาเปลี่ยน priority");
     }
 
     private static List<BookingSlotDto> ToSlotDtos(Booking b, string tz) =>

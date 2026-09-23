@@ -103,6 +103,25 @@ public class PricingTests
         var now = new DateTime(2026, 10, 24, 5, 0, 0, DateTimeKind.Utc);
         Assert.Equal(expected, Pricing.RefundAmount(1250m, now.AddHours(hoursBefore), now, 4));
     }
+
+    [Theory]
+    [InlineData("any", "weekend", 0, 0, true)]          // same court scope + priority, overlapping times
+    [InlineData("weekday", "weekend", 0, 0, false)]     // disjoint day types
+    [InlineData("any", "any", 0, 10, false)]            // different priority is a deliberate override
+    public void Ambiguity_needs_same_scope_priority_daytype_and_time_overlap(
+        string dayA, string dayB, int prioA, int prioB, bool expected)
+    {
+        var a = Rule("06:00", "12:00", 400, prioA, dayA);
+        var b = Rule("10:00", "14:00", 500, prioB, dayB);
+        Assert.Equal(expected, Pricing.AreAmbiguous(a, b));
+    }
+
+    [Fact]
+    public void Adjacent_ranges_and_different_court_scopes_are_not_ambiguous()
+    {
+        Assert.False(Pricing.AreAmbiguous(Rule("06:00", "12:00", 400), Rule("12:00", "14:00", 500)));
+        Assert.False(Pricing.AreAmbiguous(Rule("06:00", "12:00", 400), Rule("06:00", "12:00", 500, court: Court1)));
+    }
 }
 
 public class PromptPayTests
