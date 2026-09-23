@@ -24,7 +24,30 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     /// <summary>Starts at real "now" (DB defaults use now()); tests move it with <c>Advance</c>.</summary>
     public FakeTimeProvider Clock { get; } = new(DateTimeOffset.UtcNow);
 
+    /// <summary>Exceptions the API logged at Error level (i.e. behind a 500). Include them in assertion messages.</summary>
+    public System.Collections.Concurrent.ConcurrentQueue<string> ServerErrors { get; } = new();
+
     public async Task InitializeAsync() => _db = await TestDatabase.CreateAsync();
+
+    private sealed class ErrorCapture(System.Collections.Concurrent.ConcurrentQueue<string> sink) : Microsoft.Extensions.Logging.ILoggerProvider
+    {
+        public Microsoft.Extensions.Logging.ILogger CreateLogger(string categoryName) => new Capture(sink, categoryName);
+        public void Dispose() { }
+
+        private sealed class Capture(System.Collections.Concurrent.ConcurrentQueue<string> sink, string category) : Microsoft.Extensions.Logging.ILogger
+        {
+            public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+            // EF logs every failed SaveChanges at Error even when the service handles it (e.g. 23P01 → 409); skip that noise.
+            public bool IsEnabled(Microsoft.Extensions.Logging.LogLevel level) =>
+                level >= Microsoft.Extensions.Logging.LogLevel.Error && !category.StartsWith("Microsoft.EntityFrameworkCore");
+            public void Log<TState>(Microsoft.Extensions.Logging.LogLevel level, Microsoft.Extensions.Logging.EventId id, TState state,
+                Exception? exception, Func<TState, Exception?, string> formatter)
+            {
+                // Deliberate 4xx BookingExceptions are also logged by the exception-handler middleware; only genuine 500s matter.
+                if (IsEnabled(level) && exception is not BkkTennis.Api.Features.Bookings.BookingException) sink.Enqueue($"[{category}] {formatter(state, exception)}\n{exception}");
+            }
+        }
+    }
 
     async Task IAsyncLifetime.DisposeAsync()
     {
@@ -39,6 +62,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("ConnectionStrings:Default", _db.ConnectionString);
         builder.ConfigureServices(services =>
         {
+            services.AddSingleton<Microsoft.Extensions.Logging.ILoggerProvider>(new ErrorCapture(ServerErrors));
             services.RemoveAll<TimeProvider>();
             services.AddSingleton<TimeProvider>(Clock);
             // Tokens are minted with fake-clock timestamps, so validate their lifetime against the same clock —

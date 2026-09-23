@@ -41,13 +41,8 @@ public class BookingService(
     public async Task<(Booking booking, Payment payment)> CreateHoldAsync(
         Guid userId, CreateBookingRequest req, string? idempotencyKey, CancellationToken ct)
     {
-        if (idempotencyKey is not null)
-        {
-            var existing = await db.Bookings.Include(b => b.Payments)
-                .FirstOrDefaultAsync(b => b.UserId == userId && b.IdempotencyKey == idempotencyKey, ct);
-            if (existing is not null)
-                return (existing, existing.Payments.OrderByDescending(p => p.CreatedAt).First());
-        }
+        if (idempotencyKey is not null && await FindByKeyAsync(userId, idempotencyKey, ct) is { } replay)
+            return replay;
 
         if (req.Slots is not { Count: > 0 })
             throw new BookingException(400, "no_slots", "เลือกอย่างน้อย 1 ช่วงเวลา");
@@ -74,7 +69,12 @@ public class BookingService(
         var hasOpenHold = await db.Bookings.AnyAsync(b =>
             b.UserId == userId && b.Status == BookingStatus.Held && b.HoldExpiresAt > now, ct);
         if (hasOpenHold)
+        {
+            // The "open hold" may be the very booking this idempotent request created a moment ago (concurrent replay).
+            if (idempotencyKey is not null && await FindByKeyAsync(userId, idempotencyKey, ct) is { } created)
+                return created;
             throw new BookingException(409, "open_hold_exists", "คุณมีรายการที่รอชำระเงินอยู่ กรุณาชำระหรือยกเลิกก่อน");
+        }
 
         // ---- price every slot on the server; never trust client prices
         var slots = BuildSlots(venue, hours, req.Date, req.Slots, now, BookingStatus.Held, allowInProgress: false);
@@ -124,9 +124,15 @@ public class BookingService(
         {
             await db.SaveChangesAsync(ct);
         }
-        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.ExclusionViolation })
+        catch (Exception ex) when (PgError(ex) is { SqlState: PostgresErrorCodes.UniqueViolation } || IsSlotContention(ex))
         {
-            throw new BookingException(409, "slot_taken", "มีผู้จองช่วงเวลานี้แล้ว กรุณาเลือกเวลาอื่น");
+            db.ChangeTracker.Clear();
+            // A concurrent request with the same Idempotency-Key (double tap / client retry) won the race: replay its booking.
+            if (idempotencyKey is not null && await FindByKeyAsync(userId, idempotencyKey, ct) is { } winner)
+                return winner;
+            if (IsSlotContention(ex))
+                throw new BookingException(409, "slot_taken", "มีผู้จองช่วงเวลานี้แล้ว กรุณาเลือกเวลาอื่น");
+            throw;
         }
 
         var intent = await payments.CreatePromptPayAsync(booking.Id, total, holdUntil, ct);
@@ -148,6 +154,40 @@ public class BookingService(
         await notifier.ChangedAsync(venue.Id, [req.Date]);
         log.LogInformation("Booking {Code} held for user {User}, total {Total}", booking.Code, userId, total);
         return (booking, payment);
+    }
+
+    /// <summary>The Postgres error behind a failed SaveChanges. Npgsql's execution strategy wraps transient errors (deadlock) in an
+    /// InvalidOperationException, so the whole exception chain is searched.</summary>
+    private static PostgresException? PgError(Exception ex)
+    {
+        for (var e = ex; e is not null; e = e.InnerException!)
+            if (e is PostgresException pg) return pg;
+        return null;
+    }
+
+    /// <summary>
+    /// Another booking holds (or is concurrently inserting) an overlapping slot: the EXCLUDE constraint fired, or Postgres
+    /// picked us as the victim when two conflicting inserts deadlocked on it (which the constraint can cause under a race).
+    /// </summary>
+    private static bool IsSlotContention(Exception ex) =>
+        PgError(ex) is { SqlState: PostgresErrorCodes.ExclusionViolation or PostgresErrorCodes.DeadlockDetected };
+
+    /// <summary>
+    /// The booking previously created under this idempotency key, with its payment. The first request adds the payment
+    /// in a second step, so a concurrent replay may have to wait a moment for it; null if there is none (yet).
+    /// </summary>
+    private async Task<(Booking booking, Payment payment)?> FindByKeyAsync(Guid userId, string key, CancellationToken ct)
+    {
+        for (var attempt = 0; attempt < 20; attempt++)
+        {
+            var existing = await db.Bookings.AsNoTracking().Include(b => b.Payments)
+                .FirstOrDefaultAsync(b => b.UserId == userId && b.IdempotencyKey == key, ct);
+            if (existing is null) return null;
+            var payment = existing.Payments.OrderByDescending(p => p.CreatedAt).FirstOrDefault();
+            if (payment is not null) return (existing, payment);
+            await Task.Delay(50, ct);
+        }
+        return null;
     }
 
     /// <summary>Validates requested slots against opening hours and prices them server-side.</summary>
@@ -245,7 +285,7 @@ public class BookingService(
         {
             await db.SaveChangesAsync(ct);
         }
-        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.ExclusionViolation })
+        catch (Exception ex) when (IsSlotContention(ex))
         {
             throw new BookingException(409, "slot_taken", "มีผู้จองช่วงเวลานี้แล้ว");
         }
@@ -289,7 +329,7 @@ public class BookingService(
             {
                 await db.SaveChangesAsync(ct);
             }
-            catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.ExclusionViolation })
+            catch (Exception ex) when (IsSlotContention(ex))
             {
                 db.ChangeTracker.Clear();
                 await RefundLateAsync(payment.Id, ct);
