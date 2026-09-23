@@ -6,6 +6,7 @@ using BkkTennis.Api.Jobs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Time.Testing;
@@ -102,6 +103,23 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     public static string NewPhone() => "08" + Interlocked.Increment(ref _phoneSeq).ToString("D8")[^8..];
 
     public HttpClient Anonymous() => CreateClient();
+
+    /// <summary>
+    /// A fresh partner user (OTP login, then promoted in the DB and re-logged-in so the token carries the new role).
+    /// Pass <paramref name="venueId"/> to make them a member of that venue with <paramref name="memberRole"/> ("staff" | "owner").
+    /// </summary>
+    public async Task<TestUser> LoginPartnerAsync(Guid? venueId, string memberRole = "staff", string role = "partner_staff")
+    {
+        var first = await LoginAsync();
+        await WithDb(async db =>
+        {
+            await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE users SET role = {role} WHERE id = {first.Id}");
+            if (venueId is { } v)
+                await db.Database.ExecuteSqlInterpolatedAsync(
+                    $"INSERT INTO venue_members (venue_id, user_id, role) VALUES ({v}, {first.Id}, {memberRole})");
+        });
+        return await LoginAsync(first.Phone);
+    }
 
     /// <summary>Logs in via the real OTP flow and returns a client carrying the bearer token.</summary>
     public async Task<TestUser> LoginAsync(string? phone = null, string? displayName = null)

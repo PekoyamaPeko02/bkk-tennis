@@ -65,7 +65,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             },
         };
     });
-builder.Services.AddAuthorization();
+builder.Services.AddVenueAuthorization();
 
 // ---------------------------------------------------------------- http
 var origins = cfg.GetSection("Cors:Origins").Get<string[]>() ?? [];

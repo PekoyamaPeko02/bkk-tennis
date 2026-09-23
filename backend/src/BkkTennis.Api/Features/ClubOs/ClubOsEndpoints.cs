@@ -33,9 +33,9 @@ public static class ClubOsEndpoints
 
     public static RouteGroupBuilder MapClubOs(this RouteGroupBuilder api)
     {
+        // Authorization (role + membership of {venueId}) is a policy, so it is decided before body binding/validation.
         var g = api.MapGroup("/clubos/venues/{venueId:guid}")
-            .RequireAuthorization(p => p.RequireRole(Roles.PartnerStaff, Roles.PartnerOwner))
-            .AddEndpointFilter(RequireVenueMember)
+            .RequireAuthorization(VenueAuthorization.Member)
             .WithTags("ClubOS");
 
         g.MapGet("/availability", async (Guid venueId, DateOnly date, AvailabilityService availability, CancellationToken ct) =>
@@ -194,7 +194,7 @@ public static class ClubOsEndpoints
             await db.SaveChangesAsync(ct);
             var courts = await db.Courts.AsNoTracking().Where(c => c.VenueId == venueId).ToDictionaryAsync(c => c.Id, c => c.Name, ct);
             return Results.Created($"/api/v1/clubos/venues/{venueId}/prices/{rule.Id}", ToDto(rule, courts));
-        }).AddEndpointFilter(RequireVenueOwner).WithValidation();
+        }).RequireAuthorization(VenueAuthorization.Owner).WithValidation();
 
         g.MapPut("/prices/{ruleId:guid}", async (Guid venueId, Guid ruleId, PriceRuleRequest req, AppDbContext db, CancellationToken ct) =>
         {
@@ -204,7 +204,7 @@ public static class ClubOsEndpoints
             await db.SaveChangesAsync(ct);
             var courts = await db.Courts.AsNoTracking().Where(c => c.VenueId == venueId).ToDictionaryAsync(c => c.Id, c => c.Name, ct);
             return Results.Ok(ToDto(rule, courts));
-        }).AddEndpointFilter(RequireVenueOwner).WithValidation();
+        }).RequireAuthorization(VenueAuthorization.Owner).WithValidation();
 
         g.MapDelete("/prices/{ruleId:guid}", async (Guid venueId, Guid ruleId, AppDbContext db, CancellationToken ct) =>
         {
@@ -213,29 +213,9 @@ public static class ClubOsEndpoints
             db.PriceRules.Remove(rule);
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
-        }).AddEndpointFilter(RequireVenueOwner);
+        }).RequireAuthorization(VenueAuthorization.Owner);
 
         return api;
-    }
-
-    private static async ValueTask<object?> RequireVenueMember(EndpointFilterInvocationContext ctx, EndpointFilterDelegate next)
-    {
-        var http = ctx.HttpContext;
-        var venueId = Guid.Parse((string)http.Request.RouteValues["venueId"]!);
-        var uid = http.User.UserId();
-        var db = http.RequestServices.GetRequiredService<AppDbContext>();
-        var isMember = await db.VenueMembers.AnyAsync(m => m.VenueId == venueId && m.UserId == uid, http.RequestAborted);
-        return isMember ? await next(ctx) : Results.Forbid();
-    }
-
-    private static async ValueTask<object?> RequireVenueOwner(EndpointFilterInvocationContext ctx, EndpointFilterDelegate next)
-    {
-        var http = ctx.HttpContext;
-        var venueId = Guid.Parse((string)http.Request.RouteValues["venueId"]!);
-        var uid = http.User.UserId();
-        var db = http.RequestServices.GetRequiredService<AppDbContext>();
-        var isOwner = await db.VenueMembers.AnyAsync(m => m.VenueId == venueId && m.UserId == uid && m.Role == "owner", http.RequestAborted);
-        return isOwner ? await next(ctx) : Results.Forbid();
     }
 
     private static readonly string[] DayTypes = ["weekday", "weekend", "any"];
