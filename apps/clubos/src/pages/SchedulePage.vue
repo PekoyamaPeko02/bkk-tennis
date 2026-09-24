@@ -153,7 +153,7 @@ import { apiBase, isMockApi, useApi } from 'boot/api';
 import WalkInDialog from 'components/WalkInDialog.vue';
 import BlockDialog from 'components/BlockDialog.vue';
 import CheckInDialog from 'components/CheckInDialog.vue';
-import { VENUE_ID } from 'src/venue';
+import { useVenueStore } from 'stores/venue';
 
 const LEGEND: Record<string, string> = {
   booked: 'จองแล้ว', held: 'รอชำระเงิน', checked_in: 'เช็คอินแล้ว', completed: 'เล่นเสร็จ', no_show: 'ไม่มาเล่น',
@@ -175,6 +175,7 @@ const BLOCK_TH: Record<ScheduleBlock['reason'], string> = {
 
 const $q = useQuasar();
 const api = useApi();
+const VENUE_ID = useVenueStore().requireId(); // the layout remounts this page when the venue is switched
 const today = bangkokToday();
 const date = ref(today);
 const data = ref<Schedule | null>(null);

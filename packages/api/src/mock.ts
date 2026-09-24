@@ -2,7 +2,7 @@
 // Data mirrors db/init/002_seed.sql. Logic mirrors Pricing/AvailabilityService/BookingService.
 import { ApiError, type BkkApi } from './client';
 import type {
-  Addon, AddonSettings, AdminBooking, AdminBookingFilter, AdminPartner, AdminPayout, Booking, BookingStatus, CourtSettings, OpeningHours, PricePreview, PriceRule, PriceRuleRequest, ClubOsBooking, Court, CourtBlock, CourtBlockRequest, CreateBookingRequest, Schedule, ScheduleBlock, ScheduleBooking,
+  MyVenue, Addon, AddonSettings, AdminBooking, AdminBookingFilter, AdminPartner, AdminPayout, Booking, BookingStatus, CourtSettings, OpeningHours, PricePreview, PriceRule, PriceRuleRequest, ClubOsBooking, Court, CourtBlock, CourtBlockRequest, CreateBookingRequest, Schedule, ScheduleBlock, ScheduleBooking,
   ScheduleCourt, ScheduleSlot, Slot, User, VenueAvailability, VenueDetail, VenueSummary, WalkInRequest, WalkInResult,
 } from './types';
 
@@ -477,6 +477,14 @@ const MOCK_STAFF_PASSWORD ='racquet-dev-2026';
 const MOCK_STAFF: Record<string, User> = {
   'owner@racquetclub.test': { id: 'u-owner', phone: '+66800000002', email: 'owner@racquetclub.test', displayName: 'Racquet Club Owner', role: 'partner_owner' },
   'staff@racquetclub.test': { id: 'u-staff', phone: '+66800000004', email: 'staff@racquetclub.test', displayName: 'Racquet Club Front Desk', role: 'partner_staff' },
+  // Belongs to two venues, to exercise the ClubOS venue switcher (not in the SQL seed).
+  'multi@racquetclub.test': { id: 'u-multi', phone: '+66800000005', email: 'multi@racquetclub.test', displayName: 'Multi-venue Manager', role: 'partner_owner' },
+};
+/** email → [venue id, membership role][] (mirrors venue_members). */
+const MOCK_MEMBERSHIPS: Record<string, [string, MyVenue['role']][]> = {
+  'owner@racquetclub.test': [[V1, 'owner']],
+  'staff@racquetclub.test': [[V1, 'staff']],
+  'multi@racquetclub.test': [[V1, 'owner'], [V2, 'staff']],
 };
 
 // ---------------------------------------------------------------- api
@@ -521,6 +529,18 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
     async getAvailability(id, date) {
       await sleep(150);
       return availability(findVenue(id), date);
+    },
+
+    async getMyVenues() {
+      await sleep(150);
+      restoreUser();
+      const user = requireStaff();
+      return (MOCK_MEMBERSHIPS[user.email ?? ''] ?? [])
+        .map(([id, role]): MyVenue => {
+          const v = findVenue(id);
+          return { id, slug: v.s.slug, nameTh: v.s.nameTh, nameEn: v.s.nameEn, status: 'active', role };
+        })
+        .sort((a, b) => a.nameEn.localeCompare(b.nameEn));
     },
 
     async getSchedule(venueId, date) {

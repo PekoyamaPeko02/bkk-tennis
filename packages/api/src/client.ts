@@ -1,6 +1,6 @@
 import type {
   AddonSettings, AddonSettingsRequest, AdminBookingFilter, AdminBookingPage, AdminPayout, AdminPayoutDetail, AdminPayoutPage, PayoutRunResult, PayoutStatus, AdminOverview, AdminPartner, NewPartnerRequest, PartnerStatus, CourtSettings, CourtSettingsRequest, OpeningHours, PricePreview, PriceRule, PriceRuleRequest, VenueSettings,
-  AuthResponse, Booking, ClubOsBooking, CourtBlock, CourtBlockRequest, CreateBookingRequest, OtpRequestResponse, Schedule, User, WalkInRequest, WalkInResult,
+  AuthResponse, Booking, ClubOsBooking, MyVenue, CourtBlock, CourtBlockRequest, CreateBookingRequest, OtpRequestResponse, Schedule, User, WalkInRequest, WalkInResult,
   VenueAvailability, VenueDetail, VenueSearchParams, VenueSearchResult, VenueSummary,
 } from './types';
 
@@ -49,6 +49,8 @@ export interface BkkApi {
   myBookings(): Promise<Booking[]>;
   getBooking(id: string): Promise<Booking>;
   cancelBooking(id: string): Promise<{ booking: Booking; refund: number }>;
+  /** ClubOS: the venues the signed-in staff member belongs to (name order); empty for a partner login with no membership. */
+  getMyVenues(): Promise<MyVenue[]>;
   /** ClubOS (staff of the venue): the day grid with bookings, blocks and KPIs. Date defaults to today at the venue. */
   getSchedule(venueId: string, date?: string): Promise<Schedule>;
   /** ClubOS: front-desk booking, confirmed immediately. 409 `slot_taken` / `slot_blocked` when the slot is gone. */
@@ -155,6 +157,7 @@ export function createHttpApi(opt: HttpApiOptions): BkkApi {
     myBookings: () => call('GET', '/me/bookings'),
     getBooking: (id) => call('GET', `/me/bookings/${id}`),
     cancelBooking: (id) => call('POST', `/me/bookings/${id}/cancel`),
+    getMyVenues: () => call('GET', '/clubos/me/venues'),
     getSchedule: (venueId, date) => call('GET', `/clubos/venues/${venueId}/schedule${qs({ date })}`),
     createWalkIn: (venueId, req) => call('POST', `/clubos/venues/${venueId}/walk-ins`, req),
     createBlock: (venueId, req) => call('POST', `/clubos/venues/${venueId}/blocks`, req),

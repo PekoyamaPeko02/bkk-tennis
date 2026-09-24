@@ -23,6 +23,7 @@ public record PriceRuleRequest(
 public record PriceRuleDto(
     Guid Id, Guid? CourtId, string? CourtName, string DayType, string Start, string End, decimal PricePerHour, string? Label, int Priority);
 public record CourtBlockDto(Guid Id, Guid CourtId, string CourtName, DateTime StartAt, DateTime EndAt, string Reason, string? Note);
+public record MyVenueDto(Guid Id, string Slug, string NameTh, string NameEn, string Status, string Role);
 public record DayBookingDto(
     Guid Id, string Code, string Status, string Source, string? CustomerName, decimal Total, List<BookingSlotDto> Slots);
 
@@ -33,6 +34,20 @@ public static class ClubOsEndpoints
 
     public static RouteGroupBuilder MapClubOs(this RouteGroupBuilder api)
     {
+        // The venues the caller belongs to (any status, so a freshly onboarded owner can set up a draft venue before approval).
+        api.MapGet("/clubos/me/venues", async (ClaimsPrincipal user, AppDbContext db, CancellationToken ct) =>
+        {
+            if (!Guid.TryParse(user.FindFirstValue(ClaimTypes.NameIdentifier) ?? user.FindFirstValue("sub"), out var userId))
+                return Results.Unauthorized();
+            var venues = await db.VenueMembers.AsNoTracking()
+                .Where(m => m.UserId == userId)
+                .Join(db.Venues.AsNoTracking(), m => m.VenueId, v => v.Id, (m, v) => new { v, m.Role })
+                .OrderBy(x => x.v.NameEn).ThenBy(x => x.v.Id)
+                .Select(x => new MyVenueDto(x.v.Id, x.v.Slug, x.v.NameTh, x.v.NameEn, x.v.Status, x.Role))
+                .ToListAsync(ct);
+            return Results.Ok(venues);
+        }).RequireAuthorization(p => p.RequireAuthenticatedUser().RequireRole(Roles.PartnerStaff, Roles.PartnerOwner)).WithTags("ClubOS");
+
         // Authorization (role + membership of {venueId}) is a policy, so it is decided before body binding/validation.
         var g = api.MapGroup("/clubos/venues/{venueId:guid}")
             .RequireAuthorization(VenueAuthorization.Member)

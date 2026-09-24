@@ -4,7 +4,7 @@
     <div class="bkk-muted small q-mb-md">
       คอร์ท เวลาเปิด-ปิด กฎราคา บริการเสริม และนโยบายยกเลิก · การจองที่มีอยู่แล้วจะคงราคาและเวลาเดิมไว้
     </div>
-    <div v-if="!auth.isOwner" class="notice bkk-card" data-testid="readonly-note">
+    <div v-if="!isOwner" class="notice bkk-card" data-testid="readonly-note">
       <q-icon name="lock" /> บัญชีพนักงานหน้าร้านดูได้อย่างเดียว — เฉพาะเจ้าของสนามที่แก้ไขการตั้งค่าได้
     </div>
     <div v-if="error" class="err bkk-card" role="alert"><q-icon name="error_outline" /> {{ error }}</div>
@@ -25,7 +25,7 @@
       <q-tab-panel name="courts">
         <div class="bar">
           <span class="bkk-muted small">คอร์ทไม่ถูกลบ — ปิดใช้งานแทน (ต้องไม่มีการจองที่ยังไม่สิ้นสุด)</span>
-          <q-btn v-if="auth.isOwner" unelevated no-caps class="bkk-btn-forest" icon="add" label="เพิ่มคอร์ท" data-testid="add-court" @click="openCourt(null)" />
+          <q-btn v-if="isOwner" unelevated no-caps class="bkk-btn-forest" icon="add" label="เพิ่มคอร์ท" data-testid="add-court" @click="openCourt(null)" />
         </div>
         <q-list separator class="bkk-card">
           <q-item v-for="c in settings.courts" :key="c.id" :class="{ off: !c.isActive }" data-testid="court-row">
@@ -33,7 +33,7 @@
               <q-item-label class="text-weight-bold">{{ c.name }} <q-badge v-if="!c.isActive" color="grey" label="ปิดใช้งาน" /></q-item-label>
               <q-item-label caption>{{ SURFACE_TH[c.surface] }} · {{ c.indoor ? 'ในร่ม' : 'กลางแจ้ง' }}{{ c.airCon ? ' · แอร์' : '' }}{{ c.floodlit ? ' · ไฟส่อง' : '' }}</q-item-label>
             </q-item-section>
-            <q-item-section v-if="auth.isOwner" side>
+            <q-item-section v-if="isOwner" side>
               <q-btn flat dense no-caps icon="edit" label="แก้ไข" @click="openCourt(c)" />
             </q-item-section>
           </q-item>
@@ -44,16 +44,16 @@
       <q-tab-panel name="hours">
         <div class="bkk-card week">
           <div v-for="d in week" :key="d.dayOfWeek" class="day" data-testid="hours-row">
-            <q-toggle v-model="d.open" :disable="!auth.isOwner" :label="DAY_TH[d.dayOfWeek]" class="dname" />
+            <q-toggle v-model="d.open" :disable="!isOwner" :label="DAY_TH[d.dayOfWeek]" class="dname" />
             <template v-if="d.open">
-              <q-input v-model="d.from" type="time" outlined dense :readonly="!auth.isOwner" label="เปิด" class="tin" />
-              <q-input v-model="d.to" type="time" outlined dense :readonly="!auth.isOwner" label="ปิด" class="tin" />
-              <q-select v-model="d.slotMinutes" :options="[60, 30]" outlined dense :readonly="!auth.isOwner" label="นาที/สล็อต" class="tin" />
+              <q-input v-model="d.from" type="time" outlined dense :readonly="!isOwner" label="เปิด" class="tin" />
+              <q-input v-model="d.to" type="time" outlined dense :readonly="!isOwner" label="ปิด" class="tin" />
+              <q-select v-model="d.slotMinutes" :options="[60, 30]" outlined dense :readonly="!isOwner" label="นาที/สล็อต" class="tin" />
             </template>
             <span v-else class="bkk-muted">ปิดทำการ</span>
           </div>
         </div>
-        <div v-if="auth.isOwner" class="q-mt-md">
+        <div v-if="isOwner" class="q-mt-md">
           <q-btn unelevated no-caps class="bkk-btn-forest" label="บันทึกเวลาเปิด-ปิด" :loading="busy" data-testid="save-hours" @click="saveHours" />
         </div>
       </q-tab-panel>
@@ -62,7 +62,7 @@
       <q-tab-panel name="prices">
         <div class="bar">
           <span class="bkk-muted small">คอร์ทเฉพาะเจาะจงชนะกฎทั้งสนาม แล้วดู priority (มากกว่าชนะ)</span>
-          <q-btn v-if="auth.isOwner" unelevated no-caps class="bkk-btn-forest" icon="add" label="เพิ่มกฎราคา" data-testid="add-rule" @click="openRule(null)" />
+          <q-btn v-if="isOwner" unelevated no-caps class="bkk-btn-forest" icon="add" label="เพิ่มกฎราคา" data-testid="add-rule" @click="openRule(null)" />
         </div>
         <q-list separator class="bkk-card">
           <q-item v-for="r in rules" :key="r.id" data-testid="rule-row">
@@ -70,7 +70,7 @@
               <q-item-label class="text-weight-bold">{{ r.start }}–{{ r.end }} · {{ baht(r.pricePerHour) }}/ชม. <span v-if="r.label" class="bkk-muted">({{ r.label }})</span></q-item-label>
               <q-item-label caption>{{ DAYTYPE_TH[r.dayType] }} · {{ r.courtName ?? 'ทุกคอร์ท' }} · priority {{ r.priority }}</q-item-label>
             </q-item-section>
-            <q-item-section v-if="auth.isOwner" side>
+            <q-item-section v-if="isOwner" side>
               <div class="row no-wrap">
                 <q-btn flat dense round icon="edit" aria-label="แก้ไข" @click="openRule(r)" />
                 <q-btn flat dense round icon="delete_outline" color="negative" aria-label="ลบ" data-testid="delete-rule" @click="deleteRule(r)" />
@@ -102,7 +102,7 @@
       <q-tab-panel name="addons">
         <div class="bar">
           <span class="bkk-muted small">บริการเสริมไม่ถูกลบ — ปิดใช้งานแทน (การจองเดิมยังเห็นรายการเดิม)</span>
-          <q-btn v-if="auth.isOwner" unelevated no-caps class="bkk-btn-forest" icon="add" label="เพิ่มบริการเสริม" data-testid="add-addon" @click="openAddon(null)" />
+          <q-btn v-if="isOwner" unelevated no-caps class="bkk-btn-forest" icon="add" label="เพิ่มบริการเสริม" data-testid="add-addon" @click="openAddon(null)" />
         </div>
         <q-list separator class="bkk-card">
           <q-item v-for="a in settings.addons" :key="a.id" :class="{ off: !a.isActive }" data-testid="addon-row">
@@ -110,7 +110,7 @@
               <q-item-label class="text-weight-bold">{{ a.name }} <q-badge v-if="!a.isActive" color="grey" label="ปิดใช้งาน" /></q-item-label>
               <q-item-label caption>{{ baht(a.price) }} {{ a.unit === 'per_hour' ? '/ ชั่วโมง' : '/ การจอง' }}<span v-if="a.description"> · {{ a.description }}</span></q-item-label>
             </q-item-section>
-            <q-item-section v-if="auth.isOwner" side>
+            <q-item-section v-if="isOwner" side>
               <q-btn flat dense no-caps icon="edit" label="แก้ไข" @click="openAddon(a)" />
             </q-item-section>
           </q-item>
@@ -123,8 +123,8 @@
         <div class="bkk-card pad">
           <div class="bkk-h3 q-mb-sm">ยกเลิกฟรีก่อนเวลาเริ่ม</div>
           <div class="bkk-muted small q-mb-md">ผู้เล่นยกเลิกก่อนสล็อตแรกอย่างน้อยกี่ชั่วโมงจึงได้เงินคืนเต็มจำนวน (ยกเลิกช้ากว่านั้นไม่คืนเงิน)</div>
-          <q-input v-model.number="cancelHours" type="number" outlined dense min="0" max="168" suffix="ชั่วโมง" :readonly="!auth.isOwner" class="tin" data-testid="cancel-hours" />
-          <q-btn v-if="auth.isOwner" unelevated no-caps class="bkk-btn-forest q-mt-md" label="บันทึก" :loading="busy" data-testid="save-cancel" @click="saveCancel" />
+          <q-input v-model.number="cancelHours" type="number" outlined dense min="0" max="168" suffix="ชั่วโมง" :readonly="!isOwner" class="tin" data-testid="cancel-hours" />
+          <q-btn v-if="isOwner" unelevated no-caps class="bkk-btn-forest q-mt-md" label="บันทึก" :loading="busy" data-testid="save-cancel" @click="saveCancel" />
         </div>
       </q-tab-panel>
     </q-tab-panels>
@@ -211,8 +211,7 @@ import {
 } from '@bkk/api';
 import { baht } from '@bkk/ui';
 import { useApi } from 'boot/api';
-import { useAuthStore } from 'stores/auth';
-import { VENUE_ID } from 'src/venue';
+import { useVenueStore } from 'stores/venue';
 
 const DAY_TH = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
 const SURFACE_TH: Record<Surface, string> = { hard: 'ฮาร์ดคอร์ท', clay: 'ดินเหนียว', grass: 'หญ้า', synthetic: 'สังเคราะห์' };
@@ -222,7 +221,10 @@ const DAYTYPES = (Object.keys(DAYTYPE_TH) as DayType[]).map((value) => ({ value,
 const ADDON_UNITS = [{ value: 'per_booking', label: 'ต่อการจอง' }, { value: 'per_hour', label: 'ต่อชั่วโมง' }];
 
 const api = useApi();
-const auth = useAuthStore();
+const venueStore = useVenueStore();
+const VENUE_ID = venueStore.requireId(); // the layout remounts this page when the venue is switched
+// Price/court writes are owner-only per venue: the same person can own one venue and be front-desk staff at another.
+const isOwner = computed(() => venueStore.current?.role === 'owner');
 const $q = useQuasar();
 
 const tab = ref('courts');

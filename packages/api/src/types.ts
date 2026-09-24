@@ -433,3 +433,13 @@ export interface PricePreview {
   slotMinutes: number;
   courts: { courtId: string; name: string; slots: { start: string; end: string; price: number | null; label: string | null }[] }[];
 }
+
+/** A venue the signed-in ClubOS user belongs to (any status; `role` is their membership role there). */
+export interface MyVenue {
+  id: string;
+  slug: string;
+  nameTh: string;
+  nameEn: string;
+  status: 'draft' | 'active' | 'hidden';
+  role: 'owner' | 'staff';
+}
