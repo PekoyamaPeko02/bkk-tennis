@@ -31,3 +31,13 @@ export function setLocale(l: Locale) {
 
 /** Translate outside components (stores, composables, notifications). */
 export const tr = (key: string, params?: Record<string, unknown>) => i18n.global.t(key, params ?? {}) as string;
+
+/**
+ * User-facing text for a failed API call: the catalogue entry for the error's `code` in the current language, else the server's
+ * own (Thai) `message`, else `fallback`. Codes are listed under `apiError` in th.ts/en.ts.
+ */
+export function apiErrorMessage(e: unknown, fallback?: string): string {
+  const code = (e as { code?: unknown } | null)?.code;
+  if (typeof code === 'string' && i18n.global.te(`apiError.${code}`)) return tr(`apiError.${code}`);
+  return (e as Error | null)?.message || fallback || tr('common.actionFailed');
+}

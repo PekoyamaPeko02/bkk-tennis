@@ -35,6 +35,7 @@ import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
+import { apiErrorMessage } from 'src/i18n';
 import { useApi } from 'boot/api';
 import { useAuthStore } from 'stores/auth';
 
@@ -61,7 +62,7 @@ async function requestOtp() {
     devCode.value = r.devCode;
     step.value = 'otp';
   } catch (e) {
-    $q.notify({ type: 'negative', message: (e as Error).message });
+    $q.notify({ type: 'negative', message: apiErrorMessage(e) });
   } finally {
     busy.value = false;
   }
@@ -75,7 +76,7 @@ async function verify() {
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/';
     void router.replace(redirect);
   } catch (e) {
-    $q.notify({ type: 'negative', message: (e as Error).message });
+    $q.notify({ type: 'negative', message: apiErrorMessage(e) });
   } finally {
     busy.value = false;
   }

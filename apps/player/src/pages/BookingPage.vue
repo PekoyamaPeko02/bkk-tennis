@@ -87,6 +87,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
+import { apiErrorMessage } from 'src/i18n';
 import QRCode from 'qrcode';
 import type { Booking } from '@bkk/api';
 import { AvailabilityPill, baht, thDate } from '@bkk/ui';
@@ -119,7 +120,7 @@ async function load() {
   try {
     booking.value = await api.getBooking(String(route.params.id));
   } catch (e) {
-    error.value = (e as Error).message;
+    error.value = apiErrorMessage(e, t('common.loadFailed'));
   }
 }
 

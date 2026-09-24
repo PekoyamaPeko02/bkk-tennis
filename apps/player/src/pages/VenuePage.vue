@@ -171,6 +171,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
+import { apiErrorMessage } from 'src/i18n';
 import {
   ApiError, bangkokToday, type Addon, type CourtAvailability, type Slot, type VenueAvailability, type VenueDetail,
 } from '@bkk/api';
@@ -288,7 +289,7 @@ async function checkout() {
     void router.push({ name: 'booking', params: { id: booking.id } });
   } catch (e) {
     const err = e as ApiError;
-    $q.notify({ type: 'negative', message: err.message || t('venue.bookFailed') });
+    $q.notify({ type: 'negative', message: apiErrorMessage(err, t('venue.bookFailed')) });
     if (err.code === 'slot_taken') await loadSlots();
     if (err.code === 'open_hold_exists') void router.push({ name: 'bookings' });
   } finally {

@@ -92,6 +92,7 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
+import { apiErrorMessage } from 'src/i18n';
 import { bangkokToday, type VenueSearchResult, type VenueSummary } from '@bkk/api';
 import { addDays, FilterChip, thDate, thDay, VenueCard } from '@bkk/ui';
 import { useApi } from 'boot/api';
@@ -163,7 +164,7 @@ async function search() {
     });
     if (my === seq) result.value = r;
   } catch (e) {
-    if (my === seq) error.value = (e as Error).message || t('common.loadFailed');
+    if (my === seq) error.value = apiErrorMessage(e, t('common.loadFailed'));
   } finally {
     if (my === seq) loading.value = false;
   }

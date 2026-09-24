@@ -761,7 +761,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
       const s = settingsOf(findVenue(venueId));
       requireOwner();
       const c = s.courts.find((x) => x.id === courtId);
-      if (!c) throw new ApiError(404, 'http_404', 'ไม่พบข้อมูล');
+      if (!c) throw new ApiError(404, 'not_found', 'ไม่พบข้อมูล');
       if (!req.name.trim()) throw new ApiError(400, 'bad_name', 'กรุณาระบุชื่อคอร์ท');
       if (c.isActive && !req.isActive) {
         const live = bookings.find((b) => b.venueId === venueId && b.status !== 'cancelled' && b.status !== 'expired'
@@ -811,7 +811,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
       const s = settingsOf(findVenue(venueId));
       requireOwner();
       const a = s.addons.find((x) => x.id === addonId);
-      if (!a) throw new ApiError(404, 'http_404', 'ไม่พบข้อมูล');
+      if (!a) throw new ApiError(404, 'not_found', 'ไม่พบข้อมูล');
       if (!req.name.trim()) throw new ApiError(400, 'bad_name', 'กรุณาระบุชื่อบริการ');
       if (req.price < 0 || req.price > 100_000) throw new ApiError(400, 'bad_price', 'ราคาไม่ถูกต้อง');
       Object.assign(a, req, { name: req.name.trim() });
@@ -842,7 +842,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
       const s = settingsOf(findVenue(venueId));
       requireOwner();
       const i = s.rules.findIndex((r) => r.id === ruleId);
-      if (i < 0) throw new ApiError(404, 'http_404', 'ไม่พบข้อมูล');
+      if (i < 0) throw new ApiError(404, 'not_found', 'ไม่พบข้อมูล');
       const rule = ruleFromRequest(s, ruleId, req);
       s.rules[i] = rule;
       return { ...rule };
@@ -854,7 +854,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
       const s = settingsOf(findVenue(venueId));
       requireOwner();
       const i = s.rules.findIndex((r) => r.id === ruleId);
-      if (i < 0) throw new ApiError(404, 'http_404', 'ไม่พบข้อมูล');
+      if (i < 0) throw new ApiError(404, 'not_found', 'ไม่พบข้อมูล');
       s.rules.splice(i, 1);
     },
 
@@ -937,7 +937,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
       restoreUser();
       requireAdmin();
       const p = mockPartners().find((x) => x.id === partnerId);
-      if (!p) throw new ApiError(404, 'http_404', 'ไม่พบข้อมูล');
+      if (!p) throw new ApiError(404, 'not_found', 'ไม่พบข้อมูล');
       if (!p.ownerEmail) throw new ApiError(409, 'no_owner', 'พาร์ทเนอร์นี้ยังไม่มีบัญชีเจ้าของสนาม');
       const expires = Date.now() + RESET_TTL_MS;
       const token = `mock-reset.${btoa(p.ownerEmail)}.${expires}`;
@@ -1014,7 +1014,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
       restoreUser();
       requireAdmin();
       const p = mockPayouts().find((x) => x.id === id);
-      if (!p) throw new ApiError(404, 'http_404', 'ไม่พบข้อมูล');
+      if (!p) throw new ApiError(404, 'not_found', 'ไม่พบข้อมูล');
       const rows = mockExplorer().filter((b) => p.bookingIds.includes(b.id));
       return { payout: publicPayout(p), bookings: rows.map((b) => ({ id: b.id, code: b.code, venueName: b.venueName, date: b.date, total: b.total, commission: b.commission })) };
     },
@@ -1042,7 +1042,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
       restoreUser();
       requireAdmin();
       const p = mockPayouts().find((x) => x.id === id);
-      if (!p) throw new ApiError(404, 'http_404', 'ไม่พบข้อมูล');
+      if (!p) throw new ApiError(404, 'not_found', 'ไม่พบข้อมูล');
       if (!transferRef.trim()) throw new ApiError(400, 'bad_transfer_ref', 'กรุณาระบุเลขอ้างอิงการโอน');
       if (p.status === 'paid') throw new ApiError(409, 'bad_transition', 'Payout นี้จ่ายแล้ว');
       Object.assign(p, { status: 'paid', transferRef: transferRef.trim(), paidAt: new Date().toISOString() });
@@ -1083,7 +1083,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
       restoreUser();
       requireAdmin();
       const p = mockPartners().find((x) => x.id === id);
-      if (!p) throw new ApiError(404, 'http_404', 'ไม่พบข้อมูล');
+      if (!p) throw new ApiError(404, 'not_found', 'ไม่พบข้อมูล');
       if (p.status === 'active') throw new ApiError(409, 'bad_transition', 'พาร์ทเนอร์นี้เปิดใช้งานอยู่แล้ว');
       p.status = 'active';
       p.venues.forEach((v) => { if (v.status === 'draft') v.status = 'active'; });
@@ -1095,7 +1095,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
       restoreUser();
       requireAdmin();
       const p = mockPartners().find((x) => x.id === id);
-      if (!p) throw new ApiError(404, 'http_404', 'ไม่พบข้อมูล');
+      if (!p) throw new ApiError(404, 'not_found', 'ไม่พบข้อมูล');
       if (p.status !== 'active') throw new ApiError(409, 'bad_transition', 'ระงับได้เฉพาะพาร์ทเนอร์ที่เปิดใช้งานอยู่');
       p.status = 'suspended';
       return structuredClone(p);
@@ -1121,7 +1121,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
       const slots = req.slots.map((s) => {
         const c = avail.courts.find((x) => x.courtId === s.courtId);
         const slot = c?.slots.find((x) => x.start === s.start);
-        if (!c || !slot) throw new ApiError(400, 'bad_slot', 'ช่วงเวลาไม่ถูกต้อง');
+        if (!c || !slot) throw new ApiError(400, 'no_price', 'ช่วงเวลาไม่ถูกต้อง');
         if (slot.status !== 'available') throw new ApiError(409, 'slot_taken', 'มีผู้จองช่วงเวลานี้แล้ว กรุณาเลือกเวลาอื่น');
         return { courtId: c.courtId, courtName: c.name, date: req.date, start: slot.start, end: slot.end, price: slot.price!, label: slot.label, startAt: slot.startAt };
       });

@@ -27,6 +27,7 @@ import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
+import { apiErrorMessage } from 'src/i18n';
 import type { VenueSummary } from '@bkk/api';
 import { VenueCard } from '@bkk/ui';
 import { useApi } from 'boot/api';
@@ -48,7 +49,7 @@ async function load() {
     venues.value = await api.getFavorites();
     favorites.ids = venues.value.map((v) => v.id);
   } catch (e) {
-    error.value = (e as Error).message || t('favorites.loadFailed');
+    error.value = apiErrorMessage(e, t('favorites.loadFailed'));
   } finally {
     loading.value = false;
   }
@@ -64,7 +65,7 @@ async function unfavorite(v: VenueSummary) {
     await favorites.toggle(v.id);
     venues.value = venues.value.filter((x) => x.id !== v.id);
   } catch (e) {
-    $q.notify({ type: 'negative', message: (e as Error).message || t('common.actionFailed') });
+    $q.notify({ type: 'negative', message: apiErrorMessage(e, t('common.actionFailed')) });
   }
 }
 
