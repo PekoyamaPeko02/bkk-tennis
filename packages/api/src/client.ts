@@ -1,5 +1,5 @@
 import type {
-  AddonSettings, AddonSettingsRequest, AdminOverview, CourtSettings, CourtSettingsRequest, OpeningHours, PricePreview, PriceRule, PriceRuleRequest, VenueSettings,
+  AddonSettings, AddonSettingsRequest, AdminOverview, AdminPartner, NewPartnerRequest, PartnerStatus, CourtSettings, CourtSettingsRequest, OpeningHours, PricePreview, PriceRule, PriceRuleRequest, VenueSettings,
   AuthResponse, Booking, ClubOsBooking, CourtBlock, CourtBlockRequest, CreateBookingRequest, OtpRequestResponse, Schedule, User, WalkInRequest, WalkInResult,
   VenueAvailability, VenueDetail, VenueSearchParams, VenueSearchResult,
 } from './types';
@@ -22,6 +22,14 @@ export interface BkkApi {
   adminLogin(email: string, password: string): Promise<AuthResponse>;
   /** Admin: platform totals (online sales only) + a zero-filled last-30-days series (Bangkok days). */
   getAdminOverview(): Promise<AdminOverview>;
+  /** Admin: newest first, optionally one status. */
+  getPartners(status?: PartnerStatus): Promise<AdminPartner[]>;
+  /** Creates a `pending` partner + its owner login + a `draft` venue. 409 `email_taken` / `slug_taken`. */
+  createPartner(req: NewPartnerRequest): Promise<AdminPartner>;
+  /** pending|suspended → active, publishing draft venues. 409 `bad_transition` when already active. */
+  approvePartner(id: string): Promise<AdminPartner>;
+  /** active → suspended: all its venues disappear from search/booking; existing bookings stay valid. */
+  suspendPartner(id: string): Promise<AdminPartner>;
   me(): Promise<User>;
   createBooking(req: CreateBookingRequest, idempotencyKey: string): Promise<Booking>;
   myBookings(): Promise<Booking[]>;
@@ -111,6 +119,10 @@ export function createHttpApi(opt: HttpApiOptions): BkkApi {
     staffLogin: (email, password) => call('POST', '/auth/staff/login', { email, password }),
     adminLogin: (email, password) => call('POST', '/auth/admin/login', { email, password }),
     getAdminOverview: () => call('GET', '/admin/overview'),
+    getPartners: (status) => call('GET', `/admin/partners${qs({ status })}`),
+    createPartner: (req) => call('POST', '/admin/partners', req),
+    approvePartner: (id) => call('POST', `/admin/partners/${id}/approve`),
+    suspendPartner: (id) => call('POST', `/admin/partners/${id}/suspend`),
     me: () => call('GET', '/auth/me'),
     createBooking: (req, key) => call('POST', '/bookings', req, { 'Idempotency-Key': key }),
     myBookings: () => call('GET', '/me/bookings'),

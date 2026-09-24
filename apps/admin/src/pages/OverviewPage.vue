@@ -64,9 +64,7 @@
     <div class="section bkk-card">
       <div class="row items-center justify-between q-mb-sm">
         <div class="bkk-h3">สนามพันธมิตรที่เปิดใช้งาน</div>
-        <q-btn unelevated no-caps class="bkk-btn-forest" icon="add_circle" label="ลงทะเบียนสนามใหม่" disable>
-          <q-tooltip>Sprint 5</q-tooltip>
-        </q-btn>
+        <q-btn unelevated no-caps class="bkk-btn-forest" icon="add_circle" label="ลงทะเบียนสนามใหม่" to="/partners" />
       </div>
       <q-table flat :rows="venues" :columns="columns" row-key="id" :loading="loading" hide-pagination :rows-per-page-options="[0]">
         <template #body-cell-name="p">

@@ -2,7 +2,7 @@
 // Data mirrors db/init/002_seed.sql. Logic mirrors Pricing/AvailabilityService/BookingService.
 import { ApiError, type BkkApi } from './client';
 import type {
-  Addon, AddonSettings, Booking, BookingStatus, CourtSettings, OpeningHours, PricePreview, PriceRule, PriceRuleRequest, ClubOsBooking, Court, CourtBlock, CourtBlockRequest, CreateBookingRequest, Schedule, ScheduleBlock, ScheduleBooking,
+  Addon, AddonSettings, AdminPartner, Booking, BookingStatus, CourtSettings, OpeningHours, PricePreview, PriceRule, PriceRuleRequest, ClubOsBooking, Court, CourtBlock, CourtBlockRequest, CreateBookingRequest, Schedule, ScheduleBlock, ScheduleBooking,
   ScheduleCourt, ScheduleSlot, Slot, User, VenueAvailability, VenueDetail, VenueSummary, WalkInRequest, WalkInResult,
 } from './types';
 
@@ -317,6 +317,29 @@ function requireStaff() {
   const user = requireUser();
   if (user.role !== 'partner_staff' && user.role !== 'partner_owner') throw new ApiError(403, 'forbidden', 'ไม่มีสิทธิ์เข้าถึง');
   return user;
+}
+
+function requireAdmin() {
+  if (requireUser().role !== 'platform_admin') throw new ApiError(403, 'forbidden', 'ไม่มีสิทธิ์เข้าถึง');
+}
+
+// ---- admin partners (A2): the four seed venues' partners + one waiting for approval
+let partnerList: AdminPartner[] | null = null;
+function mockPartners(): AdminPartner[] {
+  partnerList ??= [
+    ...VENUES.map((v, i): AdminPartner => ({
+      id: `partner-seed-${i + 1}`, legalName: `${v.s.nameEn} Co., Ltd.`, taxId: `01055${String(60000 + i)}1234`, bankName: 'KBank', bankAccount: `123-4-5678${i}-9`,
+      commissionRate: 0.1, status: 'active', createdAt: new Date(Date.UTC(2026, 0, 5 + i)).toISOString(),
+      ownerEmail: i === 0 ? 'owner@racquetclub.test' : null, ownerName: i === 0 ? 'Racquet Club Owner' : null,
+      venues: [{ id: v.s.id, slug: v.s.slug, nameTh: v.s.nameTh, nameEn: v.s.nameEn, status: 'active' }],
+    })),
+    {
+      id: 'partner-seed-5', legalName: 'Thonglor Tennis Co., Ltd.', taxId: null, bankName: null, bankAccount: null, commissionRate: 0.1, status: 'pending',
+      createdAt: new Date(Date.UTC(2026, 8, 1)).toISOString(), ownerEmail: 'owner@thonglor.test', ownerName: 'Thonglor Owner',
+      venues: [{ id: 'venue-seed-5', slug: 'thonglor-tennis', nameTh: 'ทองหล่อ เทนนิส', nameEn: 'Thonglor Tennis', status: 'draft' }],
+    },
+  ];
+  return partnerList.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 function requireOwner() {
@@ -746,6 +769,58 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
         bookings: days.reduce((t, d) => t + d.bookings, 0), walkInBookings: 24,
         activePartners: 4, activeVenues: VENUES.length, activeCourts: VENUES.reduce((t, v) => t + v.courts.length, 0), last30Days: days,
       };
+    },
+
+    async getPartners(status) {
+      await sleep(200);
+      restoreUser();
+      requireAdmin();
+      return structuredClone(mockPartners().filter((p) => !status || p.status === status));
+    },
+
+    async createPartner(req) {
+      await sleep(300);
+      restoreUser();
+      requireAdmin();
+      const list = mockPartners();
+      const email = req.owner.email.trim().toLowerCase();
+      if (!req.legalName.trim()) throw new ApiError(400, 'bad_name', 'กรุณาระบุชื่อนิติบุคคล');
+      if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(req.venue.slug)) throw new ApiError(400, 'bad_slug', 'slug ใช้ได้เฉพาะ a-z 0-9 และ - (เช่น my-tennis-club)');
+      if (req.owner.password.length < 10) throw new ApiError(400, 'validation_failed', 'รหัสผ่านอย่างน้อย 10 ตัวอักษร');
+      if (req.commissionRate !== null && (req.commissionRate < 0 || req.commissionRate > 0.5)) throw new ApiError(400, 'bad_commission', 'ค่าคอมมิชชั่นต้องอยู่ระหว่าง 0-50%');
+      if (list.some((p) => p.ownerEmail === email) || email in MOCK_STAFF) throw new ApiError(409, 'email_taken', 'อีเมลนี้ถูกใช้แล้ว');
+      if (list.some((p) => p.venues.some((v) => v.slug === req.venue.slug)) || VENUES.some((v) => v.s.slug === req.venue.slug))
+        throw new ApiError(409, 'slug_taken', 'slug นี้ถูกใช้แล้ว');
+      const p: AdminPartner = {
+        id: `partner-${settingsSeq++}`, legalName: req.legalName.trim(), taxId: req.taxId, bankName: req.bankName, bankAccount: req.bankAccount,
+        commissionRate: req.commissionRate ?? 0.1, status: 'pending', createdAt: new Date().toISOString(), ownerEmail: email, ownerName: req.owner.displayName.trim(),
+        venues: [{ id: `venue-${settingsSeq++}`, slug: req.venue.slug, nameTh: req.venue.nameTh, nameEn: req.venue.nameEn, status: 'draft' }],
+      };
+      list.unshift(p);
+      return structuredClone(p);
+    },
+
+    async approvePartner(id) {
+      await sleep(200);
+      restoreUser();
+      requireAdmin();
+      const p = mockPartners().find((x) => x.id === id);
+      if (!p) throw new ApiError(404, 'http_404', 'ไม่พบข้อมูล');
+      if (p.status === 'active') throw new ApiError(409, 'bad_transition', 'พาร์ทเนอร์นี้เปิดใช้งานอยู่แล้ว');
+      p.status = 'active';
+      p.venues.forEach((v) => { if (v.status === 'draft') v.status = 'active'; });
+      return structuredClone(p);
+    },
+
+    async suspendPartner(id) {
+      await sleep(200);
+      restoreUser();
+      requireAdmin();
+      const p = mockPartners().find((x) => x.id === id);
+      if (!p) throw new ApiError(404, 'http_404', 'ไม่พบข้อมูล');
+      if (p.status !== 'active') throw new ApiError(409, 'bad_transition', 'ระงับได้เฉพาะพาร์ทเนอร์ที่เปิดใช้งานอยู่');
+      p.status = 'suspended';
+      return structuredClone(p);
     },
 
     async me() {

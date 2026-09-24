@@ -54,6 +54,8 @@ public static class AdminEndpoints
             return Results.Ok(new AdminOverviewDto(gbv, take, bookings, walkIns, activePartners, activeVenues, activeCourts, series));
         });
 
+        g.MapPartners();
+
         return api;
     }
 }

@@ -40,7 +40,7 @@ public static class VenueEndpoints
                 .Include(v => v.Courts.Where(c => c.IsActive))
                 .Include(v => v.OperatingHours)
                 .Include(v => v.PriceRules)
-                .Where(v => v.Status == "active");
+                .Where(v => v.Status == "active" && v.Partner!.Status == "active");
             if (distances is not null)
             {
                 var ids = distances.Keys.ToList();
@@ -93,7 +93,7 @@ public static class VenueEndpoints
                 .Include(v => v.Courts.Where(c => c.IsActive).OrderBy(c => c.SortOrder))
                 .Include(v => v.PriceRules)
                 .Include(v => v.Addons.Where(a => a.IsActive))
-                .Where(v => v.Status == "active");
+                .Where(v => v.Status == "active" && v.Partner!.Status == "active");
             var v = Guid.TryParse(idOrSlug, out var id)
                 ? await q.FirstOrDefaultAsync(x => x.Id == id, ct)
                 : await q.FirstOrDefaultAsync(x => x.Slug == idOrSlug, ct);
@@ -137,10 +137,11 @@ public static class VenueEndpoints
         var radiusM = Math.Clamp(radiusKm ?? 5, 0.5, 60) * 1000;
 
         const string sql = """
-            SELECT id, ST_Distance(location, ST_SetSRID(ST_MakePoint(@lng, @lat), 4326)::geography) AS dist
-            FROM venues
-            WHERE status = 'active'
-              AND ST_DWithin(location, ST_SetSRID(ST_MakePoint(@lng, @lat), 4326)::geography, @radius)
+            SELECT v.id, ST_Distance(v.location, ST_SetSRID(ST_MakePoint(@lng, @lat), 4326)::geography) AS dist
+            FROM venues v
+            JOIN partners p ON p.id = v.partner_id
+            WHERE v.status = 'active' AND p.status = 'active'
+              AND ST_DWithin(v.location, ST_SetSRID(ST_MakePoint(@lng, @lat), 4326)::geography, @radius)
             """;
 
         var conn = (NpgsqlConnection)db.Database.GetDbConnection();

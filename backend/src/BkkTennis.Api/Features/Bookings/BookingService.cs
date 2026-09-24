@@ -60,7 +60,7 @@ public class BookingService(
             .Include(v => v.OperatingHours)
             .Include(v => v.PriceRules)
             .Include(v => v.Addons)
-            .FirstOrDefaultAsync(v => v.Id == req.VenueId && v.Status == "active", ct)
+            .FirstOrDefaultAsync(v => v.Id == req.VenueId && v.Status == "active" && v.Partner!.Status == "active", ct)
             ?? throw new BookingException(404, "venue_not_found", "ไม่พบสนาม");
 
         var now = clock.GetUtcNow().UtcDateTime;

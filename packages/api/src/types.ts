@@ -285,6 +285,33 @@ export interface AdminOverview {
   last30Days: { date: string; bookings: number; gbv: number; take: number }[];
 }
 
+export type PartnerStatus = 'pending' | 'active' | 'suspended';
+export interface AdminPartner {
+  id: string;
+  legalName: string;
+  taxId: string | null;
+  bankName: string | null;
+  bankAccount: string | null;
+  /** 0.10 = 10% */
+  commissionRate: number;
+  status: PartnerStatus;
+  createdAt: string;
+  ownerEmail: string | null;
+  ownerName: string | null;
+  venues: { id: string; slug: string; nameTh: string; nameEn: string; status: 'draft' | 'active' | 'hidden' }[];
+}
+export interface NewPartnerRequest {
+  legalName: string;
+  taxId: string | null;
+  bankName: string | null;
+  bankAccount: string | null;
+  commissionRate: number | null;
+  /** The owner's ClubOS login. The password is set here and handed over out of band (no reset flow yet). */
+  owner: { email: string; displayName: string; password: string };
+  /** Created as `draft` (hidden from search) until the partner is approved. */
+  venue: { slug: string; nameTh: string; nameEn: string; district: string; address: string; lat: number; lng: number };
+}
+
 // ---------------------------------------------------------------- ClubOS venue settings (C5)
 export interface CourtSettings {
   id: string;

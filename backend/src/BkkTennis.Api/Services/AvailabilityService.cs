@@ -23,7 +23,7 @@ public class AvailabilityService(AppDbContext db, TimeProvider clock)
             .Include(v => v.Courts.Where(c => c.IsActive).OrderBy(c => c.SortOrder))
             .Include(v => v.OperatingHours)
             .Include(v => v.PriceRules)
-            .FirstOrDefaultAsync(v => v.Id == venueId && v.Status == "active", ct);
+            .FirstOrDefaultAsync(v => v.Id == venueId && v.Status == "active" && v.Partner!.Status == "active", ct);
         if (venue is null) return null;
 
         return await BuildAsync(venue, date, ct);

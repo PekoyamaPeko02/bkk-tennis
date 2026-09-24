@@ -62,6 +62,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         {
             e.ToTable("venue_members");
             e.HasKey(x => new { x.VenueId, x.UserId });
+            // Declared so EF inserts venues/users before their membership row when they are created in one SaveChanges.
+            e.HasOne<Venue>().WithMany().HasForeignKey(x => x.VenueId);
+            e.HasOne<User>().WithMany().HasForeignKey(x => x.UserId);
         });
 
         b.Entity<Court>().ToTable("courts");
