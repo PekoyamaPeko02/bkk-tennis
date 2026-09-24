@@ -454,6 +454,45 @@ public class BookingService(
         return booking;
     }
 
+    /// <summary>
+    /// Background settle: an app booking still <c>confirmed</c> <see cref="BookingOptions.NoShowGraceMinutes"/> after its
+    /// first slot started becomes <c>no_show</c> (no refund); a <c>checked_in</c> booking, or a walk-in (paid at the
+    /// counter, so never a no-show), becomes <c>completed</c> once its last slot has ended. Returns (noShows, completed).
+    /// </summary>
+    public async Task<(int noShows, int completed)> SettleBookingsAsync(CancellationToken ct)
+    {
+        var now = clock.GetUtcNow().UtcDateTime;
+        var noShowBefore = now.AddMinutes(-Opt.NoShowGraceMinutes);
+        var due = await db.Bookings.Include(b => b.Slots).Include(b => b.Venue)
+            .Where(b => (b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.CheckedIn)
+                        && b.Slots.Min(s => s.StartAt) < now)
+            .OrderBy(b => b.Id)
+            .Take(200)
+            .ToListAsync(ct);
+
+        int noShows = 0, completed = 0;
+        var changed = new List<Booking>();
+        foreach (var b in due)
+        {
+            string? next = null;
+            var ended = b.Slots.Max(s => s.EndAt) <= now;
+            if (b.Status == BookingStatus.CheckedIn) { if (ended) next = BookingStatus.Completed; }
+            else if (b.Source == "walk_in") { if (ended) next = BookingStatus.Completed; }
+            else if (b.Slots.Min(s => s.StartAt) <= noShowBefore) next = BookingStatus.NoShow;
+            if (next is null) continue;
+
+            b.Status = next;
+            b.UpdatedAt = now;
+            foreach (var s in b.Slots) s.Status = next;
+            changed.Add(b);
+            if (next == BookingStatus.NoShow) noShows++; else completed++;
+        }
+        if (changed.Count == 0) return (0, 0);
+        await db.SaveChangesAsync(ct);
+        foreach (var b in changed) await NotifyAsync(b);
+        return (noShows, completed);
+    }
+
     /// <summary>Releases expired holds. Returns number of bookings expired.</summary>
     public async Task<int> ExpireHoldsAsync(CancellationToken ct)
     {

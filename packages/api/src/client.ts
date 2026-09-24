@@ -1,5 +1,5 @@
 import type {
-  AuthResponse, Booking, CourtBlock, CourtBlockRequest, CreateBookingRequest, OtpRequestResponse, Schedule, User, WalkInRequest, WalkInResult,
+  AuthResponse, Booking, ClubOsBooking, CourtBlock, CourtBlockRequest, CreateBookingRequest, OtpRequestResponse, Schedule, User, WalkInRequest, WalkInResult,
   VenueAvailability, VenueDetail, VenueSearchParams, VenueSearchResult,
 } from './types';
 
@@ -29,6 +29,12 @@ export interface BkkApi {
   /** ClubOS: take a court out of sale. 409 `block_conflict` when a live booking overlaps. */
   createBlock(venueId: string, req: CourtBlockRequest): Promise<CourtBlock>;
   deleteBlock(venueId: string, blockId: string): Promise<void>;
+  /** ClubOS: look a booking up by the code the player shows (case-insensitive; 404 when it is not this venue's). */
+  getBookingByCode(venueId: string, code: string): Promise<ClubOsBooking>;
+  /** ClubOS: check the player in (30 min before start until the last slot ends; 409 `too_early`/`too_late`/`not_checkin_able`). Idempotent. */
+  checkIn(venueId: string, bookingId: string): Promise<ClubOsBooking>;
+  /** ClubOS: mark a paid, not-checked-in booking as no-show, 15 min after start (409 `too_early`/`not_no_show_able`). No refund. */
+  markNoShow(venueId: string, bookingId: string): Promise<ClubOsBooking>;
   /** Development only — pretends the PromptPay QR was paid. */
   simulatePayment(id: string): Promise<Booking>;
 }
@@ -90,6 +96,9 @@ export function createHttpApi(opt: HttpApiOptions): BkkApi {
     createWalkIn: (venueId, req) => call('POST', `/clubos/venues/${venueId}/walk-ins`, req),
     createBlock: (venueId, req) => call('POST', `/clubos/venues/${venueId}/blocks`, req),
     deleteBlock: (venueId, blockId) => call('DELETE', `/clubos/venues/${venueId}/blocks/${blockId}`),
+    getBookingByCode: (venueId, code) => call('GET', `/clubos/venues/${venueId}/bookings/by-code/${encodeURIComponent(code.trim())}`),
+    checkIn: (venueId, bookingId) => call('POST', `/clubos/venues/${venueId}/bookings/${bookingId}/check-in`),
+    markNoShow: (venueId, bookingId) => call('POST', `/clubos/venues/${venueId}/bookings/${bookingId}/no-show`),
     simulatePayment: (id) => call('POST', `/dev/bookings/${id}/simulate-payment`),
   };
 }

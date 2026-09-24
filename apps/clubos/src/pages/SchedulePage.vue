@@ -11,6 +11,7 @@
         </div>
       </div>
       <div class="actions">
+        <q-btn outline no-caps icon="qr_code_scanner" label="เช็คอิน" data-testid="open-checkin" @click="checkInOpen = true" />
         <q-btn unelevated no-caps class="bkk-btn-forest" icon="person_add" label="เพิ่มการจอง Walk-in" :disable="!data" @click="openWalkIn(null)" />
         <q-btn outline no-caps icon="block" label="บล็อกคอร์ท (ซ่อมบำรุง)" :disable="!data" @click="openBlock(null)" />
       </div>
@@ -112,6 +113,12 @@
           </div>
           <q-separator class="q-my-md" />
           <div class="line total"><span>ยอดรวม</span><span class="bkk-num">{{ baht(booking.total) }}</span></div>
+          <div v-if="booking.status === 'confirmed'" class="row q-gutter-sm q-mt-lg">
+            <q-btn unelevated no-caps class="bkk-btn-forest" icon="how_to_reg" label="เช็คอิน" :loading="acting" data-testid="detail-checkin"
+              @click="act('checkIn', booking!.id)" />
+            <q-btn outline no-caps color="negative" icon="person_off" label="ไม่มาเล่น" :loading="acting" data-testid="detail-noshow"
+              @click="act('markNoShow', booking!.id)" />
+          </div>
         </q-card-section>
 
         <q-card-section v-else-if="block" class="col scroll detail">
@@ -129,6 +136,7 @@
       </q-card>
     </q-dialog>
 
+    <CheckInDialog v-model="checkInOpen" :venue-id="VENUE_ID" @changed="load" />
     <WalkInDialog v-model="walkInOpen" :venue-id="VENUE_ID" :date="date" :schedule="data" :preselect="preselect" @saved="load" />
     <BlockDialog v-model="blockOpen" :venue-id="VENUE_ID" :date="date" :schedule="data" :preselect="preselect" @saved="load" />
   </q-page>
@@ -144,6 +152,7 @@ import { addDays, baht, thDate, thDay, useLiveAvailability } from '@bkk/ui';
 import { apiBase, isMockApi, useApi } from 'boot/api';
 import WalkInDialog from 'components/WalkInDialog.vue';
 import BlockDialog from 'components/BlockDialog.vue';
+import CheckInDialog from 'components/CheckInDialog.vue';
 
 // TODO(C2 follow-up): from the signed-in staff member's venue memberships ("my venues" endpoint).
 const VENUE_ID = '20000000-0000-0000-0000-000000000001';
@@ -206,6 +215,22 @@ const walkInOpen = ref(false);
 const blockOpen = ref(false);
 const preselect = ref<{ courtId: string; start: string } | null>(null);
 const unblocking = ref(false);
+const checkInOpen = ref(false);
+const acting = ref(false);
+
+/** Check-in / no-show from the detail panel; the server enforces the time windows and explains a refusal. */
+async function act(kind: 'checkIn' | 'markNoShow', id: string) {
+  acting.value = true;
+  try {
+    await api[kind](VENUE_ID, id);
+    $q.notify({ type: 'positive', message: kind === 'checkIn' ? 'เช็คอินแล้ว' : 'บันทึกว่าไม่มาเล่นแล้ว' });
+    await load();
+  } catch (e) {
+    $q.notify({ type: 'negative', message: (e as Error).message || 'ทำรายการไม่สำเร็จ' });
+  } finally {
+    acting.value = false;
+  }
+}
 
 function openWalkIn(pre: { courtId: string; start: string } | null) {
   preselect.value = pre;

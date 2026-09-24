@@ -158,6 +158,17 @@ export interface WalkInResult {
   slots: BookingSlot[];
 }
 
+/** ClubOS booking summary (check-in / no-show results and code lookup). */
+export interface ClubOsBooking {
+  id: string;
+  code: string;
+  status: BookingStatus;
+  source: 'app' | 'walk_in';
+  customerName: string | null;
+  total: number;
+  slots: BookingSlot[];
+}
+
 export interface CourtBlockRequest {
   courtId: string;
   /** ISO instants (UTC); the portal builds them from venue-local date + time. */

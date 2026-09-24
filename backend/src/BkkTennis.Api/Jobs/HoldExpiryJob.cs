@@ -2,7 +2,7 @@ using BkkTennis.Api.Features.Bookings;
 
 namespace BkkTennis.Api.Jobs;
 
-/// <summary>Releases unpaid holds every 30 seconds. Swap for Hangfire when more jobs arrive (payouts, reminders).</summary>
+/// <summary>Every 30 seconds: releases unpaid holds and settles bookings (auto no-show / completed). Swap for Hangfire when more jobs arrive (payouts, reminders).</summary>
 public class HoldExpiryJob(IServiceScopeFactory scopes, ILogger<HoldExpiryJob> log) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -16,6 +16,8 @@ public class HoldExpiryJob(IServiceScopeFactory scopes, ILogger<HoldExpiryJob> l
                 var bookings = scope.ServiceProvider.GetRequiredService<BookingService>();
                 var n = await bookings.ExpireHoldsAsync(stoppingToken);
                 if (n > 0) log.LogInformation("Expired {Count} unpaid holds", n);
+                var (noShows, completed) = await bookings.SettleBookingsAsync(stoppingToken);
+                if (noShows + completed > 0) log.LogInformation("Settled bookings: {NoShows} no-show, {Completed} completed", noShows, completed);
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {

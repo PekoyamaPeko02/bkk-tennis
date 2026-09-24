@@ -2,7 +2,7 @@
 // Data mirrors db/init/002_seed.sql. Logic mirrors Pricing/AvailabilityService/BookingService.
 import { ApiError, type BkkApi } from './client';
 import type {
-  Addon, Booking, BookingStatus, Court, CourtBlock, CourtBlockRequest, CreateBookingRequest, Schedule, ScheduleBlock, ScheduleBooking,
+  Addon, Booking, BookingStatus, ClubOsBooking, Court, CourtBlock, CourtBlockRequest, CreateBookingRequest, Schedule, ScheduleBlock, ScheduleBooking,
   ScheduleCourt, ScheduleSlot, Slot, User, VenueAvailability, VenueDetail, VenueSummary, WalkInRequest, WalkInResult,
 } from './types';
 
@@ -133,6 +133,8 @@ interface MockBooking extends Booking {
 }
 const bookings: MockBooking[] = [];
 const blocks: (CourtBlock & { venueId: string })[] = [];
+/** ClubOS check-in / no-show marks. Kept apart from `bookings` so seeded pre-booked cells (synthetic ids) can be marked too. */
+const staffMarks = new Map<string, 'checked_in' | 'no_show'>();
 let seq = 10001;
 let currentUser: User | null = null;
 
@@ -192,8 +194,10 @@ function schedule(v: MockVenue, date: string): Schedule {
     slots: c.slots.map((s): ScheduleSlot => {
       const empty = { bookingId: null, blockId: null };
       if (s.status === 'blocked') return { ...s, status: 'blocked', bookingId: null, blockId: blockAt(c.courtId, s.startAt)?.id ?? null };
-      if (s.status !== 'booked' && s.status !== 'held') return { ...s, status: s.status, ...empty };
       const real = slotTaken(c.courtId, s.startAt);
+      // like the API, a started cell keeps its booking
+      const taken = s.status === 'past' && (real || preBooked(c.courtId, date, Number(s.start.slice(0, 2))));
+      if (s.status !== 'booked' && s.status !== 'held' && !taken) return { ...s, status: s.status, ...empty };
       const id = real?.id ?? `mock-${c.courtId}-${date}-${s.start}`;
       if (!found.has(id)) {
         const n = Math.abs([...id].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) | 0, 0));
@@ -201,7 +205,7 @@ function schedule(v: MockVenue, date: string): Schedule {
         found.set(id, {
           id,
           code: real?.code ?? `BT${10000 + (n % 90000)}`,
-          status: s.status === 'held' ? 'held' : 'confirmed',
+          status: s.status === 'held' ? 'held' : staffMarks.get(id) ?? 'confirmed',
           source: walkIn ? 'walk_in' : 'app',
           customerName: real ? (real.customerName ?? currentUser?.displayName ?? 'ลูกค้าแอป') : MOCK_CUSTOMERS[n % MOCK_CUSTOMERS.length]!,
           customerPhone: walkIn ? null : `08${n % 10}-***-${String(1000 + (n % 9000))}`,
@@ -214,14 +218,14 @@ function schedule(v: MockVenue, date: string): Schedule {
           addons: [],
         });
       }
-      return { ...s, status: s.status === 'held' ? 'held' : 'booked', bookingId: id, blockId: null };
+      return { ...s, status: s.status === 'held' ? 'held' : staffMarks.get(id) ?? 'booked', bookingId: id, blockId: null };
     }),
   }));
 
   const cells = courts.flatMap((c) => c.slots);
-  const occupied = cells.filter((s) => s.status === 'booked').length;
+  const occupied = cells.filter((s) => s.status === 'booked' || s.status === 'checked_in' || s.status === 'no_show').length;
   const sellable = cells.filter((s) => s.price !== null || s.bookingId).length;
-  const sold = [...found.values()].filter((b) => b.status === 'confirmed');
+  const sold = [...found.values()].filter((b) => b.status !== 'held');
   const sum = (xs: ScheduleBooking[]) => xs.reduce((t, b) => t + b.total, 0);
   const local = (iso: string) => new Date(Date.parse(iso) + 7 * 3600_000).toISOString().slice(11, 16); // Asia/Bangkok, no DST
   const dayStart = Date.parse(toUtcIso(date, '00:00'));
@@ -268,6 +272,45 @@ function findVenue(idOrSlug: string) {
 function requireUser() {
   if (!currentUser) throw new ApiError(401, 'unauthorized', 'กรุณาเข้าสู่ระบบ');
   return currentUser;
+}
+
+/** The date (Bangkok) a schedule booking lives on: real bookings from their first slot, seeded cells from the id `mock-<court>-<date>-<hh:mm>`. */
+function dayOf(id: string): string | null {
+  const real = bookings.find((b) => b.id === id);
+  if (real) return new Date(Date.parse(real.slotStarts[0]!.startAt) + 7 * 3600_000).toISOString().slice(0, 10);
+  return /^mock-.+-(\d{4}-\d{2}-\d{2})-\d{2}:\d{2}$/.exec(id)?.[1] ?? null;
+}
+
+function scheduleBookingOf(v: MockVenue, id: string): ClubOsBooking | null {
+  const date = dayOf(id);
+  const b = date ? schedule(v, date).bookings.find((x) => x.id === id) : undefined;
+  return b ? toClubOs(b, date!) : null;
+}
+
+/** Seeded (synthetic) bookings have no code index; scan a window of days around today. */
+function findSyntheticByCode(v: MockVenue, code: string): ClubOsBooking | null {
+  for (let d = -1; d <= 15; d++) {
+    const date = new Date(Date.now() + 7 * 3600_000 + d * 86400_000).toISOString().slice(0, 10);
+    const b = schedule(v, date).bookings.find((x) => x.code === code);
+    if (b) return toClubOs(b, date);
+  }
+  return null;
+}
+
+function toClubOs(b: ScheduleBooking, date: string): ClubOsBooking {
+  return {
+    id: b.id, code: b.code, status: b.status, source: b.source, customerName: b.customerName, total: b.total,
+    slots: b.slots.map((s) => ({ ...s, date, label: null })),
+  };
+}
+
+function stateOf(v: MockVenue, id: string) {
+  const date = dayOf(id);
+  const b = date ? schedule(v, date).bookings.find((x) => x.id === id) : undefined;
+  if (!b || !date) throw new ApiError(404, 'booking_not_found', 'ไม่พบการจอง');
+  const starts = b.slots.map((s) => Date.parse(toUtcIso(date, s.start)));
+  const ends = b.slots.map((s) => Date.parse(toUtcIso(date, s.end)));
+  return { b: toClubOs(b, date), first: Math.min(...starts), last: Math.max(...ends) };
 }
 
 function requireStaff() {
@@ -407,6 +450,42 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
       const i = blocks.findIndex((b) => b.id === blockId && b.venueId === venueId);
       if (i < 0) throw new ApiError(404, 'not_found', 'ไม่พบข้อมูล');
       blocks.splice(i, 1);
+    },
+
+    async getBookingByCode(venueId, code) {
+      await sleep(200);
+      const v = findVenue(venueId);
+      requireStaff();
+      const wanted = code.trim().toUpperCase();
+      const real = bookings.find((b) => b.venueId === v.s.id && b.code === wanted);
+      const found = real ? scheduleBookingOf(v, real.id) : findSyntheticByCode(v, wanted);
+      if (!found) throw new ApiError(404, 'not_found', 'ไม่พบข้อมูล');
+      return found;
+    },
+
+    async checkIn(venueId, bookingId) {
+      await sleep(200);
+      const v = findVenue(venueId);
+      requireStaff();
+      const { b, first, last } = stateOf(v, bookingId);
+      if (b.status === 'checked_in') return b;
+      if (b.status !== 'confirmed') throw new ApiError(409, 'not_checkin_able', 'รายการนี้เช็คอินไม่ได้ (ต้องชำระเงินแล้วและยังไม่ยกเลิก)');
+      if (Date.now() < first - 30 * 60_000) throw new ApiError(409, 'too_early', 'เช็คอินได้ก่อนเวลาเริ่มไม่เกิน 30 นาที');
+      if (Date.now() >= last) throw new ApiError(409, 'too_late', 'เลยเวลาการจองแล้ว');
+      staffMarks.set(bookingId, 'checked_in');
+      return { ...b, status: 'checked_in' };
+    },
+
+    async markNoShow(venueId, bookingId) {
+      await sleep(200);
+      const v = findVenue(venueId);
+      requireStaff();
+      const { b, first } = stateOf(v, bookingId);
+      if (b.status === 'no_show') return b;
+      if (b.status !== 'confirmed') throw new ApiError(409, 'not_no_show_able', 'ทำเครื่องหมายไม่มาได้เฉพาะรายการที่ชำระแล้วและยังไม่เช็คอิน');
+      if (Date.now() < first + 15 * 60_000) throw new ApiError(409, 'too_early', 'ทำเครื่องหมายไม่มาได้หลังเวลาเริ่ม 15 นาที');
+      staffMarks.set(bookingId, 'no_show');
+      return { ...b, status: 'no_show' };
     },
 
     async requestOtp(phone) {
