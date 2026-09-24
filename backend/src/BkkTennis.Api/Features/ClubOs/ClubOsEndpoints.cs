@@ -219,6 +219,8 @@ public static class ClubOsEndpoints
             return Results.NoContent();
         }).RequireAuthorization(VenueAuthorization.Owner);
 
+        g.MapSettings();
+
         return api;
     }
 

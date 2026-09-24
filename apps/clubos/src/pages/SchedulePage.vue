@@ -153,9 +153,7 @@ import { apiBase, isMockApi, useApi } from 'boot/api';
 import WalkInDialog from 'components/WalkInDialog.vue';
 import BlockDialog from 'components/BlockDialog.vue';
 import CheckInDialog from 'components/CheckInDialog.vue';
-
-// TODO(C2 follow-up): from the signed-in staff member's venue memberships ("my venues" endpoint).
-const VENUE_ID = '20000000-0000-0000-0000-000000000001';
+import { VENUE_ID } from 'src/venue';
 
 const LEGEND: Record<string, string> = {
   booked: 'จองแล้ว', held: 'รอชำระเงิน', checked_in: 'เช็คอินแล้ว', completed: 'เล่นเสร็จ', no_show: 'ไม่มาเล่น',

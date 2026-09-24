@@ -270,3 +270,62 @@ export interface Booking {
   payment: { provider: string; method: string; amount: number; status: string; qrPayload: string | null } | null;
   cancelFreeHours: number;
 }
+
+// ---------------------------------------------------------------- ClubOS venue settings (C5)
+export interface CourtSettings {
+  id: string;
+  name: string;
+  surface: Surface;
+  indoor: boolean;
+  airCon: boolean;
+  floodlit: boolean;
+  sortOrder: number;
+  isActive: boolean;
+}
+export type CourtSettingsRequest = Omit<CourtSettings, 'id'>;
+
+/** 0 = Sunday … 6 = Saturday. A day that is missing from the week is closed. */
+export interface OpeningHours {
+  dayOfWeek: number;
+  open: string;
+  close: string;
+  slotMinutes: number;
+}
+
+export interface AddonSettings {
+  id: string;
+  name: string;
+  description: string | null;
+  icon: string | null;
+  price: number;
+  unit: 'per_booking' | 'per_hour';
+  isActive: boolean;
+}
+export type AddonSettingsRequest = Omit<AddonSettings, 'id'>;
+
+export interface VenueSettings {
+  cancelFreeHours: number;
+  courts: CourtSettings[];
+  hours: OpeningHours[];
+  addons: AddonSettings[];
+}
+
+export type DayType = 'weekday' | 'weekend' | 'any';
+export interface PriceRule {
+  id: string;
+  courtId: string | null;
+  courtName: string | null;
+  dayType: DayType;
+  start: string;
+  end: string;
+  pricePerHour: number;
+  label: string | null;
+  priority: number;
+}
+export type PriceRuleRequest = Omit<PriceRule, 'id' | 'courtName'>;
+
+export interface PricePreview {
+  date: string;
+  slotMinutes: number;
+  courts: { courtId: string; name: string; slots: { start: string; end: string; price: number | null; label: string | null }[] }[];
+}

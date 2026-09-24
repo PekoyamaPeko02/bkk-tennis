@@ -2,7 +2,7 @@
 // Data mirrors db/init/002_seed.sql. Logic mirrors Pricing/AvailabilityService/BookingService.
 import { ApiError, type BkkApi } from './client';
 import type {
-  Addon, Booking, BookingStatus, ClubOsBooking, Court, CourtBlock, CourtBlockRequest, CreateBookingRequest, Schedule, ScheduleBlock, ScheduleBooking,
+  Addon, AddonSettings, Booking, BookingStatus, CourtSettings, OpeningHours, PricePreview, PriceRule, PriceRuleRequest, ClubOsBooking, Court, CourtBlock, CourtBlockRequest, CreateBookingRequest, Schedule, ScheduleBlock, ScheduleBooking,
   ScheduleCourt, ScheduleSlot, Slot, User, VenueAvailability, VenueDetail, VenueSummary, WalkInRequest, WalkInResult,
 } from './types';
 
@@ -319,6 +319,49 @@ function requireStaff() {
   return user;
 }
 
+function requireOwner() {
+  const user = requireStaff();
+  if (user.role !== 'partner_owner') throw new ApiError(403, 'forbidden', 'ไม่มีสิทธิ์เข้าถึง');
+  return user;
+}
+
+// ---- venue settings (C5). Kept apart from the booking mock: editing courts/hours/prices here does not change the schedule grid.
+interface MockSettings { cancelFreeHours: number; courts: CourtSettings[]; hours: OpeningHours[]; addons: AddonSettings[]; rules: PriceRule[] }
+const settingsByVenue = new Map<string, MockSettings>();
+let settingsSeq = 1;
+const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+function settingsOf(v: MockVenue): MockSettings {
+  let s = settingsByVenue.get(v.s.id);
+  if (!s) {
+    s = {
+      cancelFreeHours: v.cancelFreeHours,
+      courts: v.courts.map((c, i) => ({ ...c, sortOrder: i + 1, isActive: true })),
+      hours: [0, 1, 2, 3, 4, 5, 6].map((d) => ({ dayOfWeek: d, open: `${pad(OPEN)}:00`, close: `${pad(CLOSE)}:00`, slotMinutes: 60 })),
+      addons: v.addons.map((a) => ({ id: a.id, name: a.name, description: a.description, icon: a.icon, price: a.price, unit: a.unit, isActive: true })),
+      rules: v.rules.map((r) => ({
+        id: `rule-${settingsSeq++}`, courtId: null, courtName: null, dayType: 'any', start: r.start, end: r.end,
+        pricePerHour: r.price, label: r.label, priority: r.priority,
+      })),
+    };
+    settingsByVenue.set(v.s.id, s);
+  }
+  return s;
+}
+
+function ruleFromRequest(s: MockSettings, id: string, req: PriceRuleRequest): PriceRule {
+  if (!HHMM.test(req.start) || !HHMM.test(req.end)) throw new ApiError(400, 'bad_time', 'รูปแบบเวลาไม่ถูกต้อง (HH:mm)');
+  if (req.end <= req.start) throw new ApiError(400, 'bad_range', 'เวลาสิ้นสุดต้องหลังเวลาเริ่ม');
+  if (req.pricePerHour < 0 || req.pricePerHour > 100_000) throw new ApiError(400, 'bad_price', 'ราคาไม่ถูกต้อง');
+  const court = req.courtId ? s.courts.find((c) => c.id === req.courtId) : null;
+  if (req.courtId && !court) throw new ApiError(404, 'court_not_found', 'ไม่พบคอร์ท');
+  const rule: PriceRule = { ...req, id, courtName: court?.name ?? null, label: req.label?.trim() || null };
+  const clash = s.rules.find((o) => o.id !== id && o.courtId === rule.courtId && o.priority === rule.priority
+    && (o.dayType === 'any' || rule.dayType === 'any' || o.dayType === rule.dayType) && o.start < rule.end && rule.start < o.end);
+  if (clash) throw new ApiError(409, 'price_rule_ambiguous', `ทับกับกฎราคาเดิม (${clash.start}-${clash.end}) ที่ priority เท่ากัน กรุณาเปลี่ยน priority`);
+  return rule;
+}
+
 function publicBooking(b: MockBooking): Booking {
   expireHolds();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -486,6 +529,158 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
       if (Date.now() < first + 15 * 60_000) throw new ApiError(409, 'too_early', 'ทำเครื่องหมายไม่มาได้หลังเวลาเริ่ม 15 นาที');
       staffMarks.set(bookingId, 'no_show');
       return { ...b, status: 'no_show' };
+    },
+
+    async getSettings(venueId) {
+      await sleep(150);
+      const s = settingsOf(findVenue(venueId));
+      requireStaff();
+      return structuredClone({ cancelFreeHours: s.cancelFreeHours, courts: s.courts, hours: s.hours, addons: s.addons });
+    },
+
+    async setCancelPolicy(venueId, cancelFreeHours) {
+      await sleep(150);
+      const s = settingsOf(findVenue(venueId));
+      requireOwner();
+      if (!Number.isInteger(cancelFreeHours) || cancelFreeHours < 0 || cancelFreeHours > 168)
+        throw new ApiError(400, 'bad_cancel_hours', 'ชั่วโมงยกเลิกฟรีต้องอยู่ระหว่าง 0-168');
+      s.cancelFreeHours = cancelFreeHours;
+      return { cancelFreeHours };
+    },
+
+    async createCourt(venueId, req) {
+      await sleep(150);
+      const s = settingsOf(findVenue(venueId));
+      requireOwner();
+      if (!req.name.trim()) throw new ApiError(400, 'bad_name', 'กรุณาระบุชื่อคอร์ท');
+      const c: CourtSettings = { ...req, name: req.name.trim(), id: `court-${settingsSeq++}` };
+      s.courts.push(c);
+      s.courts.sort((a, b) => a.sortOrder - b.sortOrder);
+      return { ...c };
+    },
+
+    async updateCourt(venueId, courtId, req) {
+      await sleep(150);
+      const s = settingsOf(findVenue(venueId));
+      requireOwner();
+      const c = s.courts.find((x) => x.id === courtId);
+      if (!c) throw new ApiError(404, 'http_404', 'ไม่พบข้อมูล');
+      if (!req.name.trim()) throw new ApiError(400, 'bad_name', 'กรุณาระบุชื่อคอร์ท');
+      if (c.isActive && !req.isActive) {
+        const live = bookings.find((b) => b.venueId === venueId && b.status !== 'cancelled' && b.status !== 'expired'
+          && b.slotStarts.some((x) => x.courtId === courtId && Date.parse(x.startAt) + 3600_000 > Date.now()));
+        if (live) throw new ApiError(409, 'court_has_bookings', `คอร์ทนี้ยังมีการจองที่ยังไม่สิ้นสุด (${live.code}) กรุณายกเลิกก่อนปิดคอร์ท`);
+      }
+      Object.assign(c, req, { name: req.name.trim() });
+      s.courts.sort((a, b) => a.sortOrder - b.sortOrder);
+      return { ...c };
+    },
+
+    async setHours(venueId, days) {
+      await sleep(150);
+      const s = settingsOf(findVenue(venueId));
+      requireOwner();
+      const seen = new Set<number>();
+      for (const d of days) {
+        if (!Number.isInteger(d.dayOfWeek) || d.dayOfWeek < 0 || d.dayOfWeek > 6) throw new ApiError(400, 'bad_day', 'วันต้องอยู่ระหว่าง 0 (อาทิตย์) - 6 (เสาร์)');
+        if (seen.has(d.dayOfWeek)) throw new ApiError(400, 'duplicate_day', 'มีวันซ้ำกัน');
+        seen.add(d.dayOfWeek);
+        if (!HHMM.test(d.open) || !HHMM.test(d.close)) throw new ApiError(400, 'bad_time', 'รูปแบบเวลาไม่ถูกต้อง (HH:mm)');
+        if (d.close <= d.open) throw new ApiError(400, 'bad_range', 'เวลาปิดต้องหลังเวลาเปิด');
+        if (d.slotMinutes !== 30 && d.slotMinutes !== 60) throw new ApiError(400, 'bad_slot_minutes', 'ช่วงเวลาต่อสล็อตต้องเป็น 30 หรือ 60 นาที');
+        const mins = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3));
+        if ((mins(d.close) - mins(d.open)) % d.slotMinutes !== 0) throw new ApiError(400, 'bad_range', 'ช่วงเวลาเปิด-ปิดต้องหารด้วยความยาวสล็อตลงตัว');
+      }
+      s.hours = days.map((d) => ({ ...d })).sort((a, b) => a.dayOfWeek - b.dayOfWeek);
+      return structuredClone(s.hours);
+    },
+
+    async createAddon(venueId, req) {
+      await sleep(150);
+      const s = settingsOf(findVenue(venueId));
+      requireOwner();
+      if (!req.name.trim()) throw new ApiError(400, 'bad_name', 'กรุณาระบุชื่อบริการ');
+      if (req.price < 0 || req.price > 100_000) throw new ApiError(400, 'bad_price', 'ราคาไม่ถูกต้อง');
+      const a: AddonSettings = { ...req, name: req.name.trim(), id: `addon-${settingsSeq++}` };
+      s.addons.push(a);
+      return { ...a };
+    },
+
+    async updateAddon(venueId, addonId, req) {
+      await sleep(150);
+      const s = settingsOf(findVenue(venueId));
+      requireOwner();
+      const a = s.addons.find((x) => x.id === addonId);
+      if (!a) throw new ApiError(404, 'http_404', 'ไม่พบข้อมูล');
+      if (!req.name.trim()) throw new ApiError(400, 'bad_name', 'กรุณาระบุชื่อบริการ');
+      if (req.price < 0 || req.price > 100_000) throw new ApiError(400, 'bad_price', 'ราคาไม่ถูกต้อง');
+      Object.assign(a, req, { name: req.name.trim() });
+      return { ...a };
+    },
+
+    async getPriceRules(venueId) {
+      await sleep(150);
+      const s = settingsOf(findVenue(venueId));
+      requireStaff();
+      return structuredClone([...s.rules].sort((a, b) => Number(!!a.courtId) - Number(!!b.courtId) || a.start.localeCompare(b.start) || b.priority - a.priority));
+    },
+
+    async createPriceRule(venueId, req) {
+      await sleep(150);
+      const s = settingsOf(findVenue(venueId));
+      requireOwner();
+      const rule = ruleFromRequest(s, `rule-${settingsSeq++}`, req);
+      s.rules.push(rule);
+      return { ...rule };
+    },
+
+    async updatePriceRule(venueId, ruleId, req) {
+      await sleep(150);
+      const s = settingsOf(findVenue(venueId));
+      requireOwner();
+      const i = s.rules.findIndex((r) => r.id === ruleId);
+      if (i < 0) throw new ApiError(404, 'http_404', 'ไม่พบข้อมูล');
+      const rule = ruleFromRequest(s, ruleId, req);
+      s.rules[i] = rule;
+      return { ...rule };
+    },
+
+    async deletePriceRule(venueId, ruleId) {
+      await sleep(150);
+      const s = settingsOf(findVenue(venueId));
+      requireOwner();
+      const i = s.rules.findIndex((r) => r.id === ruleId);
+      if (i < 0) throw new ApiError(404, 'http_404', 'ไม่พบข้อมูล');
+      s.rules.splice(i, 1);
+    },
+
+    async getPricePreview(venueId, date) {
+      await sleep(150);
+      const s = settingsOf(findVenue(venueId));
+      requireStaff();
+      const dow = new Date(`${date}T00:00:00Z`).getUTCDay();
+      const weekend = dow === 0 || dow === 6;
+      const hours = s.hours.find((h) => h.dayOfWeek === dow);
+      const minutes = hours?.slotMinutes ?? 60;
+      const mins = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3));
+      const hhmm = (m: number) => `${pad(Math.floor(m / 60))}:${pad(m % 60)}`;
+      return {
+        date,
+        slotMinutes: minutes,
+        courts: s.courts.filter((c) => c.isActive).map((c) => {
+          const slots: PricePreview['courts'][number]['slots'] = [];
+          if (hours) {
+            for (let m = mins(hours.open); m < mins(hours.close); m += minutes) {
+              const start = hhmm(m);
+              const rule = s.rules
+                .filter((r) => (r.courtId === null || r.courtId === c.id) && (r.dayType === 'any' || (r.dayType === 'weekend') === weekend) && start >= r.start && start < r.end)
+                .sort((a, b) => Number(!!b.courtId) - Number(!!a.courtId) || b.priority - a.priority)[0];
+              slots.push({ start, end: hhmm(m + minutes), price: rule ? Math.round((rule.pricePerHour * minutes) / 60 * 100) / 100 : null, label: rule?.label ?? null });
+            }
+          }
+          return { courtId: c.id, name: c.name, slots };
+        }),
+      };
     },
 
     async requestOtp(phone) {

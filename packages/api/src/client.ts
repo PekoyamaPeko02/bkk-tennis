@@ -1,4 +1,5 @@
 import type {
+  AddonSettings, AddonSettingsRequest, CourtSettings, CourtSettingsRequest, OpeningHours, PricePreview, PriceRule, PriceRuleRequest, VenueSettings,
   AuthResponse, Booking, ClubOsBooking, CourtBlock, CourtBlockRequest, CreateBookingRequest, OtpRequestResponse, Schedule, User, WalkInRequest, WalkInResult,
   VenueAvailability, VenueDetail, VenueSearchParams, VenueSearchResult,
 } from './types';
@@ -35,6 +36,23 @@ export interface BkkApi {
   checkIn(venueId: string, bookingId: string): Promise<ClubOsBooking>;
   /** ClubOS: mark a paid, not-checked-in booking as no-show, 15 min after start (409 `too_early`/`not_no_show_able`). No refund. */
   markNoShow(venueId: string, bookingId: string): Promise<ClubOsBooking>;
+  /** ClubOS settings (C5). Reads: any staff. Writes: venue owner only (403 for front-desk staff). */
+  getSettings(venueId: string): Promise<VenueSettings>;
+  setCancelPolicy(venueId: string, cancelFreeHours: number): Promise<{ cancelFreeHours: number }>;
+  createCourt(venueId: string, req: CourtSettingsRequest): Promise<CourtSettings>;
+  /** Deactivating a court with unfinished bookings → 409 `court_has_bookings`. Courts are never deleted. */
+  updateCourt(venueId: string, courtId: string, req: CourtSettingsRequest): Promise<CourtSettings>;
+  /** Replaces the whole week; days that are left out are closed. Existing bookings are kept. */
+  setHours(venueId: string, days: OpeningHours[]): Promise<OpeningHours[]>;
+  createAddon(venueId: string, req: AddonSettingsRequest): Promise<AddonSettings>;
+  updateAddon(venueId: string, addonId: string, req: AddonSettingsRequest): Promise<AddonSettings>;
+  getPriceRules(venueId: string): Promise<PriceRule[]>;
+  /** 409 `price_rule_ambiguous` when it overlaps a rule with the same court scope and priority. */
+  createPriceRule(venueId: string, req: PriceRuleRequest): Promise<PriceRule>;
+  updatePriceRule(venueId: string, ruleId: string, req: PriceRuleRequest): Promise<PriceRule>;
+  deletePriceRule(venueId: string, ruleId: string): Promise<void>;
+  /** What each court costs per slot on `date`, computed by the same rules as booking. */
+  getPricePreview(venueId: string, date: string): Promise<PricePreview>;
   /** Development only — pretends the PromptPay QR was paid. */
   simulatePayment(id: string): Promise<Booking>;
 }
@@ -99,6 +117,18 @@ export function createHttpApi(opt: HttpApiOptions): BkkApi {
     getBookingByCode: (venueId, code) => call('GET', `/clubos/venues/${venueId}/bookings/by-code/${encodeURIComponent(code.trim())}`),
     checkIn: (venueId, bookingId) => call('POST', `/clubos/venues/${venueId}/bookings/${bookingId}/check-in`),
     markNoShow: (venueId, bookingId) => call('POST', `/clubos/venues/${venueId}/bookings/${bookingId}/no-show`),
+    getSettings: (venueId) => call('GET', `/clubos/venues/${venueId}/settings`),
+    setCancelPolicy: (venueId, cancelFreeHours) => call('PUT', `/clubos/venues/${venueId}/settings/cancel-policy`, { cancelFreeHours }),
+    createCourt: (venueId, req) => call('POST', `/clubos/venues/${venueId}/courts`, req),
+    updateCourt: (venueId, courtId, req) => call('PUT', `/clubos/venues/${venueId}/courts/${courtId}`, req),
+    setHours: (venueId, days) => call('PUT', `/clubos/venues/${venueId}/hours`, { days }),
+    createAddon: (venueId, req) => call('POST', `/clubos/venues/${venueId}/addons`, req),
+    updateAddon: (venueId, addonId, req) => call('PUT', `/clubos/venues/${venueId}/addons/${addonId}`, req),
+    getPriceRules: (venueId) => call('GET', `/clubos/venues/${venueId}/prices`),
+    createPriceRule: (venueId, req) => call('POST', `/clubos/venues/${venueId}/prices`, req),
+    updatePriceRule: (venueId, ruleId, req) => call('PUT', `/clubos/venues/${venueId}/prices/${ruleId}`, req),
+    deletePriceRule: (venueId, ruleId) => call('DELETE', `/clubos/venues/${venueId}/prices/${ruleId}`),
+    getPricePreview: (venueId, date) => call('GET', `/clubos/venues/${venueId}/prices/preview${qs({ date })}`),
     simulatePayment: (id) => call('POST', `/dev/bookings/${id}/simulate-payment`),
   };
 }

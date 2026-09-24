@@ -5,7 +5,10 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     component: () => import('layouts/PortalLayout.vue'),
     meta: { auth: true },
-    children: [{ path: '', name: 'schedule', component: () => import('pages/SchedulePage.vue') }],
+    children: [
+      { path: '', name: 'schedule', component: () => import('pages/SchedulePage.vue') },
+      { path: 'settings', name: 'settings', component: () => import('pages/SettingsPage.vue') },
+    ],
   },
   {
     path: '/login',

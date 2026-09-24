@@ -45,8 +45,7 @@ function logout() {
 }
 const NAV: { label: string; icon: string; to?: string; soon?: boolean }[] = [
   { label: 'ตารางจองประจำวัน', icon: 'calendar_today', to: '/' },
-  { label: 'ตั้งค่าคอร์ท & ราคา', icon: 'tune', soon: true },
-  { label: 'บริการเสริม', icon: 'sports_tennis', soon: true },
+  { label: 'ตั้งค่าคอร์ท & ราคา', icon: 'tune', to: '/settings' },
   { label: 'รายได้ & Payout', icon: 'payments', soon: true },
 ];
 </script>
