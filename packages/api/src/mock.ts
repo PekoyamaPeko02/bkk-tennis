@@ -393,7 +393,7 @@ const addIsoDays = (iso: string, n: number) => new Date(Date.parse(`${iso}T00:00
 let payoutList: (AdminPayout & { bookingIds: string[] })[] | null = null;
 function mockPayoutFor(partnerIdx: number, cutoff: string, status: AdminPayout['status'], ref: string | null): AdminPayout & { bookingIds: string[] } {
   const partner = mockPartners().find((p) => p.id === `partner-seed-${partnerIdx}`)!;
-  const rows = mockExplorer().filter((b) => b.venueId === partner.venues[0]!.id && b.source === 'app' && b.status === 'completed' && b.date !== null && b.date < cutoff);
+  const rows = mockExplorer().filter((b) => b.venueId === partner.venues[0]!.id && b.source === 'app' && (b.status === 'completed' || b.status === 'no_show') && b.date !== null && b.date < cutoff);
   const gross = rows.reduce((t, b) => t + b.total, 0);
   const commission = rows.reduce((t, b) => t + b.commission, 0);
   return {

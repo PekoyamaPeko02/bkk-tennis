@@ -4,7 +4,7 @@
       <div>
         <h1 class="bkk-h1 q-my-none">การเงิน &amp; Payout</h1>
         <div class="bkk-muted small">
-          สรุปยอดโอนให้พาร์ทเนอร์ทุกวันศุกร์ จากการจองออนไลน์ที่เล่นเสร็จแล้ว (completed) · ยอดสุทธิ = ยอดจอง − ค่าธรรมเนียมแพลตฟอร์ม · walk-in ไม่รวม (จ่ายที่เคาน์เตอร์)
+          สรุปยอดโอนให้พาร์ทเนอร์ทุกวันศุกร์ จากการจองออนไลน์ที่เล่นเสร็จแล้ว (completed) หรือไม่มาเล่น (no_show — ไม่คืนเงิน) · ยอดสุทธิ = ยอดจอง − ค่าธรรมเนียมแพลตฟอร์ม · walk-in ไม่รวม (จ่ายที่เคาน์เตอร์)
         </div>
       </div>
       <q-btn outline no-caps icon="calculate" label="คำนวณรอบล่าสุดตอนนี้" :loading="running" data-testid="run-payouts" @click="run" />

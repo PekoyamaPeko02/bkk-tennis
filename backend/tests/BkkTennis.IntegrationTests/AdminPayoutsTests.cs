@@ -307,24 +307,26 @@ public class AdminPayoutsTests(ApiFactory api) : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Only_completed_app_bookings_with_slots_are_settled()
+    public async Task Only_completed_and_no_show_app_bookings_with_slots_are_settled()
     {
         var pv = await NewPartnerVenueAsync();
         var baseEnd = Cut(F1).AddDays(-3);
         var ineligible = new List<Guid>();
         var i = 0;
         // distinct, 2 h apart ends so held/confirmed/checked_in slots never overlap on the one court
-        foreach (var status in new[] { "held", "confirmed", "checked_in", "no_show", "cancelled", "expired" })
+        foreach (var status in new[] { "held", "confirmed", "checked_in", "cancelled", "expired" })
             ineligible.Add(await AddAsync(pv, baseEnd.AddHours(2 * i++), 700, 70, status));
         ineligible.Add(await AddAsync(pv, baseEnd.AddHours(2 * i++), 700, 0, "completed", "walk_in"));
         ineligible.Add(await AddNoSlotsAsync(pv, 700, 70));
-        var good = await AddAsync(pv, baseEnd.AddHours(2 * i), 300, 30);
+        var good = await AddAsync(pv, baseEnd.AddHours(2 * i++), 300, 30);
+        var noShow = await AddAsync(pv, baseEnd.AddHours(2 * i), 500, 50, "no_show"); // F1: a paid online no-show is revenue
 
         Assert.Equal(new Res(1, 0, 0), await RunAsync(F1));
 
-        var p = await AssertPayoutAsync(pv.PartnerId, F1, 300, 30);
-        Assert.Equal(1, await BookingsInAsync(p.Id));
+        var p = await AssertPayoutAsync(pv.PartnerId, F1, 800, 80);
+        Assert.Equal(2, await BookingsInAsync(p.Id));
         Assert.Equal(p.Id, await PayoutIdOfBookingAsync(good));
+        Assert.Equal(p.Id, await PayoutIdOfBookingAsync(noShow));
         foreach (var id in ineligible) Assert.Null(await PayoutIdOfBookingAsync(id));
     }
 
@@ -332,7 +334,7 @@ public class AdminPayoutsTests(ApiFactory api) : IAsyncLifetime
     public async Task A_partner_with_nothing_eligible_gets_no_payout_and_no_zero_row()
     {
         var pv = await NewPartnerVenueAsync();
-        await AddAsync(pv, Cut(F1).AddDays(-2), 500, 50, "no_show");
+        await AddAsync(pv, Cut(F1).AddDays(-2), 500, 50, "cancelled");
         await AddAsync(pv, Cut(F1).AddDays(-2).AddHours(3), 500, 0, "completed", "walk_in");
 
         Assert.Equal(new Res(0, 0, 0), await RunAsync(F1));

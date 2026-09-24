@@ -9,7 +9,7 @@ namespace BkkTennis.Api.Features.Admin;
 public record PayoutRunResult(DateOnly Cutoff, int Created, int Updated, int Skipped);
 
 /// <summary>
-/// Weekly partner payouts. A run with cutoff C (a Friday, Bangkok) settles every <c>completed</c> online booking whose last slot
+/// Weekly partner payouts. A run with cutoff C (a Friday, Bangkok) settles every <c>completed</c> or <c>no_show</c> online booking (a no-show is still revenue: no refund, partner paid minus commission) whose last slot
 /// ended before C 00:00 and that is not in a payout yet, into one payout per partner for the week C-7 … C-1.
 /// Money = booking totals the platform collected online; walk-ins are paid at the counter and never appear here.
 /// A booking belongs to at most one payout (<c>bookings.payout_id</c>), so re-running is safe and late completions roll forward.
@@ -26,7 +26,7 @@ public class PayoutService(AppDbContext db, TimeProvider clock, ILogger<PayoutSe
     public DateOnly Today => VenueClock.Today(Timezone, clock.GetUtcNow().UtcDateTime);
 
     private IQueryable<Booking> Eligible(DateTime cutoffUtc) =>
-        db.Bookings.Where(b => b.Status == BookingStatus.Completed && b.Source == "app" && b.PayoutId == null
+        db.Bookings.Where(b => (b.Status == BookingStatus.Completed || b.Status == BookingStatus.NoShow) && b.Source == "app" && b.PayoutId == null
                                && b.Slots.Any() && b.Slots.Max(s => s.EndAt) <= cutoffUtc);
 
     public async Task<PayoutRunResult> RunAsync(DateOnly cutoff, CancellationToken ct)
