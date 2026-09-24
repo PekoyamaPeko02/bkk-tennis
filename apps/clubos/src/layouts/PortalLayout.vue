@@ -78,7 +78,7 @@ function logout() {
 const NAV: { label: string; icon: string; to?: string; soon?: boolean }[] = [
   { label: 'ตารางจองประจำวัน', icon: 'calendar_today', to: '/' },
   { label: 'ตั้งค่าคอร์ท & ราคา', icon: 'tune', to: '/settings' },
-  { label: 'รายได้ & Payout', icon: 'payments', soon: true },
+  { label: 'รายได้ & Payout', icon: 'payments', to: '/payouts' },
   { label: 'บัญชีของฉัน', icon: 'manage_accounts', to: '/account' },
 ];
 </script>

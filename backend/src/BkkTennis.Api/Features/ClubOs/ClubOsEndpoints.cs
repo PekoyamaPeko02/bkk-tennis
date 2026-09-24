@@ -235,6 +235,7 @@ public static class ClubOsEndpoints
         }).RequireAuthorization(VenueAuthorization.Owner);
 
         g.MapSettings();
+        g.MapPayoutView();
 
         return api;
     }

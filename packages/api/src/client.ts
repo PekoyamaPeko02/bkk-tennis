@@ -60,6 +60,13 @@ export interface BkkApi {
   cancelBooking(id: string): Promise<{ booking: Booking; refund: number }>;
   /** ClubOS: the venues the signed-in staff member belongs to (name order); empty for a partner login with no membership. */
   getMyVenues(): Promise<MyVenue[]>;
+  /**
+   * ClubOS, venue owners only (403 for staff): the weekly payouts of the partner that runs the venue — newest week first, and
+   * across all of that partner's venues. Read-only.
+   */
+  getVenuePayouts(venueId: string, page?: number, pageSize?: number): Promise<AdminPayoutPage>;
+  /** ClubOS owner: one payout with the bookings settled in it. 404 when it belongs to another partner. */
+  getVenuePayout(venueId: string, payoutId: string): Promise<AdminPayoutDetail>;
   /** ClubOS (staff of the venue): the day grid with bookings, blocks and KPIs. Date defaults to today at the venue. */
   getSchedule(venueId: string, date?: string): Promise<Schedule>;
   /** ClubOS: front-desk booking, confirmed immediately. 409 `slot_taken` / `slot_blocked` when the slot is gone. */
@@ -170,6 +177,8 @@ export function createHttpApi(opt: HttpApiOptions): BkkApi {
     getBooking: (id) => call('GET', `/me/bookings/${id}`),
     cancelBooking: (id) => call('POST', `/me/bookings/${id}/cancel`),
     getMyVenues: () => call('GET', '/clubos/me/venues'),
+    getVenuePayouts: (venueId, page, pageSize) => call('GET', `/clubos/venues/${venueId}/payouts${qs({ page, pageSize })}`),
+    getVenuePayout: (venueId, id) => call('GET', `/clubos/venues/${venueId}/payouts/${id}`),
     getSchedule: (venueId, date) => call('GET', `/clubos/venues/${venueId}/schedule${qs({ date })}`),
     createWalkIn: (venueId, req) => call('POST', `/clubos/venues/${venueId}/walk-ins`, req),
     createBlock: (venueId, req) => call('POST', `/clubos/venues/${venueId}/blocks`, req),

@@ -420,6 +420,15 @@ const publicPayout = (p: AdminPayout & { bookingIds: string[] }): AdminPayout =>
   return { ...rest };
 };
 
+/** The payouts of the partner that runs `venueId`, for a signed-in owner of that venue (403 otherwise, like the API). */
+function venuePayouts(venueId: string) {
+  const user = requireStaff();
+  if (!(MOCK_MEMBERSHIPS[user.email ?? ''] ?? []).some(([id, role]) => id === venueId && role === 'owner'))
+    throw new ApiError(403, 'forbidden', 'ไม่มีสิทธิ์เข้าถึง');
+  const partner = mockPartners().find((p) => p.venues.some((v) => v.id === venueId));
+  return mockPayouts().filter((p) => p.partnerId === partner?.id);
+}
+
 function requireOwner() {
   const user = requireStaff();
   if (user.role !== 'partner_owner') throw new ApiError(403, 'forbidden', 'ไม่มีสิทธิ์เข้าถึง');
@@ -477,6 +486,8 @@ const MOCK_STAFF_PASSWORD ='racquet-dev-2026';
 const MOCK_STAFF: Record<string, User> = {
   'owner@racquetclub.test': { id: 'u-owner', phone: '+66800000002', email: 'owner@racquetclub.test', displayName: 'Racquet Club Owner', role: 'partner_owner' },
   'staff@racquetclub.test': { id: 'u-staff', phone: '+66800000004', email: 'staff@racquetclub.test', displayName: 'Racquet Club Front Desk', role: 'partner_staff' },
+  // Owns the Benchasiri partner, which has payouts in the mock data (Racquet Club has none).
+  'owner@benchasiri.test': { id: 'u-owner-2', phone: '+66800000006', email: 'owner@benchasiri.test', displayName: 'Benchasiri Owner', role: 'partner_owner' },
   // Belongs to two venues, to exercise the ClubOS venue switcher (not in the SQL seed).
   'multi@racquetclub.test': { id: 'u-multi', phone: '+66800000005', email: 'multi@racquetclub.test', displayName: 'Multi-venue Manager', role: 'partner_owner' },
 };
@@ -484,6 +495,7 @@ const MOCK_STAFF: Record<string, User> = {
 const MOCK_MEMBERSHIPS: Record<string, [string, MyVenue['role']][]> = {
   'owner@racquetclub.test': [[V1, 'owner']],
   'staff@racquetclub.test': [[V1, 'staff']],
+  'owner@benchasiri.test': [[V2, 'owner']],
   'multi@racquetclub.test': [[V1, 'owner'], [V2, 'staff']],
 };
 
@@ -556,6 +568,24 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
           return { id, slug: v.s.slug, nameTh: v.s.nameTh, nameEn: v.s.nameEn, status: 'active', role };
         })
         .sort((a, b) => a.nameEn.localeCompare(b.nameEn));
+    },
+
+    async getVenuePayouts(venueId, page = 1, pageSize = 25) {
+      await sleep(200);
+      restoreUser();
+      const all = venuePayouts(venueId).sort((a, b) => b.periodStart.localeCompare(a.periodStart) || b.createdAt.localeCompare(a.createdAt));
+      const size = Math.min(Math.max(pageSize, 1), 100);
+      const p = Math.max(page, 1);
+      return { total: all.length, page: p, pageSize: size, items: all.slice((p - 1) * size, p * size).map(publicPayout) };
+    },
+
+    async getVenuePayout(venueId, id) {
+      await sleep(150);
+      restoreUser();
+      const p = venuePayouts(venueId).find((x) => x.id === id);
+      if (!p) throw new ApiError(404, 'not_found', 'ไม่พบข้อมูล');
+      const rows = mockExplorer().filter((b) => p.bookingIds.includes(b.id));
+      return { payout: publicPayout(p), bookings: rows.map((b) => ({ id: b.id, code: b.code, venueName: b.venueName, date: b.date, total: b.total, commission: b.commission })) };
     },
 
     async getSchedule(venueId, date) {

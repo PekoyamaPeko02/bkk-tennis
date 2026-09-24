@@ -42,16 +42,7 @@ public static class PayoutEndpoints
         {
             var payout = await db.Payouts.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id, ct);
             if (payout is null) return Results.NotFound();
-            var bookings = await db.Bookings.AsNoTracking().Include(b => b.Venue).Include(b => b.Slots)
-                .Where(b => b.PayoutId == id).OrderBy(b => b.Code).ToListAsync(ct);
-            var items = bookings.Select(b =>
-            {
-                var first = b.Slots.OrderBy(s => s.StartAt).FirstOrDefault();
-                var date = first is null ? null
-                    : DateOnly.FromDateTime(VenueClock.ToLocal(first.StartAt, b.Venue?.Timezone ?? PayoutService.Timezone)).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-                return new PayoutBookingDto(b.Id, b.Code, b.Venue?.NameEn ?? "", date, b.Total, b.Commission);
-            }).ToList();
-            return Results.Ok(new PayoutDetailDto((await ToDtosAsync(db, [payout], ct))[0], items));
+            return Results.Ok(await DetailAsync(db, payout, ct));
         });
 
         // Runs the weekly settlement by hand (the Friday job does the same). cutoff must be a Friday that is not in the future.
@@ -82,7 +73,22 @@ public static class PayoutEndpoints
         }).WithValidation();
     }
 
-    private static async Task<List<PayoutDto>> ToDtosAsync(AppDbContext db, List<Payout> payouts, CancellationToken ct)
+    /// <summary>The payout with the bookings settled in it (also served, partner-scoped, to ClubOS owners).</summary>
+    internal static async Task<PayoutDetailDto> DetailAsync(AppDbContext db, Payout payout, CancellationToken ct)
+    {
+        var bookings = await db.Bookings.AsNoTracking().Include(b => b.Venue).Include(b => b.Slots)
+            .Where(b => b.PayoutId == payout.Id).OrderBy(b => b.Code).ToListAsync(ct);
+        var items = bookings.Select(b =>
+        {
+            var first = b.Slots.OrderBy(s => s.StartAt).FirstOrDefault();
+            var date = first is null ? null
+                : DateOnly.FromDateTime(VenueClock.ToLocal(first.StartAt, b.Venue?.Timezone ?? PayoutService.Timezone)).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            return new PayoutBookingDto(b.Id, b.Code, b.Venue?.NameEn ?? "", date, b.Total, b.Commission);
+        }).ToList();
+        return new PayoutDetailDto((await ToDtosAsync(db, [payout], ct))[0], items);
+    }
+
+    internal static async Task<List<PayoutDto>> ToDtosAsync(AppDbContext db, List<Payout> payouts, CancellationToken ct)
     {
         var ids = payouts.Select(p => p.Id).ToList();
         var partnerIds = payouts.Select(p => p.PartnerId).Distinct().ToList();
