@@ -113,6 +113,8 @@ public static class AuthEndpoints
             return user is null ? Results.NotFound() : Results.Ok(new UserDto(user.Id, user.Phone, user.DisplayName, user.Role, user.Email));
         }).RequireAuthorization();
 
+        g.MapPasswords();
+
         return api;
     }
 
@@ -130,14 +132,7 @@ public static class AuthEndpoints
 
         if (!eligible || locked || !passwordOk)
         {
-            if (eligible && !locked)
-            {
-                // Atomic, so parallel guesses can't slip past the limit: the 5th consecutive failure locks the account.
-                var lockUntil = now.AddMinutes(LockMinutes);
-                await db.Users.Where(u => u.Id == user!.Id).ExecuteUpdateAsync(s => s
-                    .SetProperty(u => u.LockedUntil, u => u.FailedLogins + 1 >= MaxFailedLogins ? lockUntil : u.LockedUntil)
-                    .SetProperty(u => u.FailedLogins, u => u.FailedLogins + 1 >= MaxFailedLogins ? 0 : u.FailedLogins + 1), ct);
-            }
+            if (eligible && !locked) await RegisterFailedPasswordAsync(db, user!.Id, now, ct);
             // 400, not 401: the client signs the user out on any 401 (expired session), which would loop on the login form.
             return Results.BadRequest(new { code = "invalid_credentials", message = "อีเมลหรือรหัสผ่านไม่ถูกต้อง (หรือบัญชีถูกล็อกชั่วคราว)" });
         }
@@ -151,6 +146,24 @@ public static class AuthEndpoints
         return Results.Ok(Issue(user, jwt, now));
     }
 
+    /// <summary>Atomic, so parallel guesses can't slip past the limit: the 5th consecutive failure locks the account.</summary>
+    internal static Task RegisterFailedPasswordAsync(AppDbContext db, Guid userId, DateTime now, CancellationToken ct)
+    {
+        var lockUntil = now.AddMinutes(LockMinutes);
+        return db.Users.Where(u => u.Id == userId).ExecuteUpdateAsync(s => s
+            .SetProperty(u => u.LockedUntil, u => u.FailedLogins + 1 >= MaxFailedLogins ? lockUntil : u.LockedUntil)
+            .SetProperty(u => u.FailedLogins, u => u.FailedLogins + 1 >= MaxFailedLogins ? 0 : u.FailedLogins + 1), ct);
+    }
+
+    /// <summary>
+    /// Changes with every password change/reset (unix ms of <c>password_changed_at</c>, "0" if never). It rides in the JWT so a new
+    /// password logs out every older session; tokens without the claim count as "0".
+    /// </summary>
+    public static string Stamp(DateTime? passwordChangedAt) =>
+        passwordChangedAt is { } t ? new DateTimeOffset(DateTime.SpecifyKind(t, DateTimeKind.Utc)).ToUnixTimeMilliseconds().ToString() : "0";
+
+    public const string StampClaim = "pwd";
+
     public static AuthResponse Issue(User user, JwtOptions o, DateTime nowUtc)
     {
         var expires = nowUtc.AddDays(o.AccessTokenDays);
@@ -159,6 +172,7 @@ public static class AuthEndpoints
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(ClaimTypes.Role, user.Role),
             new Claim("phone", user.Phone ?? ""),
+            new Claim(StampClaim, Stamp(user.PasswordChangedAt)),
         };
         var creds = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(o.SigningKey)), SecurityAlgorithms.HmacSha256);
         var token = new JwtSecurityToken(o.Issuer, o.Audience, claims, nowUtc, expires, creds);

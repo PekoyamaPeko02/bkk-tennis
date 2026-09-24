@@ -37,7 +37,7 @@
     </q-drawer>
 
     <q-page-container>
-      <router-view v-if="venue.current" :key="venue.current.id" />
+      <router-view v-if="venue.current || $route.name === 'account'" :key="venue.current?.id ?? 'none'" />
       <q-page v-else class="state">
         <q-spinner v-if="venue.status === 'idle' || venue.status === 'loading'" size="32px" color="primary" aria-label="กำลังโหลด" />
         <div v-else-if="venue.status === 'error'" data-testid="venues-error" role="alert">
@@ -79,6 +79,7 @@ const NAV: { label: string; icon: string; to?: string; soon?: boolean }[] = [
   { label: 'ตารางจองประจำวัน', icon: 'calendar_today', to: '/' },
   { label: 'ตั้งค่าคอร์ท & ราคา', icon: 'tune', to: '/settings' },
   { label: 'รายได้ & Payout', icon: 'payments', soon: true },
+  { label: 'บัญชีของฉัน', icon: 'manage_accounts', to: '/account' },
 ];
 </script>
 

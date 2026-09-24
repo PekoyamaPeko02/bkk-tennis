@@ -11,6 +11,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<OtpCode> OtpCodes => Set<OtpCode>();
+    public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
     public DbSet<Partner> Partners => Set<Partner>();
     public DbSet<Venue> Venues => Set<Venue>();
     public DbSet<VenueMember> VenueMembers => Set<VenueMember>();
@@ -32,6 +33,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         b.Entity<User>(e =>
         {
             e.ToTable("users");
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("now()");
+        });
+
+        b.Entity<PasswordResetToken>(e =>
+        {
+            e.ToTable("password_reset_tokens");
             e.Property(x => x.CreatedAt).HasDefaultValueSql("now()");
         });
 

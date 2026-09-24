@@ -443,3 +443,10 @@ export interface MyVenue {
   status: 'draft' | 'active' | 'hidden';
   role: 'owner' | 'staff';
 }
+
+/** Admin-issued one-time password reset link for a partner owner (valid ~24 h, void once used or replaced). */
+export interface OwnerResetLink {
+  token: string;
+  url: string;
+  expiresAt: string;
+}

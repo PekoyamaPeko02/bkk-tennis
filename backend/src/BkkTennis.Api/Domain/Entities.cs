@@ -36,6 +36,20 @@ public class User
     public string? PasswordHash { get; set; }
     public int FailedLogins { get; set; }
     public DateTime? LockedUntil { get; set; }
+    /// <summary>Set on every password change/reset; tokens issued before it are rejected (see <c>AuthEndpoints.Stamp</c>).</summary>
+    public DateTime? PasswordChangedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
+
+/// <summary>A one-time password reset link issued by an admin. Only the SHA-256 of the token is stored.</summary>
+public class PasswordResetToken
+{
+    public Guid Id { get; set; }
+    public Guid UserId { get; set; }
+    public string TokenHash { get; set; } = "";
+    public DateTime ExpiresAt { get; set; }
+    public DateTime? ConsumedAt { get; set; }
+    public Guid? CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
 }
 

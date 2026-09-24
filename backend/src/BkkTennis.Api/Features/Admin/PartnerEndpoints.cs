@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using System.Text.RegularExpressions;
 using BkkTennis.Api.Data;
 using BkkTennis.Api.Domain;
@@ -6,6 +7,7 @@ using BkkTennis.Api.Features.Auth;
 using BkkTennis.Api.Features.Bookings;
 using BkkTennis.Api.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Npgsql;
 
 namespace BkkTennis.Api.Features.Admin;
@@ -14,6 +16,8 @@ public record PartnerVenueDto(Guid Id, string Slug, string NameTh, string NameEn
 public record PartnerDto(
     Guid Id, string LegalName, string? TaxId, string? BankName, string? BankAccount, decimal CommissionRate, string Status,
     DateTime CreatedAt, string? OwnerEmail, string? OwnerName, List<PartnerVenueDto> Venues);
+
+public record OwnerResetLinkDto(string Token, string Url, DateTime ExpiresAt);
 
 public record NewPartnerOwner(
     [property: Required, EmailAddress, MaxLength(254)] string Email,
@@ -118,6 +122,29 @@ public static partial class PartnerEndpoints
             partner.Status = "suspended";
             await db.SaveChangesAsync(ct);
             return Results.Ok((await ToDtosAsync(db, [partner], ct))[0]);
+        });
+
+        g.MapOwnerReset();
+    }
+
+    private static void MapOwnerReset(this RouteGroupBuilder g)
+    {
+        // No email provider yet: the admin copies this one-time link to the owner. Issuing a new one voids the previous.
+        g.MapPost("/partners/{id:guid}/owner/reset-link", async (Guid id, ClaimsPrincipal admin, AppDbContext db,
+            IOptions<PasswordResetOptions> opts, TimeProvider clock, CancellationToken ct) =>
+        {
+            if (!await db.Partners.AnyAsync(p => p.Id == id, ct)) return Results.NotFound();
+            var ownerId = await (from v in db.Venues
+                                 join m in db.VenueMembers on v.Id equals m.VenueId
+                                 join u in db.Users on m.UserId equals u.Id
+                                 where v.PartnerId == id && m.Role == "owner" && u.PasswordHash != null
+                                 orderby u.CreatedAt
+                                 select (Guid?)u.Id).FirstOrDefaultAsync(ct);
+            if (ownerId is null) throw new BookingException(409, "no_owner", "พาร์ทเนอร์นี้ยังไม่มีบัญชีเจ้าของสนาม");
+            var (token, expires) = await PasswordEndpoints.IssueResetTokenAsync(
+                db, ownerId.Value, admin.UserId(), opts.Value, clock.GetUtcNow().UtcDateTime, ct);
+            var url = $"{opts.Value.ClubOsUrl.TrimEnd('/')}/reset-password?token={token}";
+            return Results.Ok(new OwnerResetLinkDto(token, url, expires));
         });
     }
 

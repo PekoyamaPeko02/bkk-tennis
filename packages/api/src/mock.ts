@@ -487,6 +487,21 @@ const MOCK_MEMBERSHIPS: Record<string, [string, MyVenue['role']][]> = {
   'multi@racquetclub.test': [[V1, 'owner'], [V2, 'staff']],
 };
 
+/** Passwords changed at runtime (email → password); accounts not in here still use their seed password. */
+const changedPasswords: Record<string, string> = {};
+const usedResetTokens = new Set<string>();
+const passwordOf = (email: string) => changedPasswords[email] ?? (email === MOCK_ADMIN.email ? MOCK_ADMIN_PASSWORD : MOCK_STAFF_PASSWORD);
+const checkNewPassword = (p: string) => {
+  if (p.length < 10) throw new ApiError(400, 'validation_failed', 'รหัสผ่านอย่างน้อย 10 ตัวอักษร');
+};
+/** Stateless on purpose (the admin and ClubOS apps have separate in-browser mocks): `mock-reset.<base64 email>.<expiry ms>`. */
+const RESET_TTL_MS = 24 * 3600_000;
+function parseResetToken(token: string): string | null {
+  const [prefix, b64, exp] = token.trim().split('.');
+  if (prefix !== 'mock-reset' || !b64 || !exp || usedResetTokens.has(token.trim()) || Number(exp) < Date.now()) return null;
+  try { return atob(b64); } catch { return null; }
+}
+
 // ---------------------------------------------------------------- api
 export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
   const restoreUser = () => {
@@ -859,15 +874,49 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
       await sleep(300);
       const key = email.trim().toLowerCase();
       const user = MOCK_STAFF[key];
-      if (!user || password !== MOCK_STAFF_PASSWORD)
+      if (!user || password !== passwordOf(key))
         throw new ApiError(400, 'invalid_credentials', `อีเมลหรือรหัสผ่านไม่ถูกต้อง (โหมดทดลอง: owner@racquetclub.test / ${MOCK_STAFF_PASSWORD})`);
       currentUser = user;
       return { accessToken: 'mock.staff:' + key, expiresAt: new Date(Date.now() + 7 * 86400_000).toISOString(), user };
     },
 
+    async changePassword(currentPassword, newPassword) {
+      await sleep(300);
+      restoreUser();
+      const user = requireUser();
+      if (!user.email) throw new ApiError(400, 'no_password', 'บัญชีนี้ไม่ได้ใช้รหัสผ่าน');
+      checkNewPassword(newPassword);
+      if (currentPassword !== passwordOf(user.email)) throw new ApiError(400, 'wrong_password', 'รหัสผ่านปัจจุบันไม่ถูกต้อง');
+      if (newPassword === currentPassword) throw new ApiError(400, 'same_password', 'รหัสผ่านใหม่ต้องต่างจากรหัสผ่านเดิม');
+      changedPasswords[user.email] = newPassword;
+      const token = user.role === 'platform_admin' ? 'mock.admin' : 'mock.staff:' + user.email;
+      return { accessToken: token, expiresAt: new Date(Date.now() + 7 * 86400_000).toISOString(), user };
+    },
+
+    async resetPassword(token, newPassword) {
+      await sleep(300);
+      checkNewPassword(newPassword);
+      const email = parseResetToken(token);
+      if (!email || !(email in MOCK_STAFF)) throw new ApiError(400, 'reset_token_invalid', 'ลิงก์รีเซ็ตรหัสผ่านไม่ถูกต้องหรือหมดอายุแล้ว');
+      changedPasswords[email] = newPassword;
+      usedResetTokens.add(token.trim());
+    },
+
+    async createOwnerResetLink(partnerId) {
+      await sleep(200);
+      restoreUser();
+      requireAdmin();
+      const p = mockPartners().find((x) => x.id === partnerId);
+      if (!p) throw new ApiError(404, 'http_404', 'ไม่พบข้อมูล');
+      if (!p.ownerEmail) throw new ApiError(409, 'no_owner', 'พาร์ทเนอร์นี้ยังไม่มีบัญชีเจ้าของสนาม');
+      const expires = Date.now() + RESET_TTL_MS;
+      const token = `mock-reset.${btoa(p.ownerEmail)}.${expires}`;
+      return { token, url: `http://localhost:9001/reset-password?token=${token}`, expiresAt: new Date(expires).toISOString() };
+    },
+
     async adminLogin(email, password) {
       await sleep(300);
-      if (email.trim().toLowerCase() !== MOCK_ADMIN.email || password !== MOCK_ADMIN_PASSWORD)
+      if (email.trim().toLowerCase() !== MOCK_ADMIN.email || password !== passwordOf(MOCK_ADMIN.email!))
         throw new ApiError(400, 'invalid_credentials', `อีเมลหรือรหัสผ่านไม่ถูกต้อง (โหมดทดลอง: ${MOCK_ADMIN.email} / ${MOCK_ADMIN_PASSWORD})`);
       currentUser = MOCK_ADMIN;
       return { accessToken: 'mock.admin', expiresAt: new Date(Date.now() + 7 * 86400_000).toISOString(), user: MOCK_ADMIN };

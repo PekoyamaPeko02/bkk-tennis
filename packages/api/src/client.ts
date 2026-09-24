@@ -1,6 +1,6 @@
 import type {
   AddonSettings, AddonSettingsRequest, AdminBookingFilter, AdminBookingPage, AdminPayout, AdminPayoutDetail, AdminPayoutPage, PayoutRunResult, PayoutStatus, AdminOverview, AdminPartner, NewPartnerRequest, PartnerStatus, CourtSettings, CourtSettingsRequest, OpeningHours, PricePreview, PriceRule, PriceRuleRequest, VenueSettings,
-  AuthResponse, Booking, ClubOsBooking, MyVenue, CourtBlock, CourtBlockRequest, CreateBookingRequest, OtpRequestResponse, Schedule, User, WalkInRequest, WalkInResult,
+  AuthResponse, Booking, ClubOsBooking, MyVenue, OwnerResetLink, CourtBlock, CourtBlockRequest, CreateBookingRequest, OtpRequestResponse, Schedule, User, WalkInRequest, WalkInResult,
   VenueAvailability, VenueDetail, VenueSearchParams, VenueSearchResult, VenueSummary,
 } from './types';
 
@@ -18,6 +18,13 @@ export interface BkkApi {
   verifyOtp(phone: string, code: string, displayName?: string): Promise<AuthResponse>;
   /** Partner staff (ClubOS). Wrong credentials → ApiError 400 `invalid_credentials` (never 401, which means "session expired"). */
   staffLogin(email: string, password: string): Promise<AuthResponse>;
+  /**
+   * Signed-in partner: change own password. Every older session (all devices) stops working; the response is a fresh session for
+   * this one. 400 `wrong_password` (counts towards the login lockout) / `same_password` / `validation_failed` (≥ 10 chars).
+   */
+  changePassword(currentPassword: string, newPassword: string): Promise<AuthResponse>;
+  /** Anonymous: set a new password with the admin-issued link token. 400 `reset_token_invalid` (unknown, expired or already used). */
+  resetPassword(token: string, newPassword: string): Promise<void>;
   /** Admin portal: platform_admin accounts only (partner accounts get 400 `invalid_credentials`). */
   adminLogin(email: string, password: string): Promise<AuthResponse>;
   /** Admin: platform totals (online sales only) + a zero-filled last-30-days series (Bangkok days). */
@@ -44,6 +51,8 @@ export interface BkkApi {
   approvePartner(id: string): Promise<AdminPartner>;
   /** active → suspended: all its venues disappear from search/booking; existing bookings stay valid. */
   suspendPartner(id: string): Promise<AdminPartner>;
+  /** Admin: a fresh one-time password reset link for the partner's owner (voids the previous). 409 `no_owner`. */
+  createOwnerResetLink(partnerId: string): Promise<OwnerResetLink>;
   me(): Promise<User>;
   createBooking(req: CreateBookingRequest, idempotencyKey: string): Promise<Booking>;
   myBookings(): Promise<Booking[]>;
@@ -140,6 +149,8 @@ export function createHttpApi(opt: HttpApiOptions): BkkApi {
     requestOtp: (phone) => call('POST', '/auth/otp/request', { phone }),
     verifyOtp: (phone, code, displayName) => call('POST', '/auth/otp/verify', { phone, code, displayName }),
     staffLogin: (email, password) => call('POST', '/auth/staff/login', { email, password }),
+    changePassword: (currentPassword, newPassword) => call('POST', '/auth/password/change', { currentPassword, newPassword }),
+    resetPassword: (token, newPassword) => call('POST', '/auth/password/reset', { token, newPassword }),
     adminLogin: (email, password) => call('POST', '/auth/admin/login', { email, password }),
     getAdminOverview: () => call('GET', '/admin/overview'),
     getAdminBookings: (filter, page, pageSize) => call('GET', `/admin/bookings${qs({ ...filter, page, pageSize })}`),
@@ -152,6 +163,7 @@ export function createHttpApi(opt: HttpApiOptions): BkkApi {
     createPartner: (req) => call('POST', '/admin/partners', req),
     approvePartner: (id) => call('POST', `/admin/partners/${id}/approve`),
     suspendPartner: (id) => call('POST', `/admin/partners/${id}/suspend`),
+    createOwnerResetLink: (id) => call('POST', `/admin/partners/${id}/owner/reset-link`),
     me: () => call('GET', '/auth/me'),
     createBooking: (req, key) => call('POST', '/bookings', req, { 'Idempotency-Key': key }),
     myBookings: () => call('GET', '/me/bookings'),

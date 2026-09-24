@@ -17,6 +17,7 @@
         <div v-if="error" class="error" role="alert">{{ error }}</div>
         <q-btn type="submit" unelevated no-caps class="bkk-btn-forest full-width btn" label="เข้าสู่ระบบ" :loading="busy" />
       </q-form>
+      <p class="text-center bkk-muted q-mt-md q-mb-none forgot" data-testid="forgot-password">ลืมรหัสผ่าน? ติดต่อทีมงาน BKK Tennis เพื่อขอลิงก์ตั้งรหัสผ่านใหม่</p>
     </div>
   </q-page>
 </template>
@@ -65,5 +66,6 @@ async function submit() {
 .logo { width: 56px; height: 56px; border-radius: 16px; margin: 0 auto; display: grid; place-items: center; background: var(--bkk-forest); color: var(--bkk-volt-bright); }
 .form { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
 .btn { min-height: 48px; border-radius: 12px; font-size: 15px; }
+.forgot { font-size: 12px; }
 .error { padding: 8px 12px; border-radius: 8px; background: var(--bkk-clay-surface, #fee2e2); color: var(--bkk-clay-ink, #991b1b); font-size: 13px; }
 </style>

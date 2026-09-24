@@ -32,6 +32,8 @@
           </div>
         </div>
         <div class="acts">
+          <q-btn v-if="p.ownerEmail" flat no-caps icon="vpn_key" label="รีเซ็ตรหัสผ่านเจ้าของ" :loading="acting === `reset-${p.id}`"
+            data-testid="reset-owner" @click="issueReset(p)" />
           <q-btn v-if="p.status !== 'active'" unelevated no-caps class="bkk-btn-forest" icon="check_circle" :label="p.status === 'pending' ? 'อนุมัติ' : 'เปิดใช้งานอีกครั้ง'"
             :loading="acting === p.id" data-testid="approve" @click="act(p, 'approve')" />
           <q-btn v-if="p.status === 'active'" outline no-caps color="negative" icon="pause_circle" label="ระงับ" :loading="acting === p.id" data-testid="suspend" @click="confirmSuspend(p)" />
@@ -40,6 +42,23 @@
       <div v-if="!loading && !partners.length" class="bkk-muted q-pa-md" data-testid="empty">ไม่มีพาร์ทเนอร์ในสถานะนี้</div>
     </div>
     <q-inner-loading :showing="loading" />
+
+    <q-dialog v-model="resetOpen">
+      <q-card class="dlg" data-testid="reset-dialog">
+        <q-card-section>
+          <div class="bkk-h2 q-mb-sm">ลิงก์รีเซ็ตรหัสผ่าน</div>
+          <div class="bkk-muted small q-mb-sm">
+            ส่งลิงก์นี้ให้ {{ resetFor?.ownerEmail }} (ใช้ได้ครั้งเดียว หมดอายุ {{ resetLink ? new Date(resetLink.expiresAt).toLocaleString('th-TH') : '' }})
+            — ลิงก์นี้จะแสดงเพียงครั้งนี้ครั้งเดียว การออกลิงก์ใหม่จะยกเลิกลิงก์เดิม
+          </div>
+          <q-input :model-value="resetLink?.url" readonly outlined dense type="textarea" autogrow data-testid="reset-url" @focus="($event.target as HTMLTextAreaElement).select()" />
+        </q-card-section>
+        <q-card-actions align="right" class="q-pa-md">
+          <q-btn flat no-caps label="ปิด" @click="resetOpen = false" />
+          <q-btn unelevated no-caps class="bkk-btn-forest" icon="content_copy" label="คัดลอกลิงก์" data-testid="reset-copy" @click="copyReset" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
 
     <q-dialog v-model="createOpen">
       <q-card class="dlg" data-testid="partner-dialog">
@@ -84,7 +103,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
-import type { AdminPartner, NewPartnerRequest, PartnerStatus } from '@bkk/api';
+import type { AdminPartner, NewPartnerRequest, OwnerResetLink, PartnerStatus } from '@bkk/api';
 import { useApi } from 'boot/api';
 
 const FILTERS: { value: PartnerStatus | 'all'; label: string }[] = [
@@ -135,6 +154,31 @@ function confirmSuspend(p: AdminPartner) {
     title: 'ระงับพาร์ทเนอร์', message: `ระงับ ${p.legalName}? สนามทั้งหมดจะหายจากการค้นหาและรับจองใหม่ไม่ได้ (การจองเดิมยังคงอยู่)`,
     cancel: { label: 'ยกเลิก', flat: true }, ok: { label: 'ระงับ', color: 'negative', unelevated: true },
   }).onOk(() => void act(p, 'suspend'));
+}
+
+// ---- owner password reset (no email provider yet: the admin copies the link)
+const resetOpen = ref(false);
+const resetFor = ref<AdminPartner | null>(null);
+const resetLink = ref<OwnerResetLink | null>(null);
+async function issueReset(p: AdminPartner) {
+  acting.value = `reset-${p.id}`;
+  try {
+    resetLink.value = await api.createOwnerResetLink(p.id);
+    resetFor.value = p;
+    resetOpen.value = true;
+  } catch (e) {
+    $q.notify({ type: 'negative', message: msg(e, 'สร้างลิงก์ไม่สำเร็จ') });
+  } finally {
+    acting.value = null;
+  }
+}
+async function copyReset() {
+  try {
+    await navigator.clipboard.writeText(resetLink.value?.url ?? '');
+    $q.notify({ type: 'positive', message: 'คัดลอกลิงก์แล้ว' });
+  } catch {
+    $q.notify({ type: 'warning', message: 'คัดลอกไม่ได้ — เลือกข้อความในช่องแล้วคัดลอกเอง' });
+  }
 }
 
 // ---- create

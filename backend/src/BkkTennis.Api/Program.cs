@@ -1,6 +1,8 @@
 using System.Globalization;
+using System.Security.Claims;
 using System.Text;
 using BkkTennis.Api.Data;
+using BkkTennis.Api.Domain;
 using BkkTennis.Api.Features.Admin;
 using BkkTennis.Api.Features.Auth;
 using BkkTennis.Api.Features.Bookings;
@@ -27,6 +29,7 @@ builder.Services.Configure<JwtOptions>(cfg.GetSection("Jwt"));
 builder.Services.Configure<PaymentOptions>(cfg.GetSection("Payments"));
 builder.Services.Configure<BookingOptions>(cfg.GetSection("Booking"));
 builder.Services.Configure<RateLimitOptions>(cfg.GetSection("RateLimit"));
+builder.Services.Configure<PasswordResetOptions>(cfg.GetSection("PasswordReset"));
 var jwt = cfg.GetSection("Jwt").Get<JwtOptions>() ?? new JwtOptions();
 
 // ---------------------------------------------------------------- data
@@ -67,6 +70,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 if (!string.IsNullOrEmpty(token) && ctx.HttpContext.Request.Path.StartsWithSegments("/hubs"))
                     ctx.Token = token;
                 return Task.CompletedTask;
+            },
+            // A password change/reset logs out every older session: partner/admin tokens carry the password stamp they were issued under.
+            OnTokenValidated = async ctx =>
+            {
+                var principal = ctx.Principal!;
+                if (principal.IsInRole(Roles.Player)) return; // OTP logins have no password
+                var db = ctx.HttpContext.RequestServices.GetRequiredService<AppDbContext>();
+                var userId = principal.UserId();
+                var u = await db.Users.AsNoTracking().Where(x => x.Id == userId)
+                    .Select(x => new { HasPassword = x.PasswordHash != null, x.PasswordChangedAt })
+                    .FirstOrDefaultAsync(ctx.HttpContext.RequestAborted);
+                if (u is null) { ctx.Fail("unknown user"); return; }
+                if (u.HasPassword && (principal.FindFirstValue(AuthEndpoints.StampClaim) ?? "0") != AuthEndpoints.Stamp(u.PasswordChangedAt))
+                    ctx.Fail("password changed");
             },
         };
     });
