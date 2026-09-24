@@ -94,7 +94,10 @@ Mark done with `- [x]` + one note line. Items needing a human decision/credentia
 5. Everything is on `dev/autopilot` (not pushed). The CI e2e job now also builds the PWA (`pwa` Playwright project) — first run is slower.
 
 ## Handoff (autopilot round, 2026-09-24)
-- F1 done and committed (116db25). F2–F5 still open, in order; F2 (my venues + drop hard-coded VENUE_ID in ClubOS) is next.
+- F1–F5 all done and committed on `dev/autopilot` (not pushed); only BLOCKED items remain (gateway, SMS OTP, LINE Login, money-flow decision). Final gate: dotnet 45 unit + 697 integration, typecheck, build, `pnpm e2e` 86 passing.
+- Apply by hand to existing local DBs: `db/init/007_payout_no_show.sql`, `008_password_reset.sql`. New config per environment: `PasswordReset:ClubOsUrl` (ClubOS also needs SPA history fallback for `/reset-password`). Pre-F3 partner tokens stay valid until that user's first password change.
+- Flaky: `e2e/tests/admin-bookings.spec.ts:93` (venue filter) failed once each in the F2 and F4 full e2e runs and passed on re-run — stabilise it.
+- Known gaps: mock can't log in newly created partners (onboarded-owner path only covered by real-API tests); ClubOS/admin show raw server messages (no i18n catalogue); no reset UI for non-owner staff.
 - The test-engineer subagent had no Bash access this round; the lead ran `dotnet test` (33+622), typecheck and build. `pnpm e2e` was not run for F1.
 - Apply db/init/007_payout_no_show.sql by hand to existing local DBs.
 - Extra F1 tests worth adding: late no_show rolls into the next payout run; settle job then payout end to end.
