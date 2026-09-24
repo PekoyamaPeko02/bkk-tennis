@@ -285,6 +285,42 @@ export interface AdminOverview {
   last30Days: { date: string; bookings: number; gbv: number; take: number }[];
 }
 
+/** Admin bookings explorer (A3). Dates are yyyy-MM-dd venue-local and filter on the PLAY date (first slot). */
+export interface AdminBookingFilter {
+  venueId?: string | undefined;
+  status?: BookingStatus | undefined;
+  source?: 'app' | 'walk_in' | undefined;
+  from?: string | undefined;
+  to?: string | undefined;
+  /** Booking code or customer name (contains, case-insensitive). */
+  q?: string | undefined;
+}
+export interface AdminBooking {
+  id: string;
+  code: string;
+  status: BookingStatus;
+  source: 'app' | 'walk_in';
+  venueId: string;
+  venueName: string;
+  customerName: string | null;
+  /** Masked, e.g. 081-***-5678. */
+  customerPhone: string | null;
+  paymentState: PaymentState;
+  date: string | null;
+  start: string | null;
+  end: string | null;
+  courts: string[];
+  total: number;
+  commission: number;
+  createdAt: string;
+}
+export interface AdminBookingPage {
+  total: number;
+  page: number;
+  pageSize: number;
+  items: AdminBooking[];
+}
+
 export type PartnerStatus = 'pending' | 'active' | 'suspended';
 export interface AdminPartner {
   id: string;

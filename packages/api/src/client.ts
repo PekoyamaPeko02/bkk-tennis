@@ -1,5 +1,5 @@
 import type {
-  AddonSettings, AddonSettingsRequest, AdminOverview, AdminPartner, NewPartnerRequest, PartnerStatus, CourtSettings, CourtSettingsRequest, OpeningHours, PricePreview, PriceRule, PriceRuleRequest, VenueSettings,
+  AddonSettings, AddonSettingsRequest, AdminBookingFilter, AdminBookingPage, AdminOverview, AdminPartner, NewPartnerRequest, PartnerStatus, CourtSettings, CourtSettingsRequest, OpeningHours, PricePreview, PriceRule, PriceRuleRequest, VenueSettings,
   AuthResponse, Booking, ClubOsBooking, CourtBlock, CourtBlockRequest, CreateBookingRequest, OtpRequestResponse, Schedule, User, WalkInRequest, WalkInResult,
   VenueAvailability, VenueDetail, VenueSearchParams, VenueSearchResult,
 } from './types';
@@ -22,6 +22,10 @@ export interface BkkApi {
   adminLogin(email: string, password: string): Promise<AuthResponse>;
   /** Admin: platform totals (online sales only) + a zero-filled last-30-days series (Bangkok days). */
   getAdminOverview(): Promise<AdminOverview>;
+  /** Admin bookings explorer: newest created first, `pageSize` ≤ 100. */
+  getAdminBookings(filter: AdminBookingFilter, page?: number, pageSize?: number): Promise<AdminBookingPage>;
+  /** Admin: the same filter as CSV text (UTF-8 with BOM; 400 `too_many_rows` above 20,000). */
+  exportAdminBookingsCsv(filter: AdminBookingFilter): Promise<string>;
   /** Admin: newest first, optionally one status. */
   getPartners(status?: PartnerStatus): Promise<AdminPartner[]>;
   /** Creates a `pending` partner + its owner login + a `draft` venue. 409 `email_taken` / `slug_taken`. */
@@ -76,7 +80,7 @@ export interface HttpApiOptions {
 }
 
 export function createHttpApi(opt: HttpApiOptions): BkkApi {
-  async function call<T>(method: string, path: string, body?: unknown, headers: Record<string, string> = {}): Promise<T> {
+  async function call<T>(method: string, path: string, body?: unknown, headers: Record<string, string> = {}, asText = false): Promise<T> {
     const token = opt.getToken();
     const res = await fetch(opt.baseUrl + path, {
       method,
@@ -98,6 +102,7 @@ export function createHttpApi(opt: HttpApiOptions): BkkApi {
       } catch { /* not json */ }
       throw new ApiError(res.status, code, message);
     }
+    if (asText) return (await res.text()) as T;
     return (res.status === 204 ? undefined : await res.json()) as T;
   }
 
@@ -119,6 +124,8 @@ export function createHttpApi(opt: HttpApiOptions): BkkApi {
     staffLogin: (email, password) => call('POST', '/auth/staff/login', { email, password }),
     adminLogin: (email, password) => call('POST', '/auth/admin/login', { email, password }),
     getAdminOverview: () => call('GET', '/admin/overview'),
+    getAdminBookings: (filter, page, pageSize) => call('GET', `/admin/bookings${qs({ ...filter, page, pageSize })}`),
+    exportAdminBookingsCsv: (filter) => call('GET', `/admin/bookings.csv${qs(filter)}`, undefined, {}, true),
     getPartners: (status) => call('GET', `/admin/partners${qs({ status })}`),
     createPartner: (req) => call('POST', '/admin/partners', req),
     approvePartner: (id) => call('POST', `/admin/partners/${id}/approve`),

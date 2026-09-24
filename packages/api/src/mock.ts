@@ -2,7 +2,7 @@
 // Data mirrors db/init/002_seed.sql. Logic mirrors Pricing/AvailabilityService/BookingService.
 import { ApiError, type BkkApi } from './client';
 import type {
-  Addon, AddonSettings, AdminPartner, Booking, BookingStatus, CourtSettings, OpeningHours, PricePreview, PriceRule, PriceRuleRequest, ClubOsBooking, Court, CourtBlock, CourtBlockRequest, CreateBookingRequest, Schedule, ScheduleBlock, ScheduleBooking,
+  Addon, AddonSettings, AdminBooking, AdminBookingFilter, AdminPartner, Booking, BookingStatus, CourtSettings, OpeningHours, PricePreview, PriceRule, PriceRuleRequest, ClubOsBooking, Court, CourtBlock, CourtBlockRequest, CreateBookingRequest, Schedule, ScheduleBlock, ScheduleBooking,
   ScheduleCourt, ScheduleSlot, Slot, User, VenueAvailability, VenueDetail, VenueSummary, WalkInRequest, WalkInResult,
 } from './types';
 
@@ -340,6 +340,43 @@ function mockPartners(): AdminPartner[] {
     },
   ];
   return partnerList.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+// ---- admin bookings explorer (A3): 60 deterministic sample bookings across the seed venues, newest created first
+let explorerRows: AdminBooking[] | null = null;
+function mockExplorer(): AdminBooking[] {
+  if (explorerRows) return explorerRows;
+  const STATUSES: BookingStatus[] = ['confirmed', 'completed', 'completed', 'checked_in', 'no_show', 'cancelled', 'held', 'expired'];
+  const today = Date.parse(bangkokToday());
+  explorerRows = Array.from({ length: 60 }, (_, i): AdminBooking => {
+    const v = VENUES[i % VENUES.length]!;
+    const status = STATUSES[i % STATUSES.length]!;
+    const walkIn = i % 5 === 4;
+    const hour = 6 + ((i * 3) % 15);
+    const date = new Date(today + (((i * 7) % 21) - 14) * 86400_000).toISOString().slice(0, 10);
+    const hours = 1 + (i % 2);
+    const total = (v.rules[0]?.price ?? 300) * hours;
+    const sold = ['confirmed', 'checked_in', 'completed', 'no_show'].includes(status);
+    return {
+      id: `mock-bk-${i}`, code: `BT${10100 + i}`, status, source: walkIn ? 'walk_in' : 'app', venueId: v.s.id, venueName: v.s.nameEn,
+      // one name starts with "=" so the CSV formula guard is visible in demos
+      customerName: i === 7 ? '=HYPERLINK("x")' : MOCK_CUSTOMERS[i % MOCK_CUSTOMERS.length]!,
+      customerPhone: walkIn ? null : `08${i % 10}-***-${String(1000 + ((i * 37) % 9000))}`,
+      paymentState: walkIn ? 'counter' : status === 'held' ? 'pending' : status === 'expired' ? 'none' : status === 'cancelled' ? 'refunded' : 'paid',
+      date, start: `${pad(hour)}:00`, end: `${pad(hour + hours)}:00`, courts: [v.courts[i % v.courts.length]!.name],
+      total, commission: sold && !walkIn ? total * 0.1 : 0,
+      createdAt: new Date(today + 9 * 3600_000 - i * 5 * 3600_000).toISOString(),
+    };
+  });
+  return explorerRows;
+}
+
+function filterMockBookings(f: AdminBookingFilter): AdminBooking[] {
+  const q = f.q?.trim().toLowerCase();
+  return mockExplorer().filter((b) =>
+    (!f.venueId || b.venueId === f.venueId) && (!f.status || b.status === f.status) && (!f.source || b.source === f.source)
+    && (!f.from || (b.date !== null && b.date >= f.from)) && (!f.to || (b.date !== null && b.date <= f.to))
+    && (!q || b.code.toLowerCase().includes(q) || (b.customerName ?? '').toLowerCase().includes(q)));
 }
 
 function requireOwner() {
@@ -769,6 +806,32 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
         bookings: days.reduce((t, d) => t + d.bookings, 0), walkInBookings: 24,
         activePartners: 4, activeVenues: VENUES.length, activeCourts: VENUES.reduce((t, v) => t + v.courts.length, 0), last30Days: days,
       };
+    },
+
+    async getAdminBookings(filter, page = 1, pageSize = 25) {
+      await sleep(200);
+      restoreUser();
+      requireAdmin();
+      const all = filterMockBookings(filter);
+      const size = Math.min(Math.max(pageSize, 1), 100);
+      const p = Math.max(page, 1);
+      return { total: all.length, page: p, pageSize: size, items: structuredClone(all.slice((p - 1) * size, p * size)) };
+    },
+
+    async exportAdminBookingsCsv(filter) {
+      await sleep(200);
+      restoreUser();
+      requireAdmin();
+      const cell = (v: string | number | null) => {
+        let s = v === null ? '' : String(v);
+        if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
+        return /[,"\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+      };
+      const rows = filterMockBookings(filter).map((b) => [
+        b.code, b.status, b.source, b.venueName, b.customerName, b.customerPhone, b.paymentState, b.date, b.start, b.end,
+        b.courts.join(' + '), b.total.toFixed(2), b.commission.toFixed(2), b.createdAt.slice(0, 16).replace('T', ' '),
+      ].map(cell).join(','));
+      return '﻿code,status,source,venue,customer,phone,payment,date,start,end,courts,total,commission,created_at\r\n' + rows.map((r) => r + '\r\n').join('');
     },
 
     async getPartners(status) {

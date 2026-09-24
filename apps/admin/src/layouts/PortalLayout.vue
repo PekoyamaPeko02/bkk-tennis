@@ -46,7 +46,7 @@ function logout() {
 const NAV: { label: string; icon: string; to?: string; soon?: boolean }[] = [
   { label: 'ภาพรวมระบบ', icon: 'dashboard', to: '/' },
   { label: 'สนามพันธมิตร', icon: 'stadium', to: '/partners' },
-  { label: 'รายการจองทั้งหมด', icon: 'book_online', soon: true },
+  { label: 'รายการจองทั้งหมด', icon: 'book_online', to: '/bookings' },
   { label: 'การเงิน & คอมมิชชั่น', icon: 'payments', soon: true },
 ];
 </script>

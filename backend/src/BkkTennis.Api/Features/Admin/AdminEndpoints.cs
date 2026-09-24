@@ -55,6 +55,7 @@ public static class AdminEndpoints
         });
 
         g.MapPartners();
+        g.MapBookingExplorer();
 
         return api;
     }
