@@ -41,7 +41,9 @@ builder.Services.AddScoped<BookingService>();
 builder.Services.AddScoped<ScheduleService>();
 builder.Services.AddSingleton<AvailabilityNotifier>();
 builder.Services.AddSingleton<IPaymentProvider, MockPaymentProvider>(); // TODO(sprint 4): real gateway by Payments:Provider
+builder.Services.AddScoped<PayoutService>();
 builder.Services.AddHostedService<HoldExpiryJob>();
+builder.Services.AddHostedService<PayoutJob>();
 builder.Services.AddSignalR();
 
 // ---------------------------------------------------------------- auth

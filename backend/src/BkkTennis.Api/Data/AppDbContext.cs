@@ -24,6 +24,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<CourtBlock> CourtBlocks => Set<CourtBlock>();
     public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<Refund> Refunds => Set<Refund>();
+    public DbSet<Payout> Payouts => Set<Payout>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -114,6 +115,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         {
             e.ToTable("payments");
             e.Property(x => x.RawWebhook).HasColumnType("jsonb");
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("now()");
+        });
+
+        b.Entity<Payout>(e =>
+        {
+            e.ToTable("payouts");
             e.Property(x => x.CreatedAt).HasDefaultValueSql("now()");
         });
 

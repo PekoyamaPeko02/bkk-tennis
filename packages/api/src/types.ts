@@ -321,6 +321,33 @@ export interface AdminBookingPage {
   items: AdminBooking[];
 }
 
+// ---- payouts (A4)
+export type PayoutStatus = 'pending' | 'paid' | 'failed';
+export interface AdminPayout {
+  id: string;
+  partnerId: string;
+  partnerName: string;
+  bankName: string | null;
+  bankAccount: string | null;
+  /** yyyy-MM-dd, Friday … Thursday (Bangkok). */
+  periodStart: string;
+  periodEnd: string;
+  bookingCount: number;
+  gross: number;
+  commission: number;
+  net: number;
+  status: PayoutStatus;
+  transferRef: string | null;
+  paidAt: string | null;
+  createdAt: string;
+}
+export interface AdminPayoutPage { total: number; page: number; pageSize: number; items: AdminPayout[] }
+export interface AdminPayoutDetail {
+  payout: AdminPayout;
+  bookings: { id: string; code: string; venueName: string; date: string | null; total: number; commission: number }[];
+}
+export interface PayoutRunResult { cutoff: string; created: number; updated: number; skipped: number }
+
 export type PartnerStatus = 'pending' | 'active' | 'suspended';
 export interface AdminPartner {
   id: string;

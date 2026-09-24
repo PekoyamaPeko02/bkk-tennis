@@ -154,6 +154,8 @@ public class Booking
     public decimal AddonTotal { get; set; }
     public decimal Total { get; set; }
     public decimal Commission { get; set; }
+    /// <summary>The payout this completed booking was settled into (null = not yet paid out).</summary>
+    public Guid? PayoutId { get; set; }
     public DateTime? HoldExpiresAt { get; set; }
     public string? IdempotencyKey { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -220,6 +222,29 @@ public class Refund
     public decimal Amount { get; set; }
     public string Reason { get; set; } = "";
     public string Status { get; set; } = "pending";
+    public DateTime CreatedAt { get; set; }
+}
+
+public static class PayoutStatus
+{
+    public const string Pending = "pending";
+    public const string Paid = "paid";
+    public const string Failed = "failed";
+}
+
+public class Payout
+{
+    public Guid Id { get; set; }
+    public Guid PartnerId { get; set; }
+    /// <summary>Nominal week (Friday … Thursday, Bangkok dates). Completed bookings older than the week roll in too.</summary>
+    public DateOnly PeriodStart { get; set; }
+    public DateOnly PeriodEnd { get; set; }
+    public decimal Gross { get; set; }
+    public decimal Commission { get; set; }
+    public decimal Net { get; set; }
+    public string Status { get; set; } = PayoutStatus.Pending;
+    public string? TransferRef { get; set; }
+    public DateTime? PaidAt { get; set; }
     public DateTime CreatedAt { get; set; }
 }
 

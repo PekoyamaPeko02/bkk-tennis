@@ -56,6 +56,7 @@ public static class AdminEndpoints
 
         g.MapPartners();
         g.MapBookingExplorer();
+        g.MapPayouts();
 
         return api;
     }

@@ -2,7 +2,7 @@
 // Data mirrors db/init/002_seed.sql. Logic mirrors Pricing/AvailabilityService/BookingService.
 import { ApiError, type BkkApi } from './client';
 import type {
-  Addon, AddonSettings, AdminBooking, AdminBookingFilter, AdminPartner, Booking, BookingStatus, CourtSettings, OpeningHours, PricePreview, PriceRule, PriceRuleRequest, ClubOsBooking, Court, CourtBlock, CourtBlockRequest, CreateBookingRequest, Schedule, ScheduleBlock, ScheduleBooking,
+  Addon, AddonSettings, AdminBooking, AdminBookingFilter, AdminPartner, AdminPayout, Booking, BookingStatus, CourtSettings, OpeningHours, PricePreview, PriceRule, PriceRuleRequest, ClubOsBooking, Court, CourtBlock, CourtBlockRequest, CreateBookingRequest, Schedule, ScheduleBlock, ScheduleBooking,
   ScheduleCourt, ScheduleSlot, Slot, User, VenueAvailability, VenueDetail, VenueSummary, WalkInRequest, WalkInResult,
 } from './types';
 
@@ -378,6 +378,43 @@ function filterMockBookings(f: AdminBookingFilter): AdminBooking[] {
     && (!f.from || (b.date !== null && b.date >= f.from)) && (!f.to || (b.date !== null && b.date <= f.to))
     && (!q || b.code.toLowerCase().includes(q) || (b.customerName ?? '').toLowerCase().includes(q)));
 }
+
+// ---- admin payouts (A4): seed weeks are built from the sample bookings' completed app rows so the detail list adds up
+const fridayOnOrBefore = (iso: string) => {
+  const d = new Date(`${iso}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() - 5 + 7) % 7));
+  return d.toISOString().slice(0, 10);
+};
+const addIsoDays = (iso: string, n: number) => new Date(Date.parse(`${iso}T00:00:00Z`) + n * 86400_000).toISOString().slice(0, 10);
+let payoutList: (AdminPayout & { bookingIds: string[] })[] | null = null;
+function mockPayoutFor(partnerIdx: number, cutoff: string, status: AdminPayout['status'], ref: string | null): AdminPayout & { bookingIds: string[] } {
+  const partner = mockPartners().find((p) => p.id === `partner-seed-${partnerIdx}`)!;
+  const rows = mockExplorer().filter((b) => b.venueId === partner.venues[0]!.id && b.source === 'app' && b.status === 'completed' && b.date !== null && b.date < cutoff);
+  const gross = rows.reduce((t, b) => t + b.total, 0);
+  const commission = rows.reduce((t, b) => t + b.commission, 0);
+  return {
+    id: `payout-${settingsSeq++}`, partnerId: partner.id, partnerName: partner.legalName, bankName: partner.bankName, bankAccount: partner.bankAccount,
+    periodStart: addIsoDays(cutoff, -7), periodEnd: addIsoDays(cutoff, -1), bookingCount: rows.length, gross, commission, net: gross - commission,
+    status, transferRef: ref, paidAt: status === 'paid' ? `${cutoff}T05:00:00.000Z` : null, createdAt: `${cutoff}T00:10:00.000Z`,
+    bookingIds: rows.map((b) => b.id),
+  };
+}
+function mockPayouts() {
+  if (!payoutList) {
+    const latest = fridayOnOrBefore(bangkokToday());
+    payoutList = [
+      mockPayoutFor(2, latest, 'pending', null),
+      mockPayoutFor(2, addIsoDays(latest, -7), 'paid', 'KBANK-20260911-001'),
+      mockPayoutFor(3, addIsoDays(latest, -7), 'paid', 'KBANK-20260911-002'),
+    ];
+  }
+  return payoutList;
+}
+const publicPayout = (p: AdminPayout & { bookingIds: string[] }): AdminPayout => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { bookingIds, ...rest } = p;
+  return { ...rest };
+};
 
 function requireOwner() {
   const user = requireStaff();
@@ -832,6 +869,57 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
         b.courts.join(' + '), b.total.toFixed(2), b.commission.toFixed(2), b.createdAt.slice(0, 16).replace('T', ' '),
       ].map(cell).join(','));
       return '﻿code,status,source,venue,customer,phone,payment,date,start,end,courts,total,commission,created_at\r\n' + rows.map((r) => r + '\r\n').join('');
+    },
+
+    async getPayouts(status, page = 1, pageSize = 25) {
+      await sleep(200);
+      restoreUser();
+      requireAdmin();
+      const all = mockPayouts().filter((p) => !status || p.status === status)
+        .sort((a, b) => b.periodStart.localeCompare(a.periodStart) || b.createdAt.localeCompare(a.createdAt));
+      const size = Math.min(Math.max(pageSize, 1), 100);
+      const p = Math.max(page, 1);
+      return { total: all.length, page: p, pageSize: size, items: all.slice((p - 1) * size, p * size).map(publicPayout) };
+    },
+
+    async getPayout(id) {
+      await sleep(150);
+      restoreUser();
+      requireAdmin();
+      const p = mockPayouts().find((x) => x.id === id);
+      if (!p) throw new ApiError(404, 'http_404', 'ไม่พบข้อมูล');
+      const rows = mockExplorer().filter((b) => p.bookingIds.includes(b.id));
+      return { payout: publicPayout(p), bookings: rows.map((b) => ({ id: b.id, code: b.code, venueName: b.venueName, date: b.date, total: b.total, commission: b.commission })) };
+    },
+
+    async runPayouts(cutoff) {
+      await sleep(300);
+      restoreUser();
+      requireAdmin();
+      const today = bangkokToday();
+      const c = cutoff ?? fridayOnOrBefore(today);
+      if (new Date(`${c}T00:00:00Z`).getUTCDay() !== 5) throw new ApiError(400, 'not_friday', 'รอบจ่ายเงินต้องเป็นวันศุกร์');
+      if (c > today) throw new ApiError(400, 'future_cutoff', 'ยังไม่ถึงรอบจ่ายเงินนี้');
+      // Demo: partner 3 has completed bookings that are still unsettled; the first run settles them, later runs find nothing.
+      const list = mockPayouts();
+      const start = addIsoDays(c, -7);
+      if (list.some((p) => p.partnerId === 'partner-seed-3' && p.periodStart === start)) return { cutoff: c, created: 0, updated: 0, skipped: 0 };
+      const created = mockPayoutFor(3, c, 'pending', null);
+      if (created.bookingCount === 0) return { cutoff: c, created: 0, updated: 0, skipped: 0 };
+      list.push(created);
+      return { cutoff: c, created: 1, updated: 0, skipped: 0 };
+    },
+
+    async markPayoutPaid(id, transferRef) {
+      await sleep(200);
+      restoreUser();
+      requireAdmin();
+      const p = mockPayouts().find((x) => x.id === id);
+      if (!p) throw new ApiError(404, 'http_404', 'ไม่พบข้อมูล');
+      if (!transferRef.trim()) throw new ApiError(400, 'bad_transfer_ref', 'กรุณาระบุเลขอ้างอิงการโอน');
+      if (p.status === 'paid') throw new ApiError(409, 'bad_transition', 'Payout นี้จ่ายแล้ว');
+      Object.assign(p, { status: 'paid', transferRef: transferRef.trim(), paidAt: new Date().toISOString() });
+      return publicPayout(p);
     },
 
     async getPartners(status) {

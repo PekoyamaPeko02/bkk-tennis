@@ -104,7 +104,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
                     return (notBefore is null || notBefore <= now + p.ClockSkew) && (expires is null || expires > now - p.ClockSkew);
                 });
             // Tests drive expiry explicitly via BookingService.ExpireHoldsAsync instead of a 30 s timer.
-            foreach (var d in services.Where(d => d.ImplementationType == typeof(HoldExpiryJob)).ToList())
+            // Same for payouts: the shared DB must only change when a test runs PayoutService itself.
+            foreach (var d in services.Where(d => d.ImplementationType == typeof(HoldExpiryJob) || d.ImplementationType == typeof(BkkTennis.Api.Jobs.PayoutJob)).ToList())
                 services.Remove(d);
         });
     }

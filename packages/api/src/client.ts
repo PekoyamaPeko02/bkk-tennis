@@ -1,5 +1,5 @@
 import type {
-  AddonSettings, AddonSettingsRequest, AdminBookingFilter, AdminBookingPage, AdminOverview, AdminPartner, NewPartnerRequest, PartnerStatus, CourtSettings, CourtSettingsRequest, OpeningHours, PricePreview, PriceRule, PriceRuleRequest, VenueSettings,
+  AddonSettings, AddonSettingsRequest, AdminBookingFilter, AdminBookingPage, AdminPayout, AdminPayoutDetail, AdminPayoutPage, PayoutRunResult, PayoutStatus, AdminOverview, AdminPartner, NewPartnerRequest, PartnerStatus, CourtSettings, CourtSettingsRequest, OpeningHours, PricePreview, PriceRule, PriceRuleRequest, VenueSettings,
   AuthResponse, Booking, ClubOsBooking, CourtBlock, CourtBlockRequest, CreateBookingRequest, OtpRequestResponse, Schedule, User, WalkInRequest, WalkInResult,
   VenueAvailability, VenueDetail, VenueSearchParams, VenueSearchResult,
 } from './types';
@@ -26,6 +26,16 @@ export interface BkkApi {
   getAdminBookings(filter: AdminBookingFilter, page?: number, pageSize?: number): Promise<AdminBookingPage>;
   /** Admin: the same filter as CSV text (UTF-8 with BOM; 400 `too_many_rows` above 20,000). */
   exportAdminBookingsCsv(filter: AdminBookingFilter): Promise<string>;
+  /** Admin payouts: newest week first. */
+  getPayouts(status?: PayoutStatus, page?: number, pageSize?: number): Promise<AdminPayoutPage>;
+  getPayout(id: string): Promise<AdminPayoutDetail>;
+  /**
+   * Settles completed online bookings into weekly payouts now (the Friday job does the same). `cutoff` must be a Friday, not in the
+   * future (default: the latest Friday). Safe to repeat: a booking is only ever settled once.
+   */
+  runPayouts(cutoff?: string): Promise<PayoutRunResult>;
+  /** pending|failed → paid; 409 `bad_transition` when it already is. */
+  markPayoutPaid(id: string, transferRef: string): Promise<AdminPayout>;
   /** Admin: newest first, optionally one status. */
   getPartners(status?: PartnerStatus): Promise<AdminPartner[]>;
   /** Creates a `pending` partner + its owner login + a `draft` venue. 409 `email_taken` / `slug_taken`. */
@@ -126,6 +136,10 @@ export function createHttpApi(opt: HttpApiOptions): BkkApi {
     getAdminOverview: () => call('GET', '/admin/overview'),
     getAdminBookings: (filter, page, pageSize) => call('GET', `/admin/bookings${qs({ ...filter, page, pageSize })}`),
     exportAdminBookingsCsv: (filter) => call('GET', `/admin/bookings.csv${qs(filter)}`, undefined, {}, true),
+    getPayouts: (status, page, pageSize) => call('GET', `/admin/payouts${qs({ status, page, pageSize })}`),
+    getPayout: (id) => call('GET', `/admin/payouts/${id}`),
+    runPayouts: (cutoff) => call('POST', `/admin/payouts/run${qs({ cutoff })}`),
+    markPayoutPaid: (id, transferRef) => call('POST', `/admin/payouts/${id}/mark-paid`, { transferRef }),
     getPartners: (status) => call('GET', `/admin/partners${qs({ status })}`),
     createPartner: (req) => call('POST', '/admin/partners', req),
     approvePartner: (id) => call('POST', `/admin/partners/${id}/approve`),
