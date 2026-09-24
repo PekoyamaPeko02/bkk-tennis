@@ -4,6 +4,7 @@ import '@bkk/ui';
 import { useAuthStore } from 'stores/auth';
 
 export const isMockApi = process.env.API_MOCK === 'true';
+export const apiBase = process.env.API_BASE;
 let api: BkkApi;
 export const useApi = () => api;
 

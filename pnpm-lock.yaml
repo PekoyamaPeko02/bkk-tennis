@@ -175,6 +175,9 @@ importers:
       '@bkk/api':
         specifier: workspace:*
         version: link:../api
+      '@microsoft/signalr':
+        specifier: ^8.0.17
+        version: 8.0.29
     devDependencies:
       quasar:
         specifier: ^2.18.6

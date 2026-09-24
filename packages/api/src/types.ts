@@ -142,6 +142,41 @@ export interface ScheduleKpis {
   pendingBookings: number;
 }
 
+export interface WalkInRequest {
+  date: string;
+  slots: { courtId: string; start: string }[];
+  customerName?: string | undefined;
+}
+
+/** A walk-in is confirmed immediately (paid at the desk, no commission). */
+export interface WalkInResult {
+  id: string;
+  code: string;
+  status: BookingStatus;
+  customerName: string | null;
+  total: number;
+  slots: BookingSlot[];
+}
+
+export interface CourtBlockRequest {
+  courtId: string;
+  /** ISO instants (UTC); the portal builds them from venue-local date + time. */
+  startAt: string;
+  endAt: string;
+  reason?: ScheduleBlock['reason'] | undefined;
+  note?: string | undefined;
+}
+
+export interface CourtBlock {
+  id: string;
+  courtId: string;
+  courtName: string;
+  startAt: string;
+  endAt: string;
+  reason: ScheduleBlock['reason'];
+  note: string | null;
+}
+
 export interface Schedule {
   venueId: string;
   date: string;

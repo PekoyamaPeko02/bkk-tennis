@@ -19,6 +19,7 @@
     "vue-tsc": "^2.2.12"
   },
   "dependencies": {
-    "@bkk/api": "workspace:*"
+    "@bkk/api": "workspace:*",
+    "@microsoft/signalr": "^8.0.17"
   }
 }

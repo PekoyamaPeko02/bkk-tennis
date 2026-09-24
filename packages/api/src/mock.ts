@@ -2,8 +2,8 @@
 // Data mirrors db/init/002_seed.sql. Logic mirrors Pricing/AvailabilityService/BookingService.
 import { ApiError, type BkkApi } from './client';
 import type {
-  Addon, Booking, BookingStatus, Court, CreateBookingRequest, Schedule, ScheduleBooking, ScheduleCourt, ScheduleSlot, Slot, User,
-  VenueAvailability, VenueDetail, VenueSummary,
+  Addon, Booking, BookingStatus, Court, CourtBlock, CourtBlockRequest, CreateBookingRequest, Schedule, ScheduleBlock, ScheduleBooking,
+  ScheduleCourt, ScheduleSlot, Slot, User, VenueAvailability, VenueDetail, VenueSummary, WalkInRequest, WalkInResult,
 } from './types';
 
 interface Rule { start: string; end: string; price: number; label: string | null; priority: number }
@@ -124,8 +124,15 @@ function preBooked(courtId: string, date: string, hour: number) {
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 // ---------------------------------------------------------------- state
-interface MockBooking extends Booking { userId: string; slotStarts: { courtId: string; startAt: string }[] }
+interface MockBooking extends Booking {
+  userId: string;
+  slotStarts: { courtId: string; startAt: string }[];
+  /** ClubOS front-desk bookings: source 'walk_in', paid at the counter. */
+  source?: 'app' | 'walk_in';
+  customerName?: string | null;
+}
 const bookings: MockBooking[] = [];
+const blocks: (CourtBlock & { venueId: string })[] = [];
 let seq = 10001;
 let currentUser: User | null = null;
 
@@ -133,6 +140,10 @@ function slotTaken(courtId: string, startAt: string) {
   return bookings.find((b) =>
     ['held', 'confirmed', 'checked_in'].includes(b.status) &&
     b.slotStarts.some((s) => s.courtId === courtId && s.startAt === startAt));
+}
+
+function blockAt(courtId: string, startAt: string, endAt = new Date(Date.parse(startAt) + 3600_000).toISOString()) {
+  return blocks.find((b) => b.courtId === courtId && Date.parse(b.startAt) < Date.parse(endAt) && Date.parse(b.endAt) > Date.parse(startAt));
 }
 
 function expireHolds() {
@@ -160,6 +171,7 @@ function availability(v: MockVenue, date: string): VenueAvailability {
         const mine = slotTaken(c.id, startAt);
         const status: Slot['status'] =
           Date.parse(startAt) <= now ? 'past'
+          : blockAt(c.id, startAt) ? 'blocked'
           : mine ? (mine.status === 'held' ? 'held' : 'booked')
           : preBooked(c.id, date, hour) ? 'booked'
           : p ? 'available' : 'closed';
@@ -179,18 +191,19 @@ function schedule(v: MockVenue, date: string): Schedule {
     ...c,
     slots: c.slots.map((s): ScheduleSlot => {
       const empty = { bookingId: null, blockId: null };
+      if (s.status === 'blocked') return { ...s, status: 'blocked', bookingId: null, blockId: blockAt(c.courtId, s.startAt)?.id ?? null };
       if (s.status !== 'booked' && s.status !== 'held') return { ...s, status: s.status, ...empty };
       const real = slotTaken(c.courtId, s.startAt);
       const id = real?.id ?? `mock-${c.courtId}-${date}-${s.start}`;
       if (!found.has(id)) {
         const n = Math.abs([...id].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) | 0, 0));
-        const walkIn = !real && n % 3 === 0;
+        const walkIn = real ? real.source === 'walk_in' : n % 3 === 0;
         found.set(id, {
           id,
           code: real?.code ?? `BT${10000 + (n % 90000)}`,
           status: s.status === 'held' ? 'held' : 'confirmed',
           source: walkIn ? 'walk_in' : 'app',
-          customerName: real ? (currentUser?.displayName ?? 'ลูกค้าแอป') : MOCK_CUSTOMERS[n % MOCK_CUSTOMERS.length]!,
+          customerName: real ? (real.customerName ?? currentUser?.displayName ?? 'ลูกค้าแอป') : MOCK_CUSTOMERS[n % MOCK_CUSTOMERS.length]!,
           customerPhone: walkIn ? null : `08${n % 10}-***-${String(1000 + (n % 9000))}`,
           paymentState: walkIn ? 'counter' : s.status === 'held' ? 'pending' : 'paid',
           total: real?.total ?? s.price ?? 0,
@@ -210,8 +223,13 @@ function schedule(v: MockVenue, date: string): Schedule {
   const sellable = cells.filter((s) => s.price !== null || s.bookingId).length;
   const sold = [...found.values()].filter((b) => b.status === 'confirmed');
   const sum = (xs: ScheduleBooking[]) => xs.reduce((t, b) => t + b.total, 0);
+  const local = (iso: string) => new Date(Date.parse(iso) + 7 * 3600_000).toISOString().slice(11, 16); // Asia/Bangkok, no DST
+  const dayStart = Date.parse(toUtcIso(date, '00:00'));
+  const dayBlocks: ScheduleBlock[] = blocks
+    .filter((b) => b.venueId === v.s.id && Date.parse(b.startAt) < dayStart + 86400_000 && Date.parse(b.endAt) > dayStart)
+    .map((b) => ({ id: b.id, courtId: b.courtId, reason: b.reason, note: b.note, start: local(b.startAt), end: local(b.endAt), startAt: b.startAt, endAt: b.endAt }));
   return {
-    venueId: v.s.id, date, slotMinutes: av.slotMinutes, courts, bookings: [...found.values()], blocks: [],
+    venueId: v.s.id, date, slotMinutes: av.slotMinutes, courts, bookings: [...found.values()], blocks: dayBlocks,
     kpis: {
       sellableSlots: sellable, occupiedSlots: occupied, heldSlots: cells.filter((s) => s.status === 'held').length,
       occupancyPct: sellable ? Math.round((100 * occupied) / sellable) : 0,
@@ -250,6 +268,12 @@ function findVenue(idOrSlug: string) {
 function requireUser() {
   if (!currentUser) throw new ApiError(401, 'unauthorized', 'กรุณาเข้าสู่ระบบ');
   return currentUser;
+}
+
+function requireStaff() {
+  const user = requireUser();
+  if (user.role !== 'partner_staff' && user.role !== 'partner_owner') throw new ApiError(403, 'forbidden', 'ไม่มีสิทธิ์เข้าถึง');
+  return user;
 }
 
 function publicBooking(b: MockBooking): Booking {
@@ -312,9 +336,77 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
     async getSchedule(venueId, date) {
       await sleep(200);
       restoreUser();
-      const user = requireUser();
-      if (user.role !== 'partner_staff' && user.role !== 'partner_owner') throw new ApiError(403, 'forbidden', 'ไม่มีสิทธิ์เข้าถึง');
+      requireStaff();
       return schedule(findVenue(venueId), date ?? bangkokToday());
+    },
+
+    async createWalkIn(venueId, req: WalkInRequest): Promise<WalkInResult> {
+      await sleep(300);
+      const v = findVenue(venueId);
+      requireStaff();
+      if (!req.slots.length) throw new ApiError(400, 'no_slots', 'เลือกอย่างน้อย 1 ช่วงเวลา');
+      if (req.slots.length > 4) throw new ApiError(400, 'too_many_slots', 'จองได้สูงสุด 4 ช่วงต่อครั้ง');
+      expireHolds();
+      const avail = availability(v, req.date);
+      const now = Date.now();
+      const slots = req.slots.map((s) => {
+        const c = avail.courts.find((x) => x.courtId === s.courtId);
+        if (!c) throw new ApiError(400, 'court_not_found', 'ไม่พบคอร์ท');
+        const slot = c.slots.find((x) => x.start === s.start);
+        if (!slot) throw new ApiError(400, 'outside_hours', `${s.start} อยู่นอกเวลาเปิดให้บริการ`);
+        // walk-ins may take the slot that is already under way; only fully finished slots are out
+        if (Date.parse(slot.endAt) <= now) throw new ApiError(400, 'slot_in_past', `${s.start} เลยเวลาแล้ว`);
+        if (slot.status === 'blocked') throw new ApiError(409, 'slot_blocked', 'ช่วงเวลานี้ปิดปรับปรุง');
+        if (slotTaken(c.courtId, slot.startAt) || preBooked(c.courtId, req.date, Number(slot.start.slice(0, 2))))
+          throw new ApiError(409, 'slot_taken', 'มีผู้จองช่วงเวลานี้แล้ว');
+        const p = priceFor(v, slot.start);
+        if (!p) throw new ApiError(400, 'no_price', `${s.start} ยังไม่เปิดขาย`);
+        return { courtId: c.courtId, courtName: c.name, date: req.date, start: slot.start, end: slot.end, price: p.price, label: p.label, startAt: slot.startAt };
+      });
+      const total = slots.reduce((t, x) => t + x.price, 0);
+      const name = req.customerName?.trim() || null;
+      const b: MockBooking = {
+        id: crypto.randomUUID(), code: 'BT' + seq++, status: 'confirmed', venueId: v.s.id, venueName: v.s.nameEn,
+        venueDistrict: v.s.district, subtotal: total, addonTotal: 0, total, holdExpiresAt: null, createdAt: new Date().toISOString(),
+        slots: slots.map(({ startAt: _s, ...rest }) => rest), addons: [], payment: null, cancelFreeHours: v.cancelFreeHours,
+        userId: 'walk-in', slotStarts: slots.map((s) => ({ courtId: s.courtId, startAt: s.startAt })), source: 'walk_in', customerName: name,
+      };
+      bookings.push(b);
+      return { id: b.id, code: b.code, status: b.status, customerName: name, total, slots: b.slots };
+    },
+
+    async createBlock(venueId, req: CourtBlockRequest): Promise<CourtBlock> {
+      await sleep(300);
+      const v = findVenue(venueId);
+      requireStaff();
+      const court = v.courts.find((c) => c.id === req.courtId);
+      if (!court) throw new ApiError(404, 'court_not_found', 'ไม่พบคอร์ท');
+      const reason = req.reason ?? 'maintenance';
+      if (!['maintenance', 'cleaning', 'event', 'other'].includes(reason)) throw new ApiError(400, 'bad_reason', 'เหตุผลไม่ถูกต้อง');
+      if (!(Date.parse(req.endAt) > Date.parse(req.startAt))) throw new ApiError(400, 'bad_range', 'เวลาสิ้นสุดต้องหลังเวลาเริ่ม');
+      expireHolds();
+      const clash = bookings.some((b) => ['held', 'confirmed', 'checked_in'].includes(b.status) && b.slotStarts.some((s) =>
+        s.courtId === court.id && Date.parse(s.startAt) < Date.parse(req.endAt) && Date.parse(s.startAt) + 3600_000 > Date.parse(req.startAt)));
+      // the seeded "other people's bookings" the schedule shows as real bookings count too
+      let seededClash = false;
+      for (let t = Math.floor(Date.parse(req.startAt) / 3600_000) * 3600_000; t < Date.parse(req.endAt); t += 3600_000) {
+        const local = new Date(t + 7 * 3600_000).toISOString(); // Asia/Bangkok wall clock
+        if (t > Date.now() && preBooked(court.id, local.slice(0, 10), Number(local.slice(11, 13)))) seededClash = true;
+      }
+      if (clash || seededClash) throw new ApiError(409, 'block_conflict', 'มีการจองที่ยังใช้งานอยู่ในช่วงเวลานี้ ต้องยกเลิกการจองก่อน');
+      const block = { id: crypto.randomUUID(), venueId: v.s.id, courtId: court.id, courtName: court.name, startAt: req.startAt, endAt: req.endAt, reason, note: req.note?.trim() || null };
+      blocks.push(block);
+      const { venueId: _v, ...dto } = block;
+      return dto;
+    },
+
+    async deleteBlock(venueId, blockId) {
+      await sleep(200);
+      findVenue(venueId);
+      requireStaff();
+      const i = blocks.findIndex((b) => b.id === blockId && b.venueId === venueId);
+      if (i < 0) throw new ApiError(404, 'not_found', 'ไม่พบข้อมูล');
+      blocks.splice(i, 1);
     },
 
     async requestOtp(phone) {

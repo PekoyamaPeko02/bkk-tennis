@@ -11,10 +11,8 @@
         </div>
       </div>
       <div class="actions">
-        <q-btn unelevated no-caps class="bkk-btn-forest" icon="person_add" label="เพิ่มการจอง Walk-in" disable>
-          <q-tooltip>เร็วๆ นี้</q-tooltip>
-        </q-btn>
-        <q-btn outline no-caps icon="block" label="บล็อกคอร์ท (ซ่อมบำรุง)" disable><q-tooltip>เร็วๆ นี้</q-tooltip></q-btn>
+        <q-btn unelevated no-caps class="bkk-btn-forest" icon="person_add" label="เพิ่มการจอง Walk-in" :disable="!data" @click="openWalkIn(null)" />
+        <q-btn outline no-caps icon="block" label="บล็อกคอร์ท (ซ่อมบำรุง)" :disable="!data" @click="openBlock(null)" />
       </div>
     </div>
 
@@ -64,7 +62,7 @@
             <td class="time-col bkk-num">{{ row }}</td>
             <td v-for="c in data.courts" :key="c.courtId" :class="`cell s-${c.slots[i]?.status}`">
               <button v-if="c.slots[i] && isOpenable(c.slots[i]!)" type="button" class="cell-btn" :data-testid="`cell-${c.slots[i]!.status}`"
-                :aria-label="`${c.name} ${c.slots[i]!.start} ${cellText(c.slots[i]!)}`" @click="open(c.slots[i]!)">
+                :aria-label="`${c.name} ${c.slots[i]!.start} ${cellText(c.slots[i]!)}`" @click="open(c.courtId, c.slots[i]!)">
                 <span class="cell-label">{{ cellText(c.slots[i]!) }}</span>
                 <span v-if="bookingOf(c.slots[i]!)" class="cell-sub bkk-num">{{ bookingOf(c.slots[i]!)!.code }}</span>
               </button>
@@ -125,9 +123,14 @@
             <dt>หมายเหตุ</dt>
             <dd>{{ block.note ?? '—' }}</dd>
           </dl>
+          <q-btn outline no-caps color="negative" icon="lock_open" label="ยกเลิกการปิดคอร์ท" class="q-mt-lg" :loading="unblocking"
+            data-testid="unblock" @click="confirmUnblock" />
         </q-card-section>
       </q-card>
     </q-dialog>
+
+    <WalkInDialog v-model="walkInOpen" :venue-id="VENUE_ID" :date="date" :schedule="data" :preselect="preselect" @saved="load" />
+    <BlockDialog v-model="blockOpen" :venue-id="VENUE_ID" :date="date" :schedule="data" :preselect="preselect" @saved="load" />
   </q-page>
 </template>
 
@@ -136,8 +139,11 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import {
   ApiError, bangkokToday, type BookingStatus, type PaymentState, type Schedule, type ScheduleBlock, type ScheduleBooking, type ScheduleSlot,
 } from '@bkk/api';
-import { addDays, baht, thDate, thDay } from '@bkk/ui';
-import { useApi } from 'boot/api';
+import { useQuasar } from 'quasar';
+import { addDays, baht, thDate, thDay, useLiveAvailability } from '@bkk/ui';
+import { apiBase, isMockApi, useApi } from 'boot/api';
+import WalkInDialog from 'components/WalkInDialog.vue';
+import BlockDialog from 'components/BlockDialog.vue';
 
 // TODO(C2 follow-up): from the signed-in staff member's venue memberships ("my venues" endpoint).
 const VENUE_ID = '20000000-0000-0000-0000-000000000001';
@@ -160,6 +166,7 @@ const BLOCK_TH: Record<ScheduleBlock['reason'], string> = {
   maintenance: 'ซ่อมบำรุง', cleaning: 'ทำความสะอาด', event: 'จัดกิจกรรม', other: 'อื่นๆ',
 };
 
+const $q = useQuasar();
 const api = useApi();
 const today = bangkokToday();
 const date = ref(today);
@@ -177,7 +184,10 @@ const booking = computed<ScheduleBooking | null>(() => (selected.value.bookingId
 const block = computed<ScheduleBlock | null>(() => data.value?.blocks.find((b) => b.id === selected.value.blockId) ?? null);
 
 const bookingOf = (s: ScheduleSlot) => (s.bookingId ? bookingsById.value.get(s.bookingId) ?? null : null);
-const isOpenable = (s: ScheduleSlot) => !!s.bookingId || !!s.blockId;
+/** A free cell (or the slot already under way) can take a walk-in. */
+const isWalkable = (s: ScheduleSlot) =>
+  !s.bookingId && !s.blockId && (s.status === 'available' || (s.status === 'past' && Date.parse(s.endAt) > Date.now() && s.price !== null));
+const isOpenable = (s: ScheduleSlot) => !!s.bookingId || !!s.blockId || isWalkable(s);
 const hhmm = (iso: string) => new Date(iso).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Bangkok' });
 
 function cellText(s: ScheduleSlot) {
@@ -192,9 +202,49 @@ function cellText(s: ScheduleSlot) {
   }
 }
 
-function open(s: ScheduleSlot) {
-  selected.value = { bookingId: s.bookingId, blockId: s.blockId };
-  panelOpen.value = true;
+const walkInOpen = ref(false);
+const blockOpen = ref(false);
+const preselect = ref<{ courtId: string; start: string } | null>(null);
+const unblocking = ref(false);
+
+function openWalkIn(pre: { courtId: string; start: string } | null) {
+  preselect.value = pre;
+  walkInOpen.value = true;
+}
+function openBlock(pre: { courtId: string; start: string } | null) {
+  preselect.value = pre;
+  blockOpen.value = true;
+}
+
+/** Booked / blocked cells show details; free cells start a walk-in for that court and time. */
+function open(courtId: string, s: ScheduleSlot) {
+  if (s.bookingId || s.blockId) {
+    selected.value = { bookingId: s.bookingId, blockId: s.blockId };
+    panelOpen.value = true;
+  } else openWalkIn({ courtId, start: s.start });
+}
+
+function confirmUnblock() {
+  const b = block.value;
+  if (!b) return;
+  $q.dialog({
+    title: 'ยกเลิกการปิดคอร์ท?',
+    message: `เปิดให้จอง ${b.start}-${b.end} อีกครั้ง`,
+    cancel: { label: 'ไม่ยกเลิก', flat: true, noCaps: true },
+    ok: { label: 'ยืนยัน', color: 'negative', unelevated: true, noCaps: true },
+  }).onOk(async () => {
+    unblocking.value = true;
+    try {
+      await api.deleteBlock(VENUE_ID, b.id);
+      panelOpen.value = false;
+      $q.notify({ message: 'เปิดคอร์ทให้จองแล้ว' });
+      await load();
+    } catch (e) {
+      $q.notify({ type: 'negative', message: (e as Error).message || 'ยกเลิกการปิดคอร์ทไม่สำเร็จ' });
+    } finally {
+      unblocking.value = false;
+    }
+  });
 }
 
 let latest = 0; // only the most recent request may update the page (fast day-arrow clicks / the 30 s refresh can overlap)
@@ -218,6 +268,9 @@ async function load() {
 watch(data, () => {
   if (panelOpen.value && !booking.value && !block.value) panelOpen.value = false;
 });
+
+// Live: the API pushes `availabilityChanged` for this venue/day (walk-ins at another desk, player bookings, blocks …). No-op in mock mode.
+useLiveAvailability(isMockApi ? null : `${apiBase}/hubs/availability`, ref(VENUE_ID), date, () => void load());
 
 let timer: ReturnType<typeof setInterval> | undefined;
 watch(date, () => { panelOpen.value = false; void load(); });

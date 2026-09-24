@@ -1,5 +1,5 @@
 import type {
-  AuthResponse, Booking, CreateBookingRequest, OtpRequestResponse, Schedule, User,
+  AuthResponse, Booking, CourtBlock, CourtBlockRequest, CreateBookingRequest, OtpRequestResponse, Schedule, User, WalkInRequest, WalkInResult,
   VenueAvailability, VenueDetail, VenueSearchParams, VenueSearchResult,
 } from './types';
 
@@ -24,6 +24,11 @@ export interface BkkApi {
   cancelBooking(id: string): Promise<{ booking: Booking; refund: number }>;
   /** ClubOS (staff of the venue): the day grid with bookings, blocks and KPIs. Date defaults to today at the venue. */
   getSchedule(venueId: string, date?: string): Promise<Schedule>;
+  /** ClubOS: front-desk booking, confirmed immediately. 409 `slot_taken` / `slot_blocked` when the slot is gone. */
+  createWalkIn(venueId: string, req: WalkInRequest): Promise<WalkInResult>;
+  /** ClubOS: take a court out of sale. 409 `block_conflict` when a live booking overlaps. */
+  createBlock(venueId: string, req: CourtBlockRequest): Promise<CourtBlock>;
+  deleteBlock(venueId: string, blockId: string): Promise<void>;
   /** Development only — pretends the PromptPay QR was paid. */
   simulatePayment(id: string): Promise<Booking>;
 }
@@ -82,6 +87,9 @@ export function createHttpApi(opt: HttpApiOptions): BkkApi {
     getBooking: (id) => call('GET', `/me/bookings/${id}`),
     cancelBooking: (id) => call('POST', `/me/bookings/${id}/cancel`),
     getSchedule: (venueId, date) => call('GET', `/clubos/venues/${venueId}/schedule${qs({ date })}`),
+    createWalkIn: (venueId, req) => call('POST', `/clubos/venues/${venueId}/walk-ins`, req),
+    createBlock: (venueId, req) => call('POST', `/clubos/venues/${venueId}/blocks`, req),
+    deleteBlock: (venueId, blockId) => call('DELETE', `/clubos/venues/${venueId}/blocks/${blockId}`),
     simulatePayment: (id) => call('POST', `/dev/bookings/${id}/simulate-payment`),
   };
 }

@@ -20,6 +20,7 @@ test('the schedule shows KPIs and opens a booking in a side panel', async ({ pag
   const label = await page.getByTestId('date-label').innerText();
   await page.getByRole('button', { name: 'วันถัดไป' }).click();
   await expect(page.getByTestId('date-label')).not.toHaveText(label);
+  await expect(page.locator('.q-inner-loading')).toHaveCount(0); // let the new day's data land before clicking a cell
 
   const booked = page.getByTestId('cell-booked').first();
   await expect(booked).toBeVisible();
@@ -36,13 +37,17 @@ test('the schedule shows KPIs and opens a booking in a side panel', async ({ pag
   await expect(panel).toBeHidden();
 });
 
-test('empty cells are not clickable and changing the day closes the panel', async ({ page }) => {
+test('an empty cell opens the walk-in dialog (C3) and changing the day closes the panel', async ({ page }) => {
   await signInAsOwner(page);
   await page.getByRole('button', { name: 'วันถัดไป' }).click();
+  await expect(page.locator('.q-inner-loading')).toHaveCount(0);
 
   const available = page.locator('td.s-available').first();
   await expect(available).toBeVisible();
-  await expect(available.getByRole('button')).toHaveCount(0);
+  await available.getByRole('button').click();
+  await expect(page.getByTestId('walkin-dialog')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByTestId('walkin-dialog')).toBeHidden();
 
   await page.getByTestId('cell-booked').first().click();
   await expect(page.getByTestId('detail-panel')).toBeVisible();
