@@ -10,8 +10,9 @@
     <q-list bordered separator class="bkk-card q-mt-md list">
       <q-item clickable to="/bookings"><q-item-section avatar><q-icon name="calendar_month" /></q-item-section>
         <q-item-section>การจองของฉัน</q-item-section></q-item>
-      <q-item disable><q-item-section avatar><q-icon name="favorite" /></q-item-section>
-        <q-item-section>สนามที่ชอบ (เร็วๆ นี้)</q-item-section></q-item>
+      <q-item clickable to="/favorites" data-testid="open-favorites"><q-item-section avatar><q-icon name="favorite" /></q-item-section>
+        <q-item-section>สนามที่ชอบ</q-item-section>
+        <q-item-section v-if="favorites.ids.length" side><q-badge color="primary" :label="favorites.ids.length" /></q-item-section></q-item>
       <q-item clickable @click="logout"><q-item-section avatar><q-icon name="logout" color="negative" /></q-item-section>
         <q-item-section class="text-negative">ออกจากระบบ</q-item-section></q-item>
     </q-list>
@@ -22,8 +23,10 @@
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from 'stores/auth';
+import { useFavoritesStore } from 'stores/favorites';
 
 const auth = useAuthStore();
+const favorites = useFavoritesStore();
 const router = useRouter();
 const initials = computed(() => (auth.user?.displayName ?? auth.user?.phone ?? '?').replace('+66', '').slice(-2));
 

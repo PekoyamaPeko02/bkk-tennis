@@ -1,7 +1,7 @@
 import type {
   AddonSettings, AddonSettingsRequest, AdminBookingFilter, AdminBookingPage, AdminPayout, AdminPayoutDetail, AdminPayoutPage, PayoutRunResult, PayoutStatus, AdminOverview, AdminPartner, NewPartnerRequest, PartnerStatus, CourtSettings, CourtSettingsRequest, OpeningHours, PricePreview, PriceRule, PriceRuleRequest, VenueSettings,
   AuthResponse, Booking, ClubOsBooking, CourtBlock, CourtBlockRequest, CreateBookingRequest, OtpRequestResponse, Schedule, User, WalkInRequest, WalkInResult,
-  VenueAvailability, VenueDetail, VenueSearchParams, VenueSearchResult,
+  VenueAvailability, VenueDetail, VenueSearchParams, VenueSearchResult, VenueSummary,
 } from './types';
 
 export class ApiError extends Error {
@@ -79,6 +79,12 @@ export interface BkkApi {
   deletePriceRule(venueId: string, ruleId: string): Promise<void>;
   /** What each court costs per slot on `date`, computed by the same rules as booking. */
   getPricePreview(venueId: string, date: string): Promise<PricePreview>;
+  /** Player: favourite venues, newest first (no availability/distance). Venues that are no longer public are omitted. */
+  getFavorites(): Promise<VenueSummary[]>;
+  /** Idempotent. 404 when the venue is not public. */
+  addFavorite(venueId: string): Promise<void>;
+  /** Idempotent. */
+  removeFavorite(venueId: string): Promise<void>;
   /** Development only — pretends the PromptPay QR was paid. */
   simulatePayment(id: string): Promise<Booking>;
 }
@@ -156,6 +162,9 @@ export function createHttpApi(opt: HttpApiOptions): BkkApi {
     getBookingByCode: (venueId, code) => call('GET', `/clubos/venues/${venueId}/bookings/by-code/${encodeURIComponent(code.trim())}`),
     checkIn: (venueId, bookingId) => call('POST', `/clubos/venues/${venueId}/bookings/${bookingId}/check-in`),
     markNoShow: (venueId, bookingId) => call('POST', `/clubos/venues/${venueId}/bookings/${bookingId}/no-show`),
+    getFavorites: () => call('GET', '/favorites'),
+    addFavorite: (venueId) => call('PUT', `/favorites/${venueId}`),
+    removeFavorite: (venueId) => call('DELETE', `/favorites/${venueId}`),
     getSettings: (venueId) => call('GET', `/clubos/venues/${venueId}/settings`),
     setCancelPolicy: (venueId, cancelFreeHours) => call('PUT', `/clubos/venues/${venueId}/settings/cancel-policy`, { cancelFreeHours }),
     createCourt: (venueId, req) => call('POST', `/clubos/venues/${venueId}/courts`, req),

@@ -76,7 +76,7 @@
             <q-btn flat no-caps color="primary" label="ค้นหาทั่วกรุงเทพฯ" @click="radiusKm = 60" />
           </div>
           <VenueCard v-for="v in result?.items ?? []" :id="`venue-${v.id}`" :key="v.id" :venue="v" :active="v.id === activeId"
-            class="q-mb-md" @hover="activeId = $event" @open="open" />
+            :favorite="favorites.has(v.id)" class="q-mb-md" @hover="activeId = $event" @open="open" @toggle-favorite="toggleFavorite(v.id)" />
         </div>
         <div v-show="view === 'map' || $q.screen.gt.sm" class="map-col">
           <VenueMap ref="mapRef" :venues="result?.items ?? []" :center="location.coords" :radius-km="radiusKm"
@@ -95,7 +95,12 @@ import { bangkokToday, type VenueSearchResult, type VenueSummary } from '@bkk/ap
 import { addDays, FilterChip, thDate, thDay, VenueCard } from '@bkk/ui';
 import { useApi } from 'boot/api';
 import { useLocationStore } from 'stores/location';
+import { useFavoritesStore } from 'stores/favorites';
+import { useFavoriteToggle } from 'src/composables/favorite';
 import VenueMap from 'components/VenueMap.vue';
+
+const favorites = useFavoritesStore();
+const toggleFavorite = useFavoriteToggle();
 
 const RADII = [
   { km: 3, label: '< 3 กม.' },

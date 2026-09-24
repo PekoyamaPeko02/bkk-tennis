@@ -319,6 +319,10 @@ function requireStaff() {
   return user;
 }
 
+/** userId → venue ids, newest first. In memory only, like every other mock state. */
+const favoriteIds = new Map<string, string[]>();
+const favoritesOf = (userId: string) => favoriteIds.get(userId) ?? favoriteIds.set(userId, []).get(userId)!;
+
 function requireAdmin() {
   if (requireUser().role !== 'platform_admin') throw new ApiError(403, 'forbidden', 'ไม่มีสิทธิ์เข้าถึง');
 }
@@ -629,6 +633,30 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
       if (Date.now() < first + 15 * 60_000) throw new ApiError(409, 'too_early', 'ทำเครื่องหมายไม่มาได้หลังเวลาเริ่ม 15 นาที');
       staffMarks.set(bookingId, 'no_show');
       return { ...b, status: 'no_show' };
+    },
+
+    async getFavorites() {
+      await sleep(150);
+      restoreUser();
+      const ids = favoritesOf(requireUser().id);
+      return ids.map((id) => summary(findVenue(id)));
+    },
+
+    async addFavorite(venueId) {
+      await sleep(100);
+      restoreUser();
+      const user = requireUser();
+      const v = findVenue(venueId);
+      const ids = favoritesOf(user.id);
+      if (!ids.includes(v.s.id)) ids.unshift(v.s.id);
+    },
+
+    async removeFavorite(venueId) {
+      await sleep(100);
+      restoreUser();
+      const ids = favoritesOf(requireUser().id);
+      const i = ids.indexOf(venueId);
+      if (i >= 0) ids.splice(i, 1);
     },
 
     async getSettings(venueId) {

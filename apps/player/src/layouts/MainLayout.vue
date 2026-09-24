@@ -44,14 +44,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { isMockApi } from 'boot/api';
 import { useAuthStore } from 'stores/auth';
+import { useFavoritesStore } from 'stores/favorites';
 import { useLocationStore } from 'stores/location';
 
 const auth = useAuthStore();
+// Hearts follow the session: load on sign-in / app start, clear on sign-out.
+const favorites = useFavoritesStore();
+watch(() => auth.token, () => void favorites.load(), { immediate: true });
 const location = useLocationStore();
 const route = useRoute();
 const $q = useQuasar();

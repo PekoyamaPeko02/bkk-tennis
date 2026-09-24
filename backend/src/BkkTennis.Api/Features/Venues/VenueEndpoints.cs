@@ -116,7 +116,7 @@ public static class VenueEndpoints
         return api;
     }
 
-    private static VenueSummaryDto ToSummary(Venue v, double? km, List<SlotDto> free)
+    internal static VenueSummaryDto ToSummary(Venue v, double? km, List<SlotDto> free)
     {
         var prices = v.PriceRules.Select(p => p.PricePerHour).ToList();
         return new VenueSummaryDto(

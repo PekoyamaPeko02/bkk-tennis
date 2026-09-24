@@ -33,6 +33,10 @@
               <span class="bkk-num">{{ venue.summary.rating.toFixed(1) }}</span> ({{ venue.summary.ratingCount }} รีวิว)
             </AvailabilityPill>
           </div>
+          <q-btn round unelevated class="hero-fav" :class="{ on: favorites.has(venue.summary.id) }"
+            :icon="favorites.has(venue.summary.id) ? 'favorite' : 'favorite_border'" :aria-pressed="favorites.has(venue.summary.id)"
+            :aria-label="favorites.has(venue.summary.id) ? 'เอาออกจากสนามที่ชอบ' : 'บันทึกเป็นสนามที่ชอบ'" data-testid="favorite-toggle"
+            @click="toggleFavorite(venue.summary.id)" />
           <div class="hero-bottom">
             <div class="addr"><q-icon name="location_on" size="16px" /> {{ venue.summary.address }}</div>
             <h1 class="bkk-display hero-name">{{ venue.summary.nameEn }}</h1>
@@ -173,6 +177,8 @@ import { useApi } from 'boot/api';
 import { useAuthStore } from 'stores/auth';
 import { useCartStore } from 'stores/cart';
 import { useLocationStore } from 'stores/location';
+import { useFavoritesStore } from 'stores/favorites';
+import { useFavoriteToggle } from 'src/composables/favorite';
 import { useLiveAvailability } from 'src/composables/useLiveAvailability';
 
 const $q = useQuasar();
@@ -180,6 +186,8 @@ const api = useApi();
 const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
+const favorites = useFavoritesStore();
+const toggleFavorite = useFavoriteToggle();
 const cart = useCartStore();
 const location = useLocationStore();
 
@@ -340,7 +348,10 @@ onMounted(async () => {
 .hero-top { position: absolute; top: 14px; left: 14px; right: 14px; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .hero-pill { background: rgba(6, 78, 59, 0.85) !important; border: 1px solid var(--bkk-volt); }
 .volt { color: var(--bkk-volt-bright); }
-.hero-bottom { position: absolute; left: 16px; right: 16px; bottom: 16px; color: #fff; }
+.hero-fav { position: absolute; right: 16px; bottom: 16px; z-index: 2; background: rgba(255, 255, 255, 0.92); color: var(--bkk-text-2); }
+.hero-fav.on { color: #e11d48; }
+/* right padding keeps the name clear of the heart */
+.hero-bottom { position: absolute; left: 16px; right: 16px; bottom: 16px; padding-right: 56px; color: #fff; }
 .addr { font-size: 13px; color: var(--bkk-volt-bright); display: flex; align-items: center; gap: 4px; }
 .hero-name { margin: 4px 0 0; font-size: 28px; line-height: 34px; font-weight: 700; }
 @media (min-width: 1024px) { .hero-name { font-size: 40px; line-height: 46px; } }

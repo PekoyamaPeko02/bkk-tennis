@@ -25,6 +25,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<Refund> Refunds => Set<Refund>();
     public DbSet<Payout> Payouts => Set<Payout>();
+    public DbSet<Favorite> Favorites => Set<Favorite>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -115,6 +116,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         {
             e.ToTable("payments");
             e.Property(x => x.RawWebhook).HasColumnType("jsonb");
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("now()");
+        });
+
+        b.Entity<Favorite>(e =>
+        {
+            e.ToTable("favorites");
+            e.HasKey(x => new { x.UserId, x.VenueId });
             e.Property(x => x.CreatedAt).HasDefaultValueSql("now()");
         });
 

@@ -11,6 +11,9 @@
           {{ venue.hasIndoor ? 'Indoor' : 'Outdoor' }} · {{ surfaceText }}
         </AvailabilityPill>
       </div>
+      <q-btn v-if="favorite !== undefined" round unelevated class="fav" :class="{ on: favorite }" size="sm"
+        :icon="favorite ? 'favorite' : 'favorite_border'" :aria-pressed="favorite" data-testid="favorite-toggle"
+        :aria-label="favorite ? 'เอาออกจากสนามที่ชอบ' : 'บันทึกเป็นสนามที่ชอบ'" @click.stop="$emit('toggleFavorite', venue)" />
     </CourtArt>
 
     <div class="content">
@@ -64,11 +67,16 @@ import AvailabilityPill from './AvailabilityPill.vue';
 import CourtArt from './CourtArt.vue';
 import DistanceBadge from './DistanceBadge.vue';
 
-const props = withDefaults(defineProps<{ venue: VenueSummary; active?: boolean; ctaLabel?: string }>(), {
+const props = withDefaults(defineProps<{
+  venue: VenueSummary; active?: boolean; ctaLabel?: string;
+  /** Shows a heart button when set (true = already a favourite); the parent does the saving. */
+  favorite?: boolean | undefined;
+}>(), {
   active: false,
   ctaLabel: 'ดูตาราง & จองทันที',
+  favorite: undefined,
 });
-defineEmits<{ open: [venue: VenueSummary]; hover: [id: string] }>();
+defineEmits<{ open: [venue: VenueSummary]; hover: [id: string]; toggleFavorite: [venue: VenueSummary] }>();
 
 const lowAvailability = computed(() => props.venue.freeSlotCount > 0 && props.venue.freeSlotCount <= 3);
 const surfaceText = computed(() => props.venue.surfaces.map((s) => SURFACE_LABEL[s] ?? s).join(' / '));
@@ -84,6 +92,8 @@ const priceText = computed(() => {
 .media { aspect-ratio: 16 / 7; }
 .badges { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; justify-content: space-between; gap: 8px; }
 .surface { position: absolute; left: 12px; bottom: 12px; }
+.fav { position: absolute; right: 12px; bottom: 12px; background: rgba(255, 255, 255, 0.92); color: var(--bkk-text-2); }
+.fav.on { color: #e11d48; }
 .content { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
 .head { display: flex; justify-content: space-between; gap: 12px; }
 .titles { min-width: 0; }

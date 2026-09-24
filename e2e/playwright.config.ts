@@ -25,7 +25,7 @@ export default defineConfig({
     timezoneId: 'Asia/Bangkok',
   },
   projects: [
-    { name: 'player', testMatch: /booking-flow\.spec\.ts/, use: { ...devices['Desktop Chrome'], baseURL: `http://localhost:${PLAYER_PORT}` } },
+    { name: 'player', testMatch: /(booking-flow|player-.*)\.spec\.ts/, use: { ...devices['Desktop Chrome'], baseURL: `http://localhost:${PLAYER_PORT}` } },
     { name: 'clubos', testMatch: /clubos-.*\.spec\.ts/, use: { ...devices['Desktop Chrome'], baseURL: `http://localhost:${CLUBOS_PORT}` } },
     { name: 'admin', testMatch: /admin-.*\.spec\.ts/, use: { ...devices['Desktop Chrome'], baseURL: `http://localhost:${ADMIN_PORT}` } },
   ],

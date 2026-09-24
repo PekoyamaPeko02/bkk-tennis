@@ -121,6 +121,7 @@ app.MapGet("/health", async (AppDbContext db, CancellationToken ct) =>
 var api = app.MapGroup("/api/v1");
 api.MapAuth();
 api.MapVenues();
+api.MapFavorites();
 api.MapBookings();
 api.MapClubOs();
 api.MapAdmin();

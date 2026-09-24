@@ -225,6 +225,13 @@ public class Refund
     public DateTime CreatedAt { get; set; }
 }
 
+public class Favorite
+{
+    public Guid UserId { get; set; }
+    public Guid VenueId { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
+
 public static class PayoutStatus
 {
     public const string Pending = "pending";
