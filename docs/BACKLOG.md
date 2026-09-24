@@ -88,3 +88,10 @@ Mark done with `- [x]` + one note line. Items needing a human decision/credentia
 3. Done this run: C4, C5, A1–A4, P1–P5 (gate at the end: dotnet 33+622 tests, typecheck, build, `pnpm e2e` 70 passing). Not verified by a human/tool: Lighthouse (denied), browser SignalR against a real hub, any native Capacitor build. Housekeeping: `git rm mut_tmp.py` (scratch file committed by accident in d8a202f).
 4. Still blocked on a human: payment gateway, SMS OTP, LINE Login, money-flow decision. Next code candidates: owner password change/reset + "my venues" endpoint (ClubOS still hard-codes `VENUE_ID`, so a newly onboarded owner can't use the UI), ClubOS payouts page, map API error codes to i18n.
 5. Everything is on `dev/autopilot` (not pushed). The CI e2e job now also builds the PWA (`pwa` Playwright project) — first run is slower.
+
+## Handoff (autopilot round, 2026-09-24)
+- F1 done and committed (116db25). F2–F5 still open, in order; F2 (my venues + drop hard-coded VENUE_ID in ClubOS) is next.
+- The test-engineer subagent had no Bash access this round; the lead ran `dotnet test` (33+622), typecheck and build. `pnpm e2e` was not run for F1.
+- Apply db/init/007_payout_no_show.sql by hand to existing local DBs.
+- Extra F1 tests worth adding: late no_show rolls into the next payout run; settle job then payout end to end.
+- Late-cancelled (no refund) bookings are still never paid out.
