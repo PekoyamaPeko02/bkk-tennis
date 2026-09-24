@@ -271,6 +271,20 @@ export interface Booking {
   cancelFreeHours: number;
 }
 
+// ---------------------------------------------------------------- Admin (A1)
+export interface AdminOverview {
+  /** Online (app) bookings still standing: confirmed / checked-in / completed / no-show. Walk-ins are counted apart. */
+  gbv: number;
+  takeRevenue: number;
+  bookings: number;
+  walkInBookings: number;
+  activePartners: number;
+  activeVenues: number;
+  activeCourts: number;
+  /** 30 Bangkok days ending today, oldest first, zero-filled. `date` is yyyy-MM-dd. */
+  last30Days: { date: string; bookings: number; gbv: number; take: number }[];
+}
+
 // ---------------------------------------------------------------- ClubOS venue settings (C5)
 export interface CourtSettings {
   id: string;

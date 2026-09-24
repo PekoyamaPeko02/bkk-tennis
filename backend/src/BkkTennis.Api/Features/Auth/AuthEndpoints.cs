@@ -97,39 +97,14 @@ public static class AuthEndpoints
         }).RequireRateLimiting("otp").WithValidation();
 
         // Partner staff (ClubOS): email + password. Same JWT as the OTP flow; venue access is decided per venue by VenueAuthorization.
-        g.MapPost("/staff/login", async (StaffLogin req, AppDbContext db, IOptions<JwtOptions> jwt, TimeProvider clock, CancellationToken ct) =>
-        {
-            var email = req.Email.Trim().ToLowerInvariant();
-            var now = clock.GetUtcNow().UtcDateTime;
-            var user = await db.Users.FirstOrDefaultAsync(u => u.Email == email, ct);
+        g.MapPost("/staff/login", (StaffLogin req, AppDbContext db, IOptions<JwtOptions> jwt, TimeProvider clock, CancellationToken ct) =>
+            PasswordLoginAsync(req, [Roles.PartnerStaff, Roles.PartnerOwner], db, jwt.Value, clock, ct))
+            .RequireRateLimiting("otp").WithValidation();
 
-            var eligible = user is { PasswordHash: not null } && user.Role is Roles.PartnerStaff or Roles.PartnerOwner;
-            var locked = user?.LockedUntil > now;
-            // Always run one bcrypt verify (against a dummy hash if need be) so timing doesn't reveal whether the email exists.
-            var passwordOk = BCrypt.Net.BCrypt.Verify(req.Password, eligible ? user!.PasswordHash! : DummyHash);
-
-            if (!eligible || locked || !passwordOk)
-            {
-                if (eligible && !locked)
-                {
-                    // Atomic, so parallel guesses can't slip past the limit: the 5th consecutive failure locks the account.
-                    var lockUntil = now.AddMinutes(LockMinutes);
-                    await db.Users.Where(u => u.Id == user!.Id).ExecuteUpdateAsync(s => s
-                        .SetProperty(u => u.LockedUntil, u => u.FailedLogins + 1 >= MaxFailedLogins ? lockUntil : u.LockedUntil)
-                        .SetProperty(u => u.FailedLogins, u => u.FailedLogins + 1 >= MaxFailedLogins ? 0 : u.FailedLogins + 1), ct);
-                }
-                // 400, not 401: the client signs the user out on any 401 (expired session), which would loop on the login form.
-                return Results.BadRequest(new { code = "invalid_credentials", message = "อีเมลหรือรหัสผ่านไม่ถูกต้อง (หรือบัญชีถูกล็อกชั่วคราว)" });
-            }
-
-            if (user!.FailedLogins != 0 || user.LockedUntil is not null)
-            {
-                user.FailedLogins = 0;
-                user.LockedUntil = null;
-                await db.SaveChangesAsync(ct);
-            }
-            return Results.Ok(Issue(user, jwt.Value, now));
-        }).RequireRateLimiting("otp").WithValidation();
+        // Platform admins (Admin portal): same mechanics and lockout, but only platform_admin accounts; partner accounts can't use it.
+        g.MapPost("/admin/login", (StaffLogin req, AppDbContext db, IOptions<JwtOptions> jwt, TimeProvider clock, CancellationToken ct) =>
+            PasswordLoginAsync(req, [Roles.PlatformAdmin], db, jwt.Value, clock, ct))
+            .RequireRateLimiting("otp").WithValidation();
 
         g.MapGet("/me", async (ClaimsPrincipal principal, AppDbContext db, CancellationToken ct) =>
         {
@@ -139,6 +114,41 @@ public static class AuthEndpoints
         }).RequireAuthorization();
 
         return api;
+    }
+
+    private static async Task<IResult> PasswordLoginAsync(
+        StaffLogin req, string[] allowedRoles, AppDbContext db, JwtOptions jwt, TimeProvider clock, CancellationToken ct)
+    {
+        var email = req.Email.Trim().ToLowerInvariant();
+        var now = clock.GetUtcNow().UtcDateTime;
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Email == email, ct);
+
+        var eligible = user is { PasswordHash: not null } && allowedRoles.Contains(user.Role);
+        var locked = user?.LockedUntil > now;
+        // Always run one bcrypt verify (against a dummy hash if need be) so timing doesn't reveal whether the email exists.
+        var passwordOk = BCrypt.Net.BCrypt.Verify(req.Password, eligible ? user!.PasswordHash! : DummyHash);
+
+        if (!eligible || locked || !passwordOk)
+        {
+            if (eligible && !locked)
+            {
+                // Atomic, so parallel guesses can't slip past the limit: the 5th consecutive failure locks the account.
+                var lockUntil = now.AddMinutes(LockMinutes);
+                await db.Users.Where(u => u.Id == user!.Id).ExecuteUpdateAsync(s => s
+                    .SetProperty(u => u.LockedUntil, u => u.FailedLogins + 1 >= MaxFailedLogins ? lockUntil : u.LockedUntil)
+                    .SetProperty(u => u.FailedLogins, u => u.FailedLogins + 1 >= MaxFailedLogins ? 0 : u.FailedLogins + 1), ct);
+            }
+            // 400, not 401: the client signs the user out on any 401 (expired session), which would loop on the login form.
+            return Results.BadRequest(new { code = "invalid_credentials", message = "อีเมลหรือรหัสผ่านไม่ถูกต้อง (หรือบัญชีถูกล็อกชั่วคราว)" });
+        }
+
+        if (user!.FailedLogins != 0 || user.LockedUntil is not null)
+        {
+            user.FailedLogins = 0;
+            user.LockedUntil = null;
+            await db.SaveChangesAsync(ct);
+        }
+        return Results.Ok(Issue(user, jwt, now));
     }
 
     public static AuthResponse Issue(User user, JwtOptions o, DateTime nowUtc)

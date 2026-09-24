@@ -1,5 +1,5 @@
 import type {
-  AddonSettings, AddonSettingsRequest, CourtSettings, CourtSettingsRequest, OpeningHours, PricePreview, PriceRule, PriceRuleRequest, VenueSettings,
+  AddonSettings, AddonSettingsRequest, AdminOverview, CourtSettings, CourtSettingsRequest, OpeningHours, PricePreview, PriceRule, PriceRuleRequest, VenueSettings,
   AuthResponse, Booking, ClubOsBooking, CourtBlock, CourtBlockRequest, CreateBookingRequest, OtpRequestResponse, Schedule, User, WalkInRequest, WalkInResult,
   VenueAvailability, VenueDetail, VenueSearchParams, VenueSearchResult,
 } from './types';
@@ -18,6 +18,10 @@ export interface BkkApi {
   verifyOtp(phone: string, code: string, displayName?: string): Promise<AuthResponse>;
   /** Partner staff (ClubOS). Wrong credentials → ApiError 400 `invalid_credentials` (never 401, which means "session expired"). */
   staffLogin(email: string, password: string): Promise<AuthResponse>;
+  /** Admin portal: platform_admin accounts only (partner accounts get 400 `invalid_credentials`). */
+  adminLogin(email: string, password: string): Promise<AuthResponse>;
+  /** Admin: platform totals (online sales only) + a zero-filled last-30-days series (Bangkok days). */
+  getAdminOverview(): Promise<AdminOverview>;
   me(): Promise<User>;
   createBooking(req: CreateBookingRequest, idempotencyKey: string): Promise<Booking>;
   myBookings(): Promise<Booking[]>;
@@ -105,6 +109,8 @@ export function createHttpApi(opt: HttpApiOptions): BkkApi {
     requestOtp: (phone) => call('POST', '/auth/otp/request', { phone }),
     verifyOtp: (phone, code, displayName) => call('POST', '/auth/otp/verify', { phone, code, displayName }),
     staffLogin: (email, password) => call('POST', '/auth/staff/login', { email, password }),
+    adminLogin: (email, password) => call('POST', '/auth/admin/login', { email, password }),
+    getAdminOverview: () => call('GET', '/admin/overview'),
     me: () => call('GET', '/auth/me'),
     createBooking: (req, key) => call('POST', '/bookings', req, { 'Idempotency-Key': key }),
     myBookings: () => call('GET', '/me/bookings'),

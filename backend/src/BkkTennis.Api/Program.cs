@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using BkkTennis.Api.Data;
+using BkkTennis.Api.Features.Admin;
 using BkkTennis.Api.Features.Auth;
 using BkkTennis.Api.Features.Bookings;
 using BkkTennis.Api.Features.ClubOs;
@@ -120,6 +121,7 @@ api.MapAuth();
 api.MapVenues();
 api.MapBookings();
 api.MapClubOs();
+api.MapAdmin();
 api.MapPayments(app.Environment);
 
 app.MapHub<AvailabilityHub>("/hubs/availability");

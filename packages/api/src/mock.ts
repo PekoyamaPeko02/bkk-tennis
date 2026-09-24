@@ -370,7 +370,9 @@ function publicBooking(b: MockBooking): Booking {
 }
 
 // ---------------------------------------------------------------- staff (ClubOS) — same accounts as db/init/004_seed_staff.sql
-const MOCK_STAFF_PASSWORD = 'racquet-dev-2026';
+const MOCK_ADMIN_PASSWORD = 'admin-dev-2026'; // db/init/005_seed_admin.sql
+const MOCK_ADMIN: User = { id: 'u-admin', phone: '+66800000001', email: 'admin@bkktennis.test', displayName: 'BKK Tennis Admin', role: 'platform_admin' };
+const MOCK_STAFF_PASSWORD ='racquet-dev-2026';
 const MOCK_STAFF: Record<string, User> = {
   'owner@racquetclub.test': { id: 'u-owner', phone: '+66800000002', email: 'owner@racquetclub.test', displayName: 'Racquet Club Owner', role: 'partner_owner' },
   'staff@racquetclub.test': { id: 'u-staff', phone: '+66800000004', email: 'staff@racquetclub.test', displayName: 'Racquet Club Front Desk', role: 'partner_staff' },
@@ -380,7 +382,8 @@ const MOCK_STAFF: Record<string, User> = {
 export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
   const restoreUser = () => {
     const t = opts.getToken();
-    if (t?.startsWith('mock.staff:') && !currentUser) currentUser = MOCK_STAFF[t.slice('mock.staff:'.length)] ?? null;
+    if (t === 'mock.admin' && !currentUser) currentUser = MOCK_ADMIN;
+    else if (t?.startsWith('mock.staff:') && !currentUser) currentUser = MOCK_STAFF[t.slice('mock.staff:'.length)] ?? null;
     else if (t?.startsWith('mock.') && !currentUser) {
       const phone = t.slice(5);
       currentUser = { id: 'u-' + phone, phone, email: null, displayName: null, role: 'player' };
@@ -533,6 +536,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
 
     async getSettings(venueId) {
       await sleep(150);
+      restoreUser();
       const s = settingsOf(findVenue(venueId));
       requireStaff();
       return structuredClone({ cancelFreeHours: s.cancelFreeHours, courts: s.courts, hours: s.hours, addons: s.addons });
@@ -540,6 +544,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
 
     async setCancelPolicy(venueId, cancelFreeHours) {
       await sleep(150);
+      restoreUser();
       const s = settingsOf(findVenue(venueId));
       requireOwner();
       if (!Number.isInteger(cancelFreeHours) || cancelFreeHours < 0 || cancelFreeHours > 168)
@@ -550,6 +555,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
 
     async createCourt(venueId, req) {
       await sleep(150);
+      restoreUser();
       const s = settingsOf(findVenue(venueId));
       requireOwner();
       if (!req.name.trim()) throw new ApiError(400, 'bad_name', 'กรุณาระบุชื่อคอร์ท');
@@ -561,6 +567,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
 
     async updateCourt(venueId, courtId, req) {
       await sleep(150);
+      restoreUser();
       const s = settingsOf(findVenue(venueId));
       requireOwner();
       const c = s.courts.find((x) => x.id === courtId);
@@ -578,6 +585,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
 
     async setHours(venueId, days) {
       await sleep(150);
+      restoreUser();
       const s = settingsOf(findVenue(venueId));
       requireOwner();
       const seen = new Set<number>();
@@ -597,6 +605,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
 
     async createAddon(venueId, req) {
       await sleep(150);
+      restoreUser();
       const s = settingsOf(findVenue(venueId));
       requireOwner();
       if (!req.name.trim()) throw new ApiError(400, 'bad_name', 'กรุณาระบุชื่อบริการ');
@@ -608,6 +617,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
 
     async updateAddon(venueId, addonId, req) {
       await sleep(150);
+      restoreUser();
       const s = settingsOf(findVenue(venueId));
       requireOwner();
       const a = s.addons.find((x) => x.id === addonId);
@@ -620,6 +630,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
 
     async getPriceRules(venueId) {
       await sleep(150);
+      restoreUser();
       const s = settingsOf(findVenue(venueId));
       requireStaff();
       return structuredClone([...s.rules].sort((a, b) => Number(!!a.courtId) - Number(!!b.courtId) || a.start.localeCompare(b.start) || b.priority - a.priority));
@@ -627,6 +638,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
 
     async createPriceRule(venueId, req) {
       await sleep(150);
+      restoreUser();
       const s = settingsOf(findVenue(venueId));
       requireOwner();
       const rule = ruleFromRequest(s, `rule-${settingsSeq++}`, req);
@@ -636,6 +648,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
 
     async updatePriceRule(venueId, ruleId, req) {
       await sleep(150);
+      restoreUser();
       const s = settingsOf(findVenue(venueId));
       requireOwner();
       const i = s.rules.findIndex((r) => r.id === ruleId);
@@ -647,6 +660,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
 
     async deletePriceRule(venueId, ruleId) {
       await sleep(150);
+      restoreUser();
       const s = settingsOf(findVenue(venueId));
       requireOwner();
       const i = s.rules.findIndex((r) => r.id === ruleId);
@@ -656,6 +670,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
 
     async getPricePreview(venueId, date) {
       await sleep(150);
+      restoreUser();
       const s = settingsOf(findVenue(venueId));
       requireStaff();
       const dow = new Date(`${date}T00:00:00Z`).getUTCDay();
@@ -703,6 +718,34 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
         throw new ApiError(400, 'invalid_credentials', `อีเมลหรือรหัสผ่านไม่ถูกต้อง (โหมดทดลอง: owner@racquetclub.test / ${MOCK_STAFF_PASSWORD})`);
       currentUser = user;
       return { accessToken: 'mock.staff:' + key, expiresAt: new Date(Date.now() + 7 * 86400_000).toISOString(), user };
+    },
+
+    async adminLogin(email, password) {
+      await sleep(300);
+      if (email.trim().toLowerCase() !== MOCK_ADMIN.email || password !== MOCK_ADMIN_PASSWORD)
+        throw new ApiError(400, 'invalid_credentials', `อีเมลหรือรหัสผ่านไม่ถูกต้อง (โหมดทดลอง: ${MOCK_ADMIN.email} / ${MOCK_ADMIN_PASSWORD})`);
+      currentUser = MOCK_ADMIN;
+      return { accessToken: 'mock.admin', expiresAt: new Date(Date.now() + 7 * 86400_000).toISOString(), user: MOCK_ADMIN };
+    },
+
+    async getAdminOverview() {
+      await sleep(250);
+      restoreUser();
+      if (requireUser().role !== 'platform_admin') throw new ApiError(403, 'forbidden', 'ไม่มีสิทธิ์เข้าถึง');
+      // Deterministic demo numbers: a gentle weekly rhythm ending today.
+      const today = bangkokToday();
+      const days = Array.from({ length: 30 }, (_, i) => {
+        const date = new Date(Date.parse(today) - (29 - i) * 86400_000).toISOString().slice(0, 10);
+        const dow = new Date(`${date}T00:00:00Z`).getUTCDay();
+        const n = (dow === 0 || dow === 6 ? 18 : 9) + ((i * 7) % 5);
+        const gbv = n * 480;
+        return { date, bookings: n, gbv, take: gbv * 0.1 };
+      });
+      return {
+        gbv: days.reduce((t, d) => t + d.gbv, 0), takeRevenue: days.reduce((t, d) => t + d.take, 0),
+        bookings: days.reduce((t, d) => t + d.bookings, 0), walkInBookings: 24,
+        activePartners: 4, activeVenues: VENUES.length, activeCourts: VENUES.reduce((t, v) => t + v.courts.length, 0), last30Days: days,
+      };
     },
 
     async me() {

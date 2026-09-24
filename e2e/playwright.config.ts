@@ -4,6 +4,7 @@ import { defineConfig, devices } from '@playwright/test';
 // (they talk to the real DB). These are dedicated mock-mode servers.
 const PLAYER_PORT = 9100;
 const CLUBOS_PORT = 9101;
+const ADMIN_PORT = 9102;
 
 /**
  * End-to-end tests run against the apps in mock-API mode (in-browser mock: player OTP 123456, ClubOS staff
@@ -26,6 +27,7 @@ export default defineConfig({
   projects: [
     { name: 'player', testMatch: /booking-flow\.spec\.ts/, use: { ...devices['Desktop Chrome'], baseURL: `http://localhost:${PLAYER_PORT}` } },
     { name: 'clubos', testMatch: /clubos-.*\.spec\.ts/, use: { ...devices['Desktop Chrome'], baseURL: `http://localhost:${CLUBOS_PORT}` } },
+    { name: 'admin', testMatch: /admin-.*\.spec\.ts/, use: { ...devices['Desktop Chrome'], baseURL: `http://localhost:${ADMIN_PORT}` } },
   ],
   webServer: [
     {
@@ -40,6 +42,14 @@ export default defineConfig({
       command: `pnpm --filter @bkk/clubos exec quasar dev --port ${CLUBOS_PORT}`,
       cwd: '..',
       url: `http://localhost:${CLUBOS_PORT}`,
+      reuseExistingServer: false,
+      timeout: 180_000,
+      env: { API_MOCK: 'true', API_BASE: '' },
+    },
+    {
+      command: `pnpm --filter @bkk/admin exec quasar dev --port ${ADMIN_PORT}`,
+      cwd: '..',
+      url: `http://localhost:${ADMIN_PORT}`,
       reuseExistingServer: false,
       timeout: 180_000,
       env: { API_MOCK: 'true', API_BASE: '' },
