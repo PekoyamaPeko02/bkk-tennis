@@ -37,6 +37,7 @@ public class BookingService(
     AppDbContext db,
     IPaymentProvider payments,
     AvailabilityNotifier notifier,
+    BookingNotifier userNotifier,
     TimeProvider clock,
     IOptions<BookingOptions> options,
     ILogger<BookingService> log)
@@ -359,6 +360,7 @@ public class BookingService(
         db.Refunds.Add(new Refund { Id = Guid.NewGuid(), PaymentId = payment.Id, Amount = payment.Amount, Reason = "slot_taken_after_hold_expired" });
         await db.SaveChangesAsync(ct);
         await payments.RefundAsync(payment.ProviderRef, payment.Amount, ct);
+        await userNotifier.ChangedAsync(booking.UserId, booking.Id, booking.Status);
         log.LogWarning("Late payment for {Booking} refunded: slot already taken", booking.Code);
     }
 
@@ -516,9 +518,11 @@ public class BookingService(
         return expired.Count;
     }
 
-    private Task NotifyAsync(Booking b)
+    /// <summary>A booking changed state: refresh the venue's availability views and tell its owner (the player's open booking page).</summary>
+    private async Task NotifyAsync(Booking b)
     {
         var tz = b.Venue?.Timezone ?? "Asia/Bangkok";
-        return notifier.ChangedAsync(b.VenueId, b.Slots.Select(s => DateOnly.FromDateTime(VenueClock.ToLocal(s.StartAt, tz))));
+        await notifier.ChangedAsync(b.VenueId, b.Slots.Select(s => DateOnly.FromDateTime(VenueClock.ToLocal(s.StartAt, tz))));
+        await userNotifier.ChangedAsync(b.UserId, b.Id, b.Status);
     }
 }

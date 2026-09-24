@@ -9,3 +9,4 @@ export { default as SlotTile } from './components/SlotTile.vue';
 export { default as VenueCard } from './components/VenueCard.vue';
 export * from './format';
 export { useLiveAvailability } from './useLiveAvailability';
+export { useLiveBookings, type BookingChanged } from './useLiveBookings';

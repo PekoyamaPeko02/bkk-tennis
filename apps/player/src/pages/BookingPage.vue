@@ -90,6 +90,7 @@ import QRCode from 'qrcode';
 import type { Booking } from '@bkk/api';
 import { AvailabilityPill, baht, thDate } from '@bkk/ui';
 import { isMockApi, useApi } from 'boot/api';
+import { useLiveBookings } from 'src/composables/useLiveBookings';
 
 const $q = useQuasar();
 const api = useApi();
@@ -160,13 +161,16 @@ function rebook() {
   void router.push('/');
 }
 
+// Payment is confirmed by the gateway webhook: the server pushes `bookingChanged` over SignalR, so the QR flips to "confirmed"
+// at once. Polling remains as the fallback while the push connection is down (and in mock mode).
+const { connected } = useLiveBookings((msg) => { if (!msg || msg.bookingId === String(route.params.id)) void load(); });
+
 let tick: ReturnType<typeof setInterval> | undefined;
 let poll: ReturnType<typeof setInterval> | undefined;
 onMounted(async () => {
   await load();
   tick = setInterval(() => (now.value = Date.now()), 1000);
-  // Payment is confirmed by the gateway webhook — poll until it lands (SignalR per-user push is a later sprint).
-  poll = setInterval(() => { if (booking.value?.status === 'held') void load(); }, 4000);
+  poll = setInterval(() => { if (booking.value?.status === 'held' && !connected.value) void load(); }, 4000);
 });
 onBeforeUnmount(() => { clearInterval(tick); clearInterval(poll); });
 </script>

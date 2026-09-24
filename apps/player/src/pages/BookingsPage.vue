@@ -44,6 +44,7 @@ import { computed, onMounted, ref } from 'vue';
 import type { Booking, BookingStatus } from '@bkk/api';
 import { AvailabilityPill, baht, parseDay, thShortMonth } from '@bkk/ui';
 import { useApi } from 'boot/api';
+import { useLiveBookings } from 'src/composables/useLiveBookings';
 
 const STATUS: Record<BookingStatus, { label: string; tone: 'ok' | 'low' | 'muted' }> = {
   held: { label: 'รอชำระเงิน', tone: 'low' },
@@ -65,13 +66,18 @@ const isUpcoming = (b: Booking) => ['held', 'confirmed', 'checked_in'].includes(
 const upcoming = computed(() => items.value.filter(isUpcoming));
 const shown = computed(() => (tab.value === 'upcoming' ? upcoming.value : items.value.filter((b) => !isUpcoming(b))));
 
-onMounted(async () => {
+async function load() {
   try {
     items.value = await api.myBookings();
   } finally {
     loading.value = false;
   }
-});
+}
+
+// Status changes (paid, expired, cancelled, checked in, …) are pushed by the server; re-read the list quietly when one arrives.
+useLiveBookings(() => { if (!loading.value) void load(); });
+
+onMounted(load);
 </script>
 
 <style scoped>
