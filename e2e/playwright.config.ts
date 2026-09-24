@@ -5,6 +5,7 @@ import { defineConfig, devices } from '@playwright/test';
 const PLAYER_PORT = 9100;
 const CLUBOS_PORT = 9101;
 const ADMIN_PORT = 9102;
+const PWA_PORT = 9103;
 
 /**
  * End-to-end tests run against the apps in mock-API mode (in-browser mock: player OTP 123456, ClubOS staff
@@ -28,8 +29,18 @@ export default defineConfig({
     { name: 'player', testMatch: /(booking-flow|player-.*)\.spec\.ts/, use: { ...devices['Desktop Chrome'], baseURL: `http://localhost:${PLAYER_PORT}` } },
     { name: 'clubos', testMatch: /clubos-.*\.spec\.ts/, use: { ...devices['Desktop Chrome'], baseURL: `http://localhost:${CLUBOS_PORT}` } },
     { name: 'admin', testMatch: /admin-.*\.spec\.ts/, use: { ...devices['Desktop Chrome'], baseURL: `http://localhost:${ADMIN_PORT}` } },
+    // The production PWA build (service worker only exists there), served statically.
+    { name: 'pwa', testMatch: /pwa-.*\.spec\.ts/, use: { ...devices['Desktop Chrome'], baseURL: `http://localhost:${PWA_PORT}`, serviceWorkers: 'allow' } },
   ],
   webServer: [
+    {
+      command: `pnpm --filter @bkk/player exec quasar build -m pwa && node e2e/scripts/serve-spa.mjs apps/player/dist/pwa ${PWA_PORT}`,
+      cwd: '..',
+      url: `http://localhost:${PWA_PORT}`,
+      reuseExistingServer: false,
+      timeout: 240_000,
+      env: { API_MOCK: 'true', API_BASE: '' },
+    },
     {
       command: `pnpm --filter @bkk/player exec quasar dev --port ${PLAYER_PORT}`,
       cwd: '..',

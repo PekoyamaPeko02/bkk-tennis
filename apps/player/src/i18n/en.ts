@@ -25,6 +25,9 @@ export const en: MessageSchema = {
     currentLocation: 'Current location',
     mockBanner: 'Demo mode (Mock API) — sample data, not connected to the real backend',
     language: 'Language',
+    offline: 'You are offline — live availability and booking need an internet connection',
+    updateReady: 'A new version is ready',
+    reload: 'Reload',
   },
   login: {
     title: 'Sign in to BKK Tennis',

@@ -27,6 +27,9 @@
         </div>
       </div>
       <div v-if="isMock" class="mock-banner">{{ $t('nav.mockBanner') }}</div>
+      <div v-if="!online" class="offline-banner" role="status" data-testid="offline-banner">
+        <q-icon name="cloud_off" size="16px" /> {{ $t('nav.offline') }}
+      </div>
     </q-header>
 
     <q-page-container>
@@ -45,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
@@ -63,6 +66,12 @@ const location = useLocationStore();
 const route = useRoute();
 const $q = useQuasar();
 const isMock = isMockApi;
+
+// The installed app (PWA) still opens offline; say so instead of letting searches fail one by one.
+const online = ref(navigator.onLine);
+const setOnline = () => { online.value = navigator.onLine; };
+onMounted(() => { window.addEventListener('online', setOnline); window.addEventListener('offline', setOnline); });
+onBeforeUnmount(() => { window.removeEventListener('online', setOnline); window.removeEventListener('offline', setOnline); });
 
 const { t } = useI18n();
 const shortLabel = computed(() => (location.status === 'gps' ? t('nav.currentLocation') : 'Sukhumvit, BKK'));
@@ -90,6 +99,7 @@ const hideHeaderOnMobile = computed(() => route.name === 'venue' && $q.screen.lt
   display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 9999px;
   border: 1px solid var(--bkk-line); background: #fff; font: 600 13px var(--bkk-font-body); color: var(--bkk-forest); cursor: pointer;
 }
+.offline-banner { display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 12px; padding: 4px 8px; background: #fef3c7; color: #92400e; font-weight: 600; }
 .mock-banner { text-align: center; font-size: 12px; padding: 4px 8px; background: var(--bkk-clay-surface); color: var(--bkk-clay-ink); font-weight: 600; }
 .bottom-nav { background: #fff; color: var(--bkk-text-2); padding-bottom: env(safe-area-inset-bottom); }
 .tabs :deep(.q-tab__label) { font-size: 11px; font-weight: 600; }

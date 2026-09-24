@@ -25,6 +25,9 @@ export const th = {
     currentLocation: 'ตำแหน่งปัจจุบัน',
     mockBanner: 'โหมดทดลอง (Mock API) — ข้อมูลตัวอย่าง ยังไม่ต่อ backend จริง',
     language: 'ภาษา',
+    offline: 'ออฟไลน์ — ดูรอบว่างและจองไม่ได้จนกว่าจะเชื่อมต่ออินเทอร์เน็ต',
+    updateReady: 'มีเวอร์ชันใหม่พร้อมใช้งาน',
+    reload: 'โหลดใหม่',
   },
   login: {
     title: 'เข้าสู่ระบบ BKK Tennis',
