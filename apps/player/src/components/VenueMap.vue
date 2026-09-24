@@ -1,5 +1,5 @@
 <template>
-  <div ref="el" class="venue-map" role="application" aria-label="แผนที่สนามเทนนิส" />
+  <div ref="el" class="venue-map" role="application" :aria-label="$t('map.aria')" />
 </template>
 
 <script setup lang="ts">
@@ -7,6 +7,7 @@ import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import L from 'leaflet';
 import type { VenueSummary } from '@bkk/api';
 import { baht } from '@bkk/ui';
+import { i18n, tr } from 'src/i18n';
 
 const props = defineProps<{
   venues: VenueSummary[];
@@ -37,7 +38,7 @@ function render() {
   if (props.radiusKm < 60)
     L.circle(me, { radius: props.radiusKm * 1000, color: '#84cc16', weight: 2, fillColor: '#84cc16', fillOpacity: 0.08 }).addTo(layer);
   L.circleMarker(me, { radius: 8, color: '#fff', weight: 3, fillColor: '#064e3b', fillOpacity: 1 })
-    .bindTooltip('คุณอยู่ที่นี่', { direction: 'top' })
+    .bindTooltip(tr('map.you'), { direction: 'top' })
     .addTo(layer);
 
   props.venues.forEach((v) => {
@@ -66,6 +67,7 @@ onMounted(() => {
 
 watch(() => [props.venues, props.center.lat, props.center.lng, props.radiusKm], () => { render(); fit(); });
 watch(() => props.activeId, render);
+watch(() => i18n.global.locale.value, render); // tooltip + price formatting follow the language
 
 onBeforeUnmount(() => { map?.remove(); map = null; });
 

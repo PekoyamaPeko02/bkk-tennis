@@ -1,5 +1,5 @@
 <template>
-  <div class="strip" role="radiogroup" aria-label="เลือกวันที่">
+  <div class="strip" role="radiogroup" :aria-label="uiT('dateStrip.label')">
     <button v-for="d in days" :key="d" type="button" role="radio" class="day"
       :class="{ active: d === modelValue }" :aria-checked="d === modelValue" @click="$emit('update:modelValue', d)">
       <span class="name" :class="{ weekend: isWeekend(d) }">{{ dayName(d) }}</span>
@@ -12,6 +12,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { addDays, parseDay, thDay, thShortMonth } from '../format';
+import { uiT } from '../locale';
 
 const props = withDefaults(defineProps<{ modelValue: string; start: string; count?: number }>(), { count: 7 });
 defineEmits<{ 'update:modelValue': [value: string] }>();
@@ -19,7 +20,7 @@ defineEmits<{ 'update:modelValue': [value: string] }>();
 const days = computed(() => Array.from({ length: props.count }, (_, i) => addDays(props.start, i)));
 const isWeekend = (d: string) => [0, 6].includes(parseDay(d).getDay());
 const dayName = (d: string) =>
-  d === props.start ? 'วันนี้' : d === addDays(props.start, 1) ? 'พรุ่งนี้' : thDay(d);
+  d === props.start ? uiT('dateStrip.today') : d === addDays(props.start, 1) ? uiT('dateStrip.tomorrow') : thDay(d);
 </script>
 
 <style scoped>

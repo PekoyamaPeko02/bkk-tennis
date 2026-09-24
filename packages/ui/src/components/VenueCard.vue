@@ -3,7 +3,7 @@
     <CourtArt class="media" :surface="venue.surfaces[0]" :src="venue.coverImageUrl">
       <div class="badges">
         <DistanceBadge v-if="venue.distanceKm != null" :km="venue.distanceKm" />
-        <AvailabilityPill v-if="lowAvailability" tone="low" pulse>เหลือน้อย</AvailabilityPill>
+        <AvailabilityPill v-if="lowAvailability" tone="low" pulse>{{ uiT('venue.low') }}</AvailabilityPill>
       </div>
       <div class="surface">
         <AvailabilityPill tone="dark">
@@ -13,7 +13,7 @@
       </div>
       <q-btn v-if="favorite !== undefined" round unelevated class="fav" :class="{ on: favorite }" size="sm"
         :icon="favorite ? 'favorite' : 'favorite_border'" :aria-pressed="favorite" data-testid="favorite-toggle"
-        :aria-label="favorite ? 'เอาออกจากสนามที่ชอบ' : 'บันทึกเป็นสนามที่ชอบ'" @click.stop="$emit('toggleFavorite', venue)" />
+        :aria-label="favorite ? uiT('venue.favRemove') : uiT('venue.favAdd')" @click.stop="$emit('toggleFavorite', venue)" />
     </CourtArt>
 
     <div class="content">
@@ -41,19 +41,19 @@
 
       <div class="foot">
         <div>
-          <div class="bkk-label bkk-muted">{{ venue.freeSlotCount > 0 ? 'รอบว่าง' : 'วันนี้เต็ม' }}</div>
+          <div class="bkk-label bkk-muted">{{ venue.freeSlotCount > 0 ? uiT('venue.free') : uiT('venue.fullToday') }}</div>
           <div class="times">
             <span v-for="t in venue.nextFreeTimes" :key="t" class="time bkk-num">{{ t }}</span>
-            <span v-if="!venue.nextFreeTimes.length" class="bkk-muted">ลองเลือกวันอื่น</span>
+            <span v-if="!venue.nextFreeTimes.length" class="bkk-muted">{{ uiT('venue.tryOtherDay') }}</span>
           </div>
         </div>
         <div class="price">
           <div class="bkk-num amount">{{ priceText }}</div>
-          <div class="bkk-muted per">/ชม.</div>
+          <div class="bkk-muted per">{{ uiT('venue.perHour') }}</div>
         </div>
       </div>
 
-      <q-btn unelevated no-caps class="cta bkk-btn-volt full-width" :label="ctaLabel" icon-right="arrow_forward"
+      <q-btn unelevated no-caps class="cta bkk-btn-volt full-width" :label="ctaLabel ?? uiT('venue.cta')" icon-right="arrow_forward"
         @click="$emit('open', venue)" />
     </div>
   </article>
@@ -63,17 +63,18 @@
 import { computed } from 'vue';
 import type { VenueSummary } from '@bkk/api';
 import { AMENITY, baht, SURFACE_LABEL } from '../format';
+import { uiT } from '../locale';
 import AvailabilityPill from './AvailabilityPill.vue';
 import CourtArt from './CourtArt.vue';
 import DistanceBadge from './DistanceBadge.vue';
 
 const props = withDefaults(defineProps<{
-  venue: VenueSummary; active?: boolean; ctaLabel?: string;
+  venue: VenueSummary; active?: boolean; ctaLabel?: string | undefined;
   /** Shows a heart button when set (true = already a favourite); the parent does the saving. */
   favorite?: boolean | undefined;
 }>(), {
   active: false,
-  ctaLabel: 'ดูตาราง & จองทันที',
+  ctaLabel: undefined,
   favorite: undefined,
 });
 defineEmits<{ open: [venue: VenueSummary]; hover: [id: string]; toggleFavorite: [venue: VenueSummary] }>();

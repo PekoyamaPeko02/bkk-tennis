@@ -1,8 +1,8 @@
 <template>
   <div class="nf">
     <div class="bkk-display code">404</div>
-    <div class="bkk-h3">ลูกออกนอกคอร์ท — ไม่พบหน้านี้</div>
-    <q-btn unelevated no-caps class="bkk-btn-volt q-mt-md" label="กลับหน้าแรก" to="/" />
+    <div class="bkk-h3">{{ $t('notFound.text') }}</div>
+    <q-btn unelevated no-caps class="bkk-btn-volt q-mt-md" :label="$t('common.home')" to="/" />
   </div>
 </template>
 

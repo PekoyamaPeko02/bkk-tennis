@@ -1,6 +1,6 @@
 <template>
   <q-page class="bkk-page booking-page">
-    <q-btn flat no-caps icon="arrow_back" label="การจองของฉัน" to="/bookings" class="q-mb-sm back" />
+    <q-btn flat no-caps icon="arrow_back" :label="$t('booking.back')" to="/bookings" class="q-mb-sm back" />
 
     <q-skeleton v-if="!booking && !error" height="480px" style="border-radius: 20px" />
     <div v-else-if="error" class="empty bkk-card">{{ error }}</div>
@@ -11,13 +11,13 @@
         <!-- waiting for payment -->
         <template v-if="booking.status === 'held' && remaining > 0">
           <div class="status-row">
-            <AvailabilityPill tone="low" pulse>รอชำระเงิน</AvailabilityPill>
+            <AvailabilityPill tone="low" pulse>{{ $t('booking.awaitingPayment') }}</AvailabilityPill>
             <span class="countdown bkk-num" :class="{ urgent: remaining < 120 }">
               <q-icon name="timer" size="18px" /> {{ mmss }}
             </span>
           </div>
-          <h1 class="bkk-h2 q-my-sm">สแกนเพื่อชำระเงินด้วย PromptPay</h1>
-          <p class="bkk-muted">ช่องเวลาถูกล็อกไว้ให้คุณจนหมดเวลา ระบบจะยืนยันการจองอัตโนมัติเมื่อได้รับเงิน ไม่ต้องส่งสลิป</p>
+          <h1 class="bkk-h2 q-my-sm">{{ $t('booking.scanTitle') }}</h1>
+          <p class="bkk-muted">{{ $t('booking.scanHint') }}</p>
           <div class="qr-box">
             <img v-if="qrUrl" :src="qrUrl" alt="PromptPay QR" class="qr" />
             <div class="qr-brand">Thai QR Payment · PromptPay</div>
@@ -25,22 +25,22 @@
           </div>
           <div class="actions">
             <q-btn v-if="canSimulate" unelevated no-caps class="bkk-btn-volt" icon="check_circle"
-              label="จำลองการชำระเงิน (dev)" :loading="paying" @click="simulate" />
-            <q-btn flat no-caps color="negative" label="ยกเลิกการจอง" @click="cancel" />
+              :label="$t('booking.simulate')" :loading="paying" @click="simulate" />
+            <q-btn flat no-caps color="negative" :label="$t('booking.cancel')" @click="cancel" />
           </div>
         </template>
 
         <!-- confirmed: check-in pass -->
         <template v-else-if="['confirmed', 'checked_in', 'completed'].includes(booking.status)">
           <div class="success-icon"><q-icon name="check" size="36px" /></div>
-          <h1 class="bkk-h2 text-center q-mt-md q-mb-xs">จองสำเร็จ!</h1>
-          <p class="text-center bkk-muted">แสดง QR นี้ที่เคาน์เตอร์เพื่อเช็คอิน</p>
+          <h1 class="bkk-h2 text-center q-mt-md q-mb-xs">{{ $t('booking.success') }}</h1>
+          <p class="text-center bkk-muted">{{ $t('booking.showQr') }}</p>
           <div class="qr-box pass">
-            <img v-if="passUrl" :src="passUrl" alt="QR เช็คอิน" class="qr" />
+            <img v-if="passUrl" :src="passUrl" :alt="$t('booking.qrAlt')" class="qr" />
             <div class="code bkk-num">{{ booking.code }}</div>
           </div>
           <div class="actions">
-            <q-btn v-if="booking.status === 'confirmed'" flat no-caps color="negative" label="ยกเลิกการจอง" @click="cancel" />
+            <q-btn v-if="booking.status === 'confirmed'" flat no-caps color="negative" :label="$t('booking.cancel')" @click="cancel" />
           </div>
         </template>
 
@@ -50,14 +50,14 @@
           <h1 class="bkk-h2 text-center q-mt-md q-mb-xs">{{ endedTitle }}</h1>
           <p class="text-center bkk-muted">{{ endedText }}</p>
           <div class="actions center">
-            <q-btn unelevated no-caps class="bkk-btn-forest" label="จองใหม่" icon="refresh" @click="rebook" />
+            <q-btn unelevated no-caps class="bkk-btn-forest" :label="$t('booking.rebook')" icon="refresh" @click="rebook" />
           </div>
         </template>
       </section>
 
       <!-- right: booking summary -->
       <section class="panel bkk-card summary">
-        <div class="bkk-muted small">รหัสการจอง</div>
+        <div class="bkk-muted small">{{ $t('booking.code') }}</div>
         <div class="bkk-num code-lg">{{ booking.code }}</div>
         <div class="venue">
           <div class="bkk-h3">{{ booking.venueName }}</div>
@@ -73,9 +73,9 @@
           <span>{{ a.name }} × {{ a.qty }}</span><span class="bkk-num">{{ baht(a.lineTotal) }}</span>
         </div>
         <q-separator class="q-my-md" />
-        <div class="line total"><span>ยอดรวม</span><span class="bkk-num">{{ baht(booking.total) }}</span></div>
+        <div class="line total"><span>{{ $t('booking.total') }}</span><span class="bkk-num">{{ baht(booking.total) }}</span></div>
         <div class="policy bkk-muted small">
-          <q-icon name="verified_user" size="16px" /> ยกเลิกฟรีล่วงหน้าก่อน {{ booking.cancelFreeHours }} ชม. คืนเงินเต็มจำนวน
+          <q-icon name="verified_user" size="16px" /> {{ $t('booking.freeCancel', { n: booking.cancelFreeHours }) }}
         </div>
       </section>
     </div>
@@ -86,12 +86,14 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import QRCode from 'qrcode';
 import type { Booking } from '@bkk/api';
 import { AvailabilityPill, baht, thDate } from '@bkk/ui';
 import { isMockApi, useApi } from 'boot/api';
 import { useLiveBookings } from 'src/composables/useLiveBookings';
 
+const { t } = useI18n();
 const $q = useQuasar();
 const api = useApi();
 const route = useRoute();
@@ -108,10 +110,10 @@ const canSimulate = isMockApi || process.env.DEV;
 const remaining = computed(() =>
   booking.value?.holdExpiresAt ? Math.max(0, Math.floor((Date.parse(booking.value.holdExpiresAt) - now.value) / 1000)) : 0);
 const mmss = computed(() => `${String(Math.floor(remaining.value / 60)).padStart(2, '0')}:${String(remaining.value % 60).padStart(2, '0')}`);
-const endedTitle = computed(() => (booking.value?.status === 'cancelled' ? 'ยกเลิกการจองแล้ว' : 'หมดเวลาชำระเงิน'));
-const endedText = computed(() => (booking.value?.status === 'cancelled'
-  ? booking.value.payment?.status === 'refunded' ? 'ระบบกำลังคืนเงินผ่านช่องทางเดิม' : 'ช่วงเวลานี้ถูกปล่อยให้ผู้อื่นจองแล้ว'
-  : 'ช่วงเวลาที่ล็อกไว้ถูกปล่อยคืนแล้ว กรุณาเลือกเวลาใหม่'));
+const endedTitle = computed(() => t(booking.value?.status === 'cancelled' ? 'booking.endedCancelled' : 'booking.endedExpired'));
+const endedText = computed(() => t(booking.value?.status === 'cancelled'
+  ? booking.value.payment?.status === 'refunded' ? 'booking.endedRefunding' : 'booking.endedReleased'
+  : 'booking.endedHoldReleased'));
 
 async function load() {
   try {
@@ -133,7 +135,7 @@ async function simulate() {
   paying.value = true;
   try {
     booking.value = await api.simulatePayment(booking.value!.id);
-    $q.notify({ type: 'positive', message: 'ชำระเงินสำเร็จ ยืนยันการจองแล้ว' });
+    $q.notify({ type: 'positive', message: t('booking.paid') });
   } finally {
     paying.value = false;
   }
@@ -144,16 +146,16 @@ function cancel() {
   const first = Date.parse(`${b.slots[0]!.date}T${b.slots[0]!.start}:00+07:00`);
   const free = first - Date.now() >= b.cancelFreeHours * 3600_000;
   $q.dialog({
-    title: 'ยกเลิกการจอง?',
-    message: b.status === 'held' ? 'ช่วงเวลาที่ล็อกไว้จะถูกปล่อยคืน'
-      : free ? `ยกเลิกก่อน ${b.cancelFreeHours} ชม. — ได้รับเงินคืนเต็มจำนวน ${baht(b.total)}`
-      : `เหลือน้อยกว่า ${b.cancelFreeHours} ชม. — จะไม่ได้รับเงินคืน`,
-    cancel: { label: 'ไม่ยกเลิก', flat: true, noCaps: true },
-    ok: { label: 'ยืนยันยกเลิก', color: 'negative', unelevated: true, noCaps: true },
+    title: t('booking.cancelTitle'),
+    message: b.status === 'held' ? t('booking.cancelHeld')
+      : free ? t('booking.cancelFree', { n: b.cancelFreeHours, amount: baht(b.total) })
+      : t('booking.cancelLate', { n: b.cancelFreeHours }),
+    cancel: { label: t('booking.keep'), flat: true, noCaps: true },
+    ok: { label: t('booking.confirmCancel'), color: 'negative', unelevated: true, noCaps: true },
   }).onOk(async () => {
     const r = await api.cancelBooking(b.id);
     booking.value = r.booking;
-    $q.notify({ message: r.refund > 0 ? `ยกเลิกแล้ว คืนเงิน ${baht(r.refund)}` : 'ยกเลิกแล้ว' });
+    $q.notify({ message: r.refund > 0 ? t('booking.cancelledRefund', { amount: baht(r.refund) }) : t('booking.cancelled') });
   });
 }
 

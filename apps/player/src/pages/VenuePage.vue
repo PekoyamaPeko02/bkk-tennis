@@ -2,19 +2,20 @@
   <q-page class="venue-page">
     <!-- mobile app bar (design: bkk_tennis_mobile) -->
     <div class="appbar lt-md">
-      <q-btn round flat icon="arrow_back" aria-label="ย้อนกลับ" class="round-btn" @click="back" />
+      <q-btn round flat icon="arrow_back" :aria-label="$t('venue.back')" class="round-btn" @click="back" />
       <div class="appbar-title">
-        <div class="bkk-muted overline">จองคอร์ทออนไลน์</div>
-        <div class="bkk-h3">เลือกรอบและเวลา</div>
+        <div class="bkk-muted overline">{{ $t('venue.appbarOverline') }}</div>
+        <div class="bkk-h3">{{ $t('venue.appbarTitle') }}</div>
       </div>
-      <q-btn round flat icon="share" aria-label="แชร์" @click="share" />
+      <LanguageToggle />
+      <q-btn round flat icon="share" :aria-label="$t('venue.share')" @click="share" />
     </div>
 
     <div v-if="loadError" class="bkk-page">
       <div class="empty bkk-card">
         <q-icon name="error_outline" size="40px" color="negative" />
-        <div>{{ loadError }}</div>
-        <q-btn flat no-caps color="primary" label="กลับไปหน้าค้นหา" to="/" />
+        <div>{{ $t(loadError) }}</div>
+        <q-btn flat no-caps color="primary" :label="$t('venue.backToSearch')" to="/" />
       </div>
     </div>
 
@@ -30,12 +31,12 @@
             </AvailabilityPill>
             <AvailabilityPill tone="dark">
               <q-icon name="star" size="16px" color="amber-5" />
-              <span class="bkk-num">{{ venue.summary.rating.toFixed(1) }}</span> ({{ venue.summary.ratingCount }} รีวิว)
+              <span class="bkk-num">{{ venue.summary.rating.toFixed(1) }}</span> ({{ venue.summary.ratingCount }} {{ $t('venue.reviews') }})
             </AvailabilityPill>
           </div>
           <q-btn round unelevated class="hero-fav" :class="{ on: favorites.has(venue.summary.id) }"
             :icon="favorites.has(venue.summary.id) ? 'favorite' : 'favorite_border'" :aria-pressed="favorites.has(venue.summary.id)"
-            :aria-label="favorites.has(venue.summary.id) ? 'เอาออกจากสนามที่ชอบ' : 'บันทึกเป็นสนามที่ชอบ'" data-testid="favorite-toggle"
+            :aria-label="favorites.has(venue.summary.id) ? $t('venue.favRemove') : $t('venue.favAdd')" data-testid="favorite-toggle"
             @click="toggleFavorite(venue.summary.id)" />
           <div class="hero-bottom">
             <div class="addr"><q-icon name="location_on" size="16px" /> {{ venue.summary.address }}</div>
@@ -45,7 +46,7 @@
 
         <!-- amenities -->
         <template v-if="venue">
-          <div class="bkk-muted amen-title">สิ่งอำนวยความสะดวกมาตรฐานสโมสร</div>
+          <div class="bkk-muted amen-title">{{ $t('venue.amenities') }}</div>
           <div class="scroll-x">
             <span v-for="a in venue.summary.amenities" :key="a" class="amenity">
               <q-icon :name="AMENITY[a]?.icon ?? 'check'" size="18px" /> {{ AMENITY[a]?.label ?? a }}
@@ -55,15 +56,15 @@
 
         <!-- date -->
         <div class="section-head">
-          <h2 class="section-title">เลือกวันที่ (Select Date)</h2>
+          <h2 class="section-title">{{ $t('venue.selectDate') }}</h2>
           <span class="month"><q-icon name="calendar_month" size="18px" /> {{ thMonthYear(date) }}</span>
         </div>
         <DateStrip v-model="date" :start="today" :count="14" />
 
         <!-- courts -->
         <div class="section-head">
-          <h2 class="section-title">หมายเลขสนาม (Court)</h2>
-          <span class="status-ok"><span class="ok-dot" /> สนามเปิดใช้งานปกติ</span>
+          <h2 class="section-title">{{ $t('venue.courtNumber') }}</h2>
+          <span class="status-ok"><span class="ok-dot" /> {{ $t('venue.courtsOk') }}</span>
         </div>
         <div class="court-tabs" role="tablist">
           <button v-for="c in availability?.courts ?? []" :key="c.courtId" type="button" role="tab" class="court-tab"
@@ -77,12 +78,12 @@
         <!-- slots -->
         <div class="section-head slots-head">
           <div>
-            <h2 class="section-title">ตารางเวลาเปิดจอง</h2>
-            <div class="bkk-muted hint">แตะเพื่อเลือกเวลาที่ต้องการ (เลือกได้หลายช่วงเวลา)</div>
+            <h2 class="section-title">{{ $t('venue.slotsTitle') }}</h2>
+            <div class="bkk-muted hint">{{ $t('venue.slotsHint') }}</div>
           </div>
           <div class="legend">
-            <span><span class="lg lg-sel" /> เลือกแล้ว</span>
-            <span><span class="lg lg-full" /> เต็ม</span>
+            <span><span class="lg lg-sel" /> {{ $t('venue.legendSelected') }}</span>
+            <span><span class="lg lg-full" /> {{ $t('venue.legendFull') }}</span>
           </div>
         </div>
 
@@ -91,20 +92,20 @@
         </div>
         <div v-else-if="!visibleSlots.length" class="empty bkk-card">
           <q-icon name="event_busy" size="36px" color="grey-6" />
-          <div>ไม่มีรอบที่เปิดจองในวันนี้แล้ว ลองเลือกวันถัดไป</div>
+          <div>{{ $t('venue.noSlots') }}</div>
         </div>
         <div v-else class="slots">
           <SlotTile v-for="s in visibleSlots" :key="s.start" :start="s.start" :end="s.end" :price="s.price"
             :label="s.label" :minutes="availability!.slotMinutes" :state="slotState(s)"
             :unavailable-text="unavailableText(s)" @toggle="toggle(s)" />
         </div>
-        <q-toggle v-model="showPast" dense class="q-mt-sm bkk-muted" label="แสดงรอบที่ผ่านไปแล้ว" />
+        <q-toggle v-model="showPast" dense class="q-mt-sm bkk-muted" :label="$t('venue.showPast')" />
 
         <!-- add-ons -->
         <template v-if="venue?.addons.length">
           <div class="section-head">
-            <h2 class="section-title">บริการเสริม (Add-on Services)</h2>
-            <span class="bkk-muted small">ออปชันพิเศษ</span>
+            <h2 class="section-title">{{ $t('venue.addons') }}</h2>
+            <span class="bkk-muted small">{{ $t('venue.addonsSub') }}</span>
           </div>
           <div class="addons">
             <label v-for="a in venue.addons" :key="a.id" class="addon bkk-card">
@@ -113,7 +114,7 @@
                 <span class="addon-name">{{ a.name }}</span>
                 <span v-if="a.description" class="bkk-muted addon-desc">{{ a.description }}</span>
               </span>
-              <span class="addon-price bkk-num">+{{ baht(a.price) }}<small v-if="a.unit === 'per_hour'"> /ชม.</small></span>
+              <span class="addon-price bkk-num">+{{ baht(a.price) }}<small v-if="a.unit === 'per_hour'"> {{ $t('venue.perHourShort') }}</small></span>
               <q-checkbox :model-value="!!cart.addons[a.id]" color="primary"
                 @update:model-value="(v: boolean) => (cart.addons[a.id] = v ? 1 : 0)" />
             </label>
@@ -123,8 +124,8 @@
         <div v-if="venue" class="policy">
           <q-icon name="verified_user" size="22px" color="primary" />
           <div>
-            <b>ยกเลิกฟรีล่วงหน้าก่อน {{ venue.cancelFreeHours }} ชม.</b>
-            ระบบจะคืนเงินผ่านช่องทางเดิมอัตโนมัติ
+            <b>{{ $t('venue.freeCancel', { n: venue.cancelFreeHours }) }}</b>
+            {{ $t('venue.autoRefund') }}
           </div>
         </div>
       </div>
@@ -133,8 +134,8 @@
       <aside class="summary">
         <div class="summary-card">
           <div class="gt-sm summary-list">
-            <div class="bkk-h3">สรุปการจอง</div>
-            <div v-if="!cart.slots.length" class="bkk-muted">ยังไม่ได้เลือกเวลา</div>
+            <div class="bkk-h3">{{ $t('venue.summary') }}</div>
+            <div v-if="!cart.slots.length" class="bkk-muted">{{ $t('venue.nothingSelected') }}</div>
             <div v-for="s in cart.sortedSlots" :key="s.courtId + s.start" class="line">
               <span>{{ s.courtName }} · <span class="bkk-num">{{ s.start }}-{{ s.end }}</span></span>
               <span class="bkk-num">{{ baht(s.price) }}</span>
@@ -148,16 +149,16 @@
             <div>
               <div class="dur"><q-icon name="timer" size="18px" /> {{ durationText }}</div>
               <div class="total-row">
-                <span class="bkk-muted small">ยอดชำระ:</span>
+                <span class="bkk-muted small">{{ $t('venue.toPay') }}</span>
                 <span class="bkk-num total">{{ baht(total) }}</span>
-                <span class="vat">รวม VAT</span>
+                <span class="vat">{{ $t('venue.vat') }}</span>
               </div>
             </div>
-            <span class="pay-badge"><q-icon name="qr_code_2" size="16px" /> PromptPay / บัตร</span>
+            <span class="pay-badge"><q-icon name="qr_code_2" size="16px" /> {{ $t('venue.payBadge') }}</span>
           </div>
           <q-btn unelevated no-caps class="bkk-btn-volt pay-btn full-width" :disable="!cart.slots.length"
             :loading="submitting" icon-right="arrow_forward" @click="checkout">
-            ดำเนินการชำระเงิน
+            {{ $t('venue.checkout') }}
           </q-btn>
         </div>
       </aside>
@@ -169,6 +170,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import {
   ApiError, bangkokToday, type Addon, type CourtAvailability, type Slot, type VenueAvailability, type VenueDetail,
 } from '@bkk/api';
@@ -180,7 +182,9 @@ import { useLocationStore } from 'stores/location';
 import { useFavoritesStore } from 'stores/favorites';
 import { useFavoriteToggle } from 'src/composables/favorite';
 import { useLiveAvailability } from 'src/composables/useLiveAvailability';
+import LanguageToggle from 'components/LanguageToggle.vue';
 
+const { t } = useI18n();
 const $q = useQuasar();
 const api = useApi();
 const route = useRoute();
@@ -210,22 +214,22 @@ const courtHeadline = computed(() => {
   const s = venue.value?.summary;
   if (!s) return '';
   const surf = s.surfaces.map((x) => SURFACE_LABEL[x] ?? x).join(' / ');
-  return `${s.hasIndoor ? 'Indoor' : 'Outdoor'} ${surf}${s.hasAirCon ? ' ติดแอร์' : ''}`;
+  return `${s.hasIndoor ? t('venue.indoor') : t('venue.outdoor')} ${surf}${s.hasAirCon ? ` ${t('venue.airCon')}` : ''}`;
 });
 
 const chosenAddons = computed(() => (venue.value?.addons ?? []).filter((a) => cart.addons[a.id]));
 const addonLine = (a: Addon) => (a.unit === 'per_hour' ? a.price * cart.hours : a.price);
 const total = computed(() => cart.subtotal + cart.addonTotal(venue.value?.addons ?? []));
 const durationText = computed(() => {
-  if (!cart.slots.length) return 'ยังไม่ได้เลือกเวลา';
+  if (!cart.slots.length) return t('venue.nothingSelected');
   const s = cart.sortedSlots;
   const courts = new Set(s.map((x) => x.courtId)).size;
   const range = `${s[0]!.start} - ${[...s].sort((a, b) => a.end.localeCompare(b.end)).at(-1)!.end}`;
-  return `รวม ${cart.hours} ชม. (${range})${courts > 1 ? ` · ${courts} คอร์ท` : ''}`;
+  return t('venue.summaryLine', { hours: cart.hours, range }) + (courts > 1 ? t('venue.summaryCourts', { n: courts }) : '');
 });
 
 const courtMeta = (c: CourtAvailability) =>
-  `${c.surface === 'clay' ? 'Clay' : 'Hard'}${c.indoor ? (c.airCon ? ' (ติดแอร์)' : ' Indoor') : ' Outdoor'}`;
+  `${c.surface === 'clay' ? 'Clay' : 'Hard'}${c.indoor ? (c.airCon ? ` (${t('venue.airCon')})` : ` ${t('venue.indoor')}`) : ` ${t('venue.outdoor')}`}`;
 const selectedCount = (id: string) => cart.slots.filter((s) => s.courtId === id).length;
 
 function slotState(s: Slot): 'available' | 'selected' | 'unavailable' {
@@ -233,13 +237,12 @@ function slotState(s: Slot): 'available' | 'selected' | 'unavailable' {
   return s.status === 'available' ? 'available' : 'unavailable';
 }
 function unavailableText(s: Slot) {
-  return { booked: 'ไม่ว่าง (มีผู้จองแล้ว)', held: 'กำลังมีผู้ชำระเงิน', blocked: 'ปิดปรับปรุงคอร์ท', past: 'เลยเวลาแล้ว' }[
-    s.status as 'booked' | 'held' | 'blocked' | 'past'] ?? 'ไม่เปิดจอง';
+  return t(`venue.slotStatus.${['booked', 'held', 'blocked', 'past'].includes(s.status) ? s.status : 'other'}`);
 }
 function toggle(s: Slot) {
   if (s.status !== 'available' && !cart.isSelected(courtId.value!, s.start)) return;
   if (!cart.isSelected(courtId.value!, s.start) && cart.slots.length >= 4) {
-    $q.notify({ type: 'warning', message: 'จองได้สูงสุด 4 ช่วงเวลาต่อครั้ง' });
+    $q.notify({ type: 'warning', message: t('venue.maxSlots') });
     return;
   }
   cart.toggle(courtId.value!, court.value!.name, s);
@@ -249,7 +252,7 @@ async function loadVenue() {
   try {
     venue.value = await api.getVenue(String(route.params.slug), location.coords);
   } catch (e) {
-    loadError.value = e instanceof ApiError && e.status === 404 ? 'ไม่พบสนามนี้' : 'โหลดข้อมูลสนามไม่สำเร็จ';
+    loadError.value = e instanceof ApiError && e.status === 404 ? 'venue.notFound' : 'venue.loadFailed';
   }
 }
 
@@ -262,7 +265,7 @@ async function loadSlots() {
     if (!a.courts.some((c) => c.courtId === courtId.value)) courtId.value = a.courts[0]?.courtId ?? null;
     const dropped = cart.prune((cid, start) =>
       a.courts.find((c) => c.courtId === cid)?.slots.find((s) => s.start === start)?.status === 'available');
-    if (dropped) $q.notify({ type: 'warning', message: `มีผู้จองช่วงเวลาที่คุณเลือกไปแล้ว ${dropped} รายการ`, icon: 'event_busy' });
+    if (dropped) $q.notify({ type: 'warning', message: t('venue.droppedSlots', { n: dropped }), icon: 'event_busy' });
   } finally {
     loadingSlots.value = false;
   }
@@ -285,7 +288,7 @@ async function checkout() {
     void router.push({ name: 'booking', params: { id: booking.id } });
   } catch (e) {
     const err = e as ApiError;
-    $q.notify({ type: 'negative', message: err.message || 'จองไม่สำเร็จ' });
+    $q.notify({ type: 'negative', message: err.message || t('venue.bookFailed') });
     if (err.code === 'slot_taken') await loadSlots();
     if (err.code === 'open_hold_exists') void router.push({ name: 'bookings' });
   } finally {
@@ -304,7 +307,7 @@ async function share() {
     if (navigator.share) await navigator.share({ title: venue.value?.summary.nameEn ?? 'BKK Tennis', url });
     else {
       await navigator.clipboard.writeText(url);
-      $q.notify({ message: 'คัดลอกลิงก์แล้ว', icon: 'link' });
+      $q.notify({ message: t('venue.linkCopied'), icon: 'link' });
     }
   } catch { /* user cancelled */ }
 }

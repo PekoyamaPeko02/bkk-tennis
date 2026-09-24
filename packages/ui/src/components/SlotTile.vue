@@ -7,20 +7,21 @@
     <span class="body">
       <span class="time bkk-num">{{ start }} - {{ end }}</span>
       <span class="meta">
-        <span v-if="state === 'available'" class="tag">ว่าง</span>
-        <span v-else-if="state === 'selected'" class="tag tag-volt">เลือกแล้ว</span>
-        <span class="label">{{ state === 'unavailable' ? unavailableText : label }}</span>
+        <span v-if="state === 'available'" class="tag">{{ uiT('slot.available') }}</span>
+        <span v-else-if="state === 'selected'" class="tag tag-volt">{{ uiT('slot.selected') }}</span>
+        <span class="label">{{ state === 'unavailable' ? (unavailableText ?? uiT('slot.unavailable')) : label }}</span>
       </span>
     </span>
     <span class="price">
       <span class="amount bkk-num">{{ price == null ? '–' : baht(price) }}</span>
-      <span class="per">{{ state === 'unavailable' ? 'เต็ม' : `/ ${minutes === 60 ? '1 ชม.' : minutes + ' นาที'}` }}</span>
+      <span class="per">{{ state === 'unavailable' ? uiT('slot.full') : minutes === 60 ? uiT('slot.perHour') : uiT('slot.perMinutes', { n: minutes ?? 60 }) }}</span>
     </span>
   </button>
 </template>
 
 <script setup lang="ts">
 import { baht } from '../format';
+import { uiT } from '../locale';
 
 withDefaults(defineProps<{
   start: string;
@@ -29,8 +30,9 @@ withDefaults(defineProps<{
   label?: string | null;
   minutes?: number;
   state: 'available' | 'selected' | 'unavailable';
-  unavailableText?: string;
-}>(), { label: '', minutes: 60, unavailableText: 'ไม่ว่าง (มีผู้จองแล้ว)' });
+  /** Overrides the default "unavailable" caption. */
+  unavailableText?: string | undefined;
+}>(), { label: '', minutes: 60, unavailableText: undefined });
 defineEmits<{ toggle: [] }>();
 </script>
 

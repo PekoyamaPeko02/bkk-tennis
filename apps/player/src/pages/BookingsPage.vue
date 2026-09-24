@@ -1,9 +1,9 @@
 <template>
   <q-page class="bkk-page">
-    <h1 class="bkk-h1 q-mt-sm q-mb-md">การจองของฉัน</h1>
+    <h1 class="bkk-h1 q-mt-sm q-mb-md">{{ $t('bookings.title') }}</h1>
     <q-tabs v-model="tab" no-caps align="left" active-color="primary" indicator-color="secondary" class="q-mb-md tabs">
-      <q-tab name="upcoming" :label="`กำลังจะถึง (${upcoming.length})`" />
-      <q-tab name="past" label="ที่ผ่านมา / ยกเลิก" />
+      <q-tab name="upcoming" :label="$t('bookings.upcoming', { n: upcoming.length })" />
+      <q-tab name="past" :label="$t('bookings.past')" />
     </q-tabs>
 
     <div v-if="loading" class="list">
@@ -11,8 +11,8 @@
     </div>
     <div v-else-if="!shown.length" class="empty bkk-card">
       <q-icon name="sports_tennis" size="40px" color="grey-6" />
-      <div>{{ tab === 'upcoming' ? 'ยังไม่มีการจองที่กำลังจะถึง' : 'ยังไม่มีประวัติการจอง' }}</div>
-      <q-btn unelevated no-caps class="bkk-btn-volt" label="หาคอร์ทว่างใกล้ฉัน" to="/" />
+      <div>{{ tab === 'upcoming' ? $t('bookings.emptyUpcoming') : $t('bookings.emptyPast') }}</div>
+      <q-btn unelevated no-caps class="bkk-btn-volt" :label="$t('common.findCourts')" to="/" />
     </div>
     <div v-else class="list">
       <router-link v-for="b in shown" :key="b.id" :to="{ name: 'booking', params: { id: b.id } }" class="item bkk-card">
@@ -23,7 +23,7 @@
         <div class="body">
           <div class="row-top">
             <span class="bkk-h3">{{ b.venueName }}</span>
-            <AvailabilityPill :tone="STATUS[b.status].tone" :pulse="b.status === 'held'">{{ STATUS[b.status].label }}</AvailabilityPill>
+            <AvailabilityPill :tone="STATUS[b.status].tone" :pulse="b.status === 'held'">{{ $t(`bookings.status.${b.status}`) }}</AvailabilityPill>
           </div>
           <div class="bkk-muted small">
             {{ [...new Set(b.slots.map((s) => s.courtName))].join(', ') }} ·
@@ -46,14 +46,15 @@ import { AvailabilityPill, baht, parseDay, thShortMonth } from '@bkk/ui';
 import { useApi } from 'boot/api';
 import { useLiveBookings } from 'src/composables/useLiveBookings';
 
-const STATUS: Record<BookingStatus, { label: string; tone: 'ok' | 'low' | 'muted' }> = {
-  held: { label: 'รอชำระเงิน', tone: 'low' },
-  confirmed: { label: 'ยืนยันแล้ว', tone: 'ok' },
-  checked_in: { label: 'เช็คอินแล้ว', tone: 'ok' },
-  completed: { label: 'เล่นแล้ว', tone: 'muted' },
-  expired: { label: 'หมดเวลา', tone: 'muted' },
-  cancelled: { label: 'ยกเลิก', tone: 'muted' },
-  no_show: { label: 'ไม่มาเล่น', tone: 'muted' },
+// Labels: `bookings.status.<status>` in the i18n catalogue.
+const STATUS: Record<BookingStatus, { tone: 'ok' | 'low' | 'muted' }> = {
+  held: { tone: 'low' },
+  confirmed: { tone: 'ok' },
+  checked_in: { tone: 'ok' },
+  completed: { tone: 'muted' },
+  expired: { tone: 'muted' },
+  cancelled: { tone: 'muted' },
+  no_show: { tone: 'muted' },
 };
 
 const api = useApi();

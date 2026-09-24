@@ -8,10 +8,10 @@
         </router-link>
 
         <nav class="nav gt-sm">
-          <router-link to="/" class="nav-link" exact-active-class="on">ค้นหาคอร์ท</router-link>
-          <router-link to="/bookings" class="nav-link" active-class="on">การจองของฉัน</router-link>
-          <span class="nav-link soon">Tournaments <small>เร็วๆ นี้</small></span>
-          <span class="nav-link soon">Community <small>เร็วๆ นี้</small></span>
+          <router-link to="/" class="nav-link" exact-active-class="on">{{ $t('nav.search') }}</router-link>
+          <router-link to="/bookings" class="nav-link" active-class="on">{{ $t('nav.myBookings') }}</router-link>
+          <span class="nav-link soon">Tournaments <small>{{ $t('common.soon') }}</small></span>
+          <span class="nav-link soon">Community <small>{{ $t('common.soon') }}</small></span>
         </nav>
 
         <div class="right">
@@ -19,13 +19,14 @@
             <q-icon :name="location.status === 'gps' ? 'my_location' : 'location_searching'" size="16px" />
             <span>{{ shortLabel }}</span>
           </button>
-          <q-btn v-if="!auth.isLoggedIn" unelevated no-caps class="bkk-btn-forest" label="เข้าสู่ระบบ" to="/login" />
-          <q-btn v-else round flat class="avatar" to="/profile" aria-label="โปรไฟล์">
+          <LanguageToggle class="gt-xs" />
+          <q-btn v-if="!auth.isLoggedIn" unelevated no-caps class="bkk-btn-forest" :label="$t('nav.login')" to="/login" />
+          <q-btn v-else round flat class="avatar" to="/profile" :aria-label="$t('nav.profile')">
             <q-avatar size="36px" color="secondary" text-color="dark">{{ initials }}</q-avatar>
           </q-btn>
         </div>
       </div>
-      <div v-if="isMock" class="mock-banner">โหมดทดลอง (Mock API) — ข้อมูลตัวอย่าง ยังไม่ต่อ backend จริง</div>
+      <div v-if="isMock" class="mock-banner">{{ $t('nav.mockBanner') }}</div>
     </q-header>
 
     <q-page-container>
@@ -34,10 +35,10 @@
 
     <q-footer class="bottom-nav lt-md" bordered>
       <q-tabs dense no-caps active-color="primary" indicator-color="transparent" class="tabs" align="justify">
-        <q-route-tab to="/" exact icon="explore" label="สำรวจ" />
-        <q-route-tab to="/bookings" icon="calendar_month" label="จองของฉัน" />
-        <q-tab name="notifications" icon="notifications" label="แจ้งเตือน" disable />
-        <q-route-tab :to="auth.isLoggedIn ? '/profile' : '/login'" icon="person" label="โปรไฟล์" />
+        <q-route-tab to="/" exact icon="explore" :label="$t('nav.explore')" />
+        <q-route-tab to="/bookings" icon="calendar_month" :label="$t('nav.bookingsTab')" />
+        <q-tab name="notifications" icon="notifications" :label="$t('nav.notifications')" disable />
+        <q-route-tab :to="auth.isLoggedIn ? '/profile' : '/login'" icon="person" :label="$t('nav.profile')" />
       </q-tabs>
     </q-footer>
   </q-layout>
@@ -47,7 +48,9 @@
 import { computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import { isMockApi } from 'boot/api';
+import LanguageToggle from 'components/LanguageToggle.vue';
 import { useAuthStore } from 'stores/auth';
 import { useFavoritesStore } from 'stores/favorites';
 import { useLocationStore } from 'stores/location';
@@ -61,7 +64,8 @@ const route = useRoute();
 const $q = useQuasar();
 const isMock = isMockApi;
 
-const shortLabel = computed(() => (location.status === 'gps' ? 'ตำแหน่งปัจจุบัน' : 'Sukhumvit, BKK'));
+const { t } = useI18n();
+const shortLabel = computed(() => (location.status === 'gps' ? t('nav.currentLocation') : 'Sukhumvit, BKK'));
 const initials = computed(() => (auth.user?.displayName ?? auth.user?.phone ?? '?').replace('+66', '').slice(-2));
 // The venue page has its own app bar on phones (as in the design).
 const hideHeaderOnMobile = computed(() => route.name === 'venue' && $q.screen.lt.md);

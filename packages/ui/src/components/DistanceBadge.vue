@@ -1,12 +1,14 @@
 <template>
   <span class="bkk-distance">
     <q-icon name="near_me" size="14px" class="icon" />
-    <span class="bkk-num">{{ km.toFixed(1) }} กม.</span>
+    <span class="bkk-num">{{ km.toFixed(1) }} {{ uiT('distance.km') }}</span>
     <span v-if="suffix" class="suffix">{{ suffix }}</span>
   </span>
 </template>
 
 <script setup lang="ts">
+import { uiT } from '../locale';
+
 defineProps<{ km: number; suffix?: string }>();
 </script>
 

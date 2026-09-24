@@ -1,24 +1,30 @@
 import { defineStore } from 'pinia';
+import { tr } from 'src/i18n';
 
 /** Fallback when GPS is denied/unavailable: Sukhumvit 39 / Phrom Phong (matches the design). */
-export const FALLBACK = { lat: 13.7317, lng: 100.57, label: 'สุขุมวิท 39 / พร้อมพงษ์' };
+export const FALLBACK = { lat: 13.7317, lng: 100.57 };
 
+type ErrorKey = 'location.unsupported' | 'location.denied' | 'location.failed';
+
+// Texts are kept as message keys and translated in the getters, so they follow the language toggle.
 export const useLocationStore = defineStore('location', {
   state: () => ({
     lat: FALLBACK.lat,
     lng: FALLBACK.lng,
     accuracy: null as number | null,
-    label: FALLBACK.label,
+    labelKey: 'location.fallbackLabel' as 'location.fallbackLabel' | 'location.current',
     status: 'idle' as 'idle' | 'locating' | 'gps' | 'fallback',
-    error: null as string | null,
+    errorKey: null as ErrorKey | null,
   }),
   getters: {
     coords: (s) => ({ lat: s.lat, lng: s.lng }),
+    label: (s) => tr(s.labelKey),
+    error: (s) => (s.errorKey ? tr(s.errorKey) : null),
   },
   actions: {
     locate(): Promise<void> {
       if (!('geolocation' in navigator)) {
-        this.useFallback('อุปกรณ์นี้ไม่รองรับ GPS');
+        this.useFallback('location.unsupported');
         return Promise.resolve();
       }
       this.status = 'locating';
@@ -28,21 +34,21 @@ export const useLocationStore = defineStore('location', {
             this.lat = pos.coords.latitude;
             this.lng = pos.coords.longitude;
             this.accuracy = Math.round(pos.coords.accuracy);
-            this.label = 'ตำแหน่งปัจจุบันของคุณ';
+            this.labelKey = 'location.current';
             this.status = 'gps';
-            this.error = null;
+            this.errorKey = null;
             resolve();
           },
           (err) => {
-            this.useFallback(err.code === err.PERMISSION_DENIED ? 'ไม่ได้รับอนุญาตให้ใช้ตำแหน่ง' : 'หาตำแหน่งไม่สำเร็จ');
+            this.useFallback(err.code === err.PERMISSION_DENIED ? 'location.denied' : 'location.failed');
             resolve();
           },
           { enableHighAccuracy: true, timeout: 8000, maximumAge: 60_000 },
         );
       });
     },
-    useFallback(reason: string) {
-      Object.assign(this, { ...FALLBACK, accuracy: null, status: 'fallback', error: reason });
+    useFallback(reason: ErrorKey) {
+      Object.assign(this, { ...FALLBACK, labelKey: 'location.fallbackLabel', accuracy: null, status: 'fallback', errorKey: reason });
     },
   },
 });

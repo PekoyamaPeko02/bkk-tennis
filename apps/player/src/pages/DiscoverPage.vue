@@ -4,20 +4,20 @@
     <section class="hero">
       <div class="bkk-page hero-inner">
         <div class="eyebrow"><q-icon name="bolt" size="16px" /> Live GPS · Bangkok</div>
-        <h1 class="bkk-display title">ค้นหาสนามเทนนิสที่ใกล้ที่สุด</h1>
+        <h1 class="bkk-display title">{{ $t('discover.title') }}</h1>
         <div class="gps">
           <span class="gps-dot" :class="`is-${location.status}`" />
           <div class="gps-text">
             <div class="gps-main">
               <q-icon name="location_on" size="18px" /> {{ location.label }}
-              <span v-if="location.accuracy" class="bkk-muted">(แม่นยำ ±{{ location.accuracy }} ม.)</span>
+              <span v-if="location.accuracy" class="bkk-muted">{{ $t('discover.accuracy', { n: location.accuracy }) }}</span>
             </div>
             <div v-if="location.status === 'fallback'" class="gps-sub">
-              {{ location.error }} — ใช้ตำแหน่งตัวอย่างแทน
+              {{ $t('discover.fallbackNote', { error: location.error }) }}
             </div>
           </div>
           <q-btn flat dense no-caps icon="my_location" :loading="location.status === 'locating'"
-            :label="location.status === 'gps' ? 'รีเฟรช GPS' : 'ใช้ตำแหน่งของฉัน'" class="gps-btn" @click="relocate" />
+            :label="location.status === 'gps' ? $t('discover.refreshGps') : $t('discover.useMyLocation')" class="gps-btn" @click="relocate" />
         </div>
       </div>
     </section>
@@ -32,25 +32,25 @@
         </div>
         <div class="row-filters">
           <q-select v-model="date" :options="dateOptions" emit-value map-options dense outlined options-dense
-            class="sel" label="วันที่" behavior="menu">
+            class="sel" :label="$t('discover.date')" behavior="menu">
             <template #prepend><q-icon name="calendar_month" /></template>
           </q-select>
           <q-select v-model="timeWindow" :options="TIME_WINDOWS" emit-value map-options dense outlined options-dense
-            class="sel" label="ช่วงเวลา" behavior="menu">
+            class="sel" :label="$t('discover.timeWindow')" behavior="menu">
             <template #prepend><q-icon name="schedule" /></template>
           </q-select>
           <div class="scroll-x chips">
             <FilterChip v-model="hard" icon="sports_tennis">Hard Court</FilterChip>
-            <FilterChip v-model="clay" icon="grain">คอร์ทดิน (Clay)</FilterChip>
-            <FilterChip v-model="indoor" icon="roofing">Indoor / ติดแอร์</FilterChip>
+            <FilterChip v-model="clay" icon="grain">{{ $t('discover.chipClay') }}</FilterChip>
+            <FilterChip v-model="indoor" icon="roofing">{{ $t('discover.chipIndoor') }}</FilterChip>
           </div>
         </div>
       </div>
 
       <div class="result-head">
         <div>
-          <h2 class="section-title">พบ {{ result?.count ?? '…' }} สนามเทนนิสใกล้คุณ</h2>
-          <div class="bkk-muted sub">{{ radiusText }} · เรียงตาม{{ SORTS.find((s) => s.value === sort)?.label }}</div>
+          <h2 class="section-title">{{ $t('discover.found', { count: result?.count ?? '…' }) }}</h2>
+          <div class="bkk-muted sub">{{ $t('discover.subline', { radius: radiusText, sort: SORTS.find((s) => s.value === sort)?.label }) }}</div>
         </div>
         <div class="head-actions">
           <q-select v-model="sort" :options="SORTS" emit-value map-options dense borderless options-dense class="sort"
@@ -68,12 +68,12 @@
           <div v-else-if="error" class="empty bkk-card">
             <q-icon name="wifi_off" size="40px" color="negative" />
             <div>{{ error }}</div>
-            <q-btn flat no-caps color="primary" label="ลองใหม่" @click="search" />
+            <q-btn flat no-caps color="primary" :label="$t('common.retryNew')" @click="search" />
           </div>
           <div v-else-if="result && !result.items.length" class="empty bkk-card">
             <q-icon name="travel_explore" size="40px" color="grey-6" />
-            <div>ไม่พบสนามในเงื่อนไขนี้ ลองขยายรัศมีหรือเปลี่ยนตัวกรอง</div>
-            <q-btn flat no-caps color="primary" label="ค้นหาทั่วกรุงเทพฯ" @click="radiusKm = 60" />
+            <div>{{ $t('discover.empty') }}</div>
+            <q-btn flat no-caps color="primary" :label="$t('discover.searchAll')" @click="radiusKm = 60" />
           </div>
           <VenueCard v-for="v in result?.items ?? []" :id="`venue-${v.id}`" :key="v.id" :venue="v" :active="v.id === activeId"
             :favorite="favorites.has(v.id)" class="q-mb-md" @hover="activeId = $event" @open="open" @toggle-favorite="toggleFavorite(v.id)" />
@@ -91,6 +91,7 @@
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import { bangkokToday, type VenueSearchResult, type VenueSummary } from '@bkk/api';
 import { addDays, FilterChip, thDate, thDay, VenueCard } from '@bkk/ui';
 import { useApi } from 'boot/api';
@@ -102,24 +103,22 @@ import VenueMap from 'components/VenueMap.vue';
 const favorites = useFavoritesStore();
 const toggleFavorite = useFavoriteToggle();
 
-const RADII = [
-  { km: 3, label: '< 3 กม.' },
-  { km: 5, label: 'ภายใน 5 กม.' },
-  { km: 10, label: 'ภายใน 10 กม.' },
-  { km: 60, label: 'ทั่วกรุงเทพฯ' },
-];
-const TIME_WINDOWS = [
-  { value: 'all', label: 'ทั้งวัน (06:00 - 22:00)', from: undefined, to: undefined },
-  { value: 'morning', label: 'ช่วงเช้า (06:00 - 12:00)', from: '06:00', to: '12:00' },
-  { value: 'afternoon', label: 'ช่วงบ่าย (12:00 - 17:00)', from: '12:00', to: '17:00' },
-  { value: 'evening', label: 'ช่วงเย็น (17:00 - 22:00)', from: '17:00', to: '22:00' },
-];
-const SORTS = [
-  { value: 'distance', label: 'ระยะทางใกล้ที่สุด' },
-  { value: 'earliest', label: 'เวลาว่างเร็วที่สุด' },
-  { value: 'rating', label: 'คะแนนรีวิวสูงสุด' },
-  { value: 'price', label: 'ราคา ต่ำไปสูง' },
-] as const;
+const { t } = useI18n();
+// Option lists are computed so their labels follow the language toggle.
+const RADII = computed(() => [
+  { km: 3, label: t('discover.radius.r3') },
+  { km: 5, label: t('discover.radius.r5') },
+  { km: 10, label: t('discover.radius.r10') },
+  { km: 60, label: t('discover.radius.all') },
+]);
+const TIME_WINDOWS = computed(() => [
+  { value: 'all', label: t('discover.time.all'), from: undefined, to: undefined },
+  { value: 'morning', label: t('discover.time.morning'), from: '06:00', to: '12:00' },
+  { value: 'afternoon', label: t('discover.time.afternoon'), from: '12:00', to: '17:00' },
+  { value: 'evening', label: t('discover.time.evening'), from: '17:00', to: '22:00' },
+]);
+type SortKey = 'distance' | 'earliest' | 'rating' | 'price';
+const SORTS = computed(() => (['distance', 'earliest', 'rating', 'price'] as const).map((value) => ({ value, label: t(`discover.sort.${value}`) })));
 
 const $q = useQuasar();
 const api = useApi();
@@ -133,7 +132,7 @@ const timeWindow = ref('evening');
 const hard = ref(false);
 const clay = ref(false);
 const indoor = ref(false);
-const sort = ref<(typeof SORTS)[number]['value']>('distance');
+const sort = ref<SortKey>('distance');
 const view = ref<'list' | 'map'>('list');
 const activeId = ref<string | null>(null);
 const mapRef = ref<InstanceType<typeof VenueMap>>();
@@ -145,17 +144,17 @@ const error = ref<string | null>(null);
 const dateOptions = computed(() =>
   Array.from({ length: 7 }, (_, i) => {
     const d = addDays(today, i);
-    const name = i === 0 ? 'วันนี้' : i === 1 ? 'พรุ่งนี้' : thDay(d);
+    const name = i === 0 ? t('common.today') : i === 1 ? t('common.tomorrow') : thDay(d);
     return { value: d, label: `${name} (${thDate(d)})` };
   }));
-const radiusText = computed(() => (radiusKm.value >= 60 ? 'ทั่วกรุงเทพฯ' : `ในรัศมี ${radiusKm.value} กม.`));
+const radiusText = computed(() => (radiusKm.value >= 60 ? t('discover.radius.all') : t('discover.within', { n: radiusKm.value })));
 
 let seq = 0;
 async function search() {
   const my = ++seq;
   loading.value = true;
   error.value = null;
-  const tw = TIME_WINDOWS.find((t) => t.value === timeWindow.value)!;
+  const tw = TIME_WINDOWS.value.find((w) => w.value === timeWindow.value)!;
   const surface = hard.value && !clay.value ? 'hard' : clay.value && !hard.value ? 'clay' : undefined;
   try {
     const r = await api.searchVenues({
@@ -164,7 +163,7 @@ async function search() {
     });
     if (my === seq) result.value = r;
   } catch (e) {
-    if (my === seq) error.value = (e as Error).message || 'โหลดข้อมูลไม่สำเร็จ';
+    if (my === seq) error.value = (e as Error).message || t('common.loadFailed');
   } finally {
     if (my === seq) loading.value = false;
   }
