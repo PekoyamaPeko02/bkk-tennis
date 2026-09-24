@@ -13,9 +13,10 @@ MAX_ROUNDS="${1:-100}"
 LOG_DIR=".claude/logs"; mkdir -p "$LOG_DIR"
 docker compose up -d db >/dev/null 2>&1 || echo "warn: could not start db (is Docker running?)"
 
-if [[ -n "$(git status --porcelain)" ]]; then
-  echo "❌ Working tree has uncommitted changes — commit or stash them first."; exit 1
+if [[ -n "$(git status --porcelain)" && "$(git branch --show-current)" != "dev/autopilot" ]]; then
+  echo "❌ Uncommitted changes on $(git branch --show-current) — commit or stash them first."; exit 1
 fi
+# On dev/autopilot a dirty tree means the last round was cut off; /next resumes it.
 git switch dev/autopilot 2>/dev/null || git switch -c dev/autopilot
 
 for ((i = 1; i <= MAX_ROUNDS; i++)); do
@@ -25,13 +26,16 @@ for ((i = 1; i <= MAX_ROUNDS; i++)); do
   ts="$(date +%Y%m%d-%H%M%S)"; log="$LOG_DIR/round-$i-$ts.log"
   echo "▶ Round $i ($(date '+%H:%M')) — log: $log"
 
-  claude -p "/next" --permission-mode acceptEdits --max-turns 200 2>&1 | tee "$log"
+  claude -p "/next" --permission-mode acceptEdits --max-turns 300 2>&1 | tee "$log"
   code=${PIPESTATUS[0]}
 
   if grep -qiE 'usage limit|rate limit|limit reached|quota' "$log"; then
     echo "⏸  Hit a usage/rate limit — stopping. Re-run this script after the limit resets."; break
   fi
   if grep -q 'BACKLOG EMPTY' "$log"; then echo "✅ Backlog empty — done."; break; fi
+  if grep -q 'Reached max turns' "$log"; then
+    echo "↻ Round $i hit its turn cap — starting a fresh session to continue."; continue
+  fi
   if [[ $code -ne 0 ]]; then echo "❌ claude exited with $code — stopping. See $log"; break; fi
 done
 
