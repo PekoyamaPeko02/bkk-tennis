@@ -51,7 +51,9 @@ Mark done with `- [x]` + one note line. Items needing a human decision/credentia
   - **Needs a product/finance decision (read before real partners):** only `completed` bookings are paid out (per backlog), but the C4 settle job turns every confirmed online booking into `no_show` 15 min after start unless staff pressed check-in in ClubOS — so **online bookings that are not checked in are auto-marked no_show and never paid out**, while the platform keeps the customer's money. Late-cancelled (no refund) bookings have the same gap. Also depends on the open question "platform collects money vs gateway split payment". Follow-ups: no `mark-failed` action (status exists in the schema); no partner-facing payouts page in ClubOS ("รายได้ & Payout" nav still "soon"); no CSV export of payouts for the bank; payout amounts aren't reconciled against gateway settlement reports.
 
 ## Sprint 5 — Player polish
-- [ ] **P1 Favorites** — heart on venue page/cards, `favorites` API, "สนามที่ชอบ" in profile.
+- [x] **P1 Favorites** — heart on venue page/cards, `favorites` API, "สนามที่ชอบ" in profile.
+  - Done: `GET /favorites`, `PUT|DELETE /favorites/{venueId}` (auth, idempotent; PUT 404 for non-public venues; non-public venues drop out of the list but the row stays), hearts on `VenueCard` (`favorite` prop) and the venue hero, Pinia favorites store synced to the session (MainLayout), signed-out click → login → back, `/favorites` page + Profile entry with count, mock parity; no new SQL (table existed). 18 `FavoritesTests` + 4 e2e; mutation-checked. Test-engineer found the hero heart was covered by the venue name — fixed (z-index + padding).
+  - Follow-ups: the venue detail/search DTOs don't carry `isFavorite` (the store's id list is the source); no favourites cap per user; hearting then signing out within ~100 ms rolls the heart back (request goes out unauthenticated).
 - [ ] **P2 Booking push to user** — SignalR per-user group so the QR page flips to confirmed without polling.
 - [ ] **P3 i18n** — vue-i18n TH/EN toggle for the player app (Thai default), strings moved out of components.
 - [ ] **P4 PWA** — manifest, icons, offline shell; Lighthouse PWA pass.
