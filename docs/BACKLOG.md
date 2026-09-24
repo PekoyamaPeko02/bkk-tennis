@@ -68,6 +68,13 @@ Mark done with `- [x]` + one note line. Items needing a human decision/credentia
   - Not verified: any native build/run (Gradle/Xcode/emulator) — manual. `quasar mode add capacitor` is interactive (a TTY-only prompt), so the folder was scaffolded by hand from Quasar's template and the platforms added with `pnpm --dir apps/player/src-capacitor add … --ignore-workspace-root-check` + `cap add`; `quasar build -m capacitor -T ios|android` without `--skip-pkg` will try the native build and, on a fresh clone, Quasar's own `pnpm add @capacitor/<platform>` fails with ERR_PNPM_ADDING_TO_ROOT unless run with `ignore-workspace-root-check` (put it in `src-capacitor/.npmrc` — the sandbox refused to write that file).
   - Follow-ups: native builds default to the in-browser mock API unless `API_BASE=https://…` is set at build time; the service worker/PWA mode is not used inside the app; Android/iOS launcher icons and splash are still Capacitor defaults (generate from the brand icons with `@capacitor/assets`); no push/keyboard/status-bar plugins; SignalR/HTTP need CORS/`capacitor://localhost`/`https://localhost` origins allowed on the API (`Cors:Origins`).
 
+## Sprint 6 — Pre-launch fixes (decided by Luck, 2026-09-24)
+- [ ] **F1 No-show payout policy** — DECISION: a paid online booking that ends as `no_show` is still revenue: the partner is paid (minus commission) exactly like `completed`; the player gets no refund. Include `no_show` in payout settlement, ClubOS/Admin revenue and overview "take". Update tests (settle job + payouts + overview) and the A4 note.
+- [ ] **F2 "My venues" for staff** — `GET /api/v1/clubos/me/venues` (from `venue_members`); ClubOS picks the venue after login (switcher if >1) and drops the hard-coded `VENUE_ID` everywhere. Newly onboarded owners must be able to use ClubOS end-to-end (e2e).
+- [ ] **F3 Owner password change/reset** — change password (logged in) + admin-issued reset token flow (no email provider yet: admin copies a one-time link). Invalidate old tokens.
+- [ ] **F4 ClubOS payouts page** — owners see their weekly payouts (gross, commission, net, status, transfer ref) and the bookings behind each payout; read-only.
+- [ ] **F5 Error codes → i18n** — map API `code` values to TH/EN messages in the player app (fallback to server `message`); add a test that every code the API can return has a catalogue entry.
+
 ## Needs a human
 - [ ] BLOCKED: choose payment gateway (Opn / GB Prime Pay / 2C2P) + sandbox keys → implement real `IPaymentProvider` + webhook signature.
 - [ ] BLOCKED: choose SMS OTP provider + keys (e.g. Thaibulksms) → replace dev OTP.
