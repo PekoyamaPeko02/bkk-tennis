@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">BKK Tennis</string>
+    <string name="title_activity_main">BKK Tennis</string>
+    <string name="package_name">com.bkktennis.app</string>
+    <string name="custom_url_scheme">com.bkktennis.app</string>
+</resources>

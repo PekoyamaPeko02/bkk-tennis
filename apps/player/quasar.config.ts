@@ -1,7 +1,7 @@
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 import { defineConfig } from '#q-app/wrappers';
 
-export default defineConfig(() => ({
+export default defineConfig((ctx) => ({
   boot: ['i18n', 'api'],
   css: ['app.scss'],
   extras: ['material-icons', 'material-icons-outlined'],
@@ -9,7 +9,8 @@ export default defineConfig(() => ({
   build: {
     target: { browser: ['es2022', 'firefox115', 'chrome115', 'safari15'], node: 'node22' },
     typescript: { strict: true, vueShim: true },
-    vueRouterMode: 'history',
+    // The native web view serves files from disk, so deep links / reloads only work with hash routing.
+    vueRouterMode: 'capacitor' in ctx.mode ? 'hash' : 'history',
     env: {
       // Mock API (in-browser) unless API_BASE is given: `API_BASE=http://localhost:5080 pnpm dev`
       API_BASE: process.env.API_BASE ?? '',
