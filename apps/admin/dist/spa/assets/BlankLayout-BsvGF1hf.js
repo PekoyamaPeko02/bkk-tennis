@@ -1,0 +1,1 @@
+import{L as e,M as t,c as n,k as r,m as i,p as a}from"./runtime-core.esm-bundler-DYmdl_iV.js";import{n as o,t as s}from"./QLayout-CVdJKYHx.js";var c=i({name:`BlankLayout`,__name:`BlankLayout`,setup(i){return(i,c)=>{let l=t(`router-view`);return r(),n(s,{view:`hHh lpr fFf`},{default:e(()=>[a(o,null,{default:e(()=>[a(l)]),_:1})]),_:1})}}});export{c as default};

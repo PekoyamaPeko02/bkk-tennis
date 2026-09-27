@@ -1,0 +1,7 @@
+## QStepperNavigation API
+
+### Slots
+
+- `#default`
+  The content of the custom navigation, child of a QStep or of a QStepper (globally, through 'navigation' slot)
+

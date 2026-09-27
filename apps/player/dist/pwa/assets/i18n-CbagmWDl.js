@@ -1,0 +1,1 @@
+import{_ as e}from"./src-CvrlmWhW.js";import{n as t,r as n}from"./index-DmRBwoXQ.js";var r=e(({app:e})=>{e.use(t),n(t.global.locale.value)});export{r as default};
