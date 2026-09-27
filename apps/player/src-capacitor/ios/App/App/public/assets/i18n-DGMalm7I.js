@@ -1,0 +1,1 @@
+import{Q as e}from"./index-C_CgoEBC.js";import{n as t,t as n}from"./i18n-GgmmXzWn.js";var r=e(({app:e})=>{e.use(n),t(n.global.locale.value)});export{r as default};

@@ -1,0 +1,22 @@
+The backlog is finished apart from the four items that need a human. Everything is committed on `dev/autopilot`, and nothing was pushed.
+
+Done this session: C4, C5, A1, A2, A3, A4 and P1–P5. `test-engineer` covered each item, and it found four real bugs that I fixed:
+- **A2 onboarding:** creating a partner returned a 500 because EF inserted the `venue_members` row before the venue.
+- **A3 booking explorer:** the `%` and `_` characters in search were treated as wildcards.
+- **P1 favorites:** the venue-name text covered the heart button on the venue page.
+- **A4 payouts:** the non-default commission rate had no test; I added one.
+
+Test status before the Capacitor commit (a docs-only handoff followed): 33 unit and 622 integration tests, typecheck and all three app builds passed, and `pnpm e2e` had 70 passing. The last gate rerun was before the Capacitor commit.
+
+Not verified:
+- **Lighthouse (P4):** the sandbox denied it, so I tested the install and offline behaviour in e2e instead.
+- **Browser SignalR (P2):** it has not run against a real hub; e2e uses mock mode. The push itself has 20 hub tests on the server side.
+- **Native Capacitor builds (P5):** none were run. Only the web-asset build and the Android/iOS project scaffolding were.
+
+Before real partners use it:
+- **Partner payouts:** the auto-settle job marks every confirmed online booking `no_show` unless staff press check-in, and payouts only cover `completed` bookings. Un-checked-in bookings are therefore never paid out.
+- **Existing local database:** apply `db/init/005_seed_admin.sql` and `006_payouts.sql`, plus 003/004 if they haven't been applied yet, or run `pnpm db:reset`.
+- **`mut_tmp.py`:** a scratch file that was committed by accident. Remove it with `git rm mut_tmp.py`, since I couldn't.
+- **Capacitor on a fresh clone:** it needs `ignore-workspace-root-check` in `apps/player/src-capacitor/.npmrc`; I couldn't write that file.
+
+Still blocked on a human: the payment gateway, SMS OTP, LINE Login, and the money-flow decision. The five-line handoff is at the bottom of `docs/BACKLOG.md`.

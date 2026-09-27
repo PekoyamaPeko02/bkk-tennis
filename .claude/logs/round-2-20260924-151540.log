@@ -1,0 +1,21 @@
+F2 through F5 are built, tested and committed on `dev/autopilot`. The only items left in the backlog are the four BLOCKED ones (payment gateway, SMS OTP, LINE Login, the platform-collects-money decision). Nothing is pushed.
+
+**Test results.** The final `dotnet test` run passed (45 unit, 697 integration). Typecheck and build were clean. The last full `pnpm e2e` run (86 tests) was the subagent's after F5 was finished, and it passed. I didn't re-run e2e myself after the last gate.
+
+**What was built**
+- **F2 my venues:** `GET /clubos/me/venues`, a venue switcher in ClubOS, and the hard-coded `VENUE_ID` removed. The settings page now checks whether the user owns the selected venue rather than using their account-wide role.
+- **F3 passwords:** `POST /auth/password/change`, `POST /auth/password/reset`, and `POST /admin/partners/{id}/owner/reset-link` (a 24-hour, single-use link the admin copies). A password change or reset logs out every older session. New ClubOS `/account` and `/reset-password` pages, plus a reset-link dialog in the admin partners page.
+- **F4 payouts:** `GET /clubos/venues/{venueId}/payouts` and `.../payouts/{id}`, owner-only. They show the partner's payouts across all its venues, and another partner's payout returns 404. New ClubOS `/payouts` page.
+- **F5 error codes:** a 62-code TH/EN catalogue in the player app, used by the login, venue, discover, booking and favorites pages. A test scans `backend/src` for every code the API can emit and checks both catalogues.
+
+**Before you rely on this**
+- **New SQL:** apply `db/init/007_payout_no_show.sql` and `008_password_reset.sql` by hand to any existing local DB.
+- **Config for F3:** set `PasswordReset:ClubOsUrl` per environment. ClubOS also needs an SPA history fallback for `/reset-password`.
+- **Old tokens:** partner tokens issued before F3 stay valid until that user first changes their password.
+- **Test bug caught:** the test engineer found the first version of `/clubos/me/venues` returned 500 for every partner (an EF ordering translation error), and I fixed it.
+- **Flaky test:** `e2e/tests/admin-bookings.spec.ts:93` failed once in each of the F2 and F4 e2e runs and passed on re-run.
+- **Mock accounts:** I added `multi@racquetclub.test` (two venues) and `owner@benchasiri.test` (owns the partner that has payouts). The mock also can't log in newly created partners.
+- **Untested branch:** the "code not in catalogue, use the server message" path in the player's error helper has no test, because there's no TS unit runner.
+- **Not covered:** ClubOS and admin still show raw server messages, and there's no reset UI for non-owner staff.
+
+The 5-line handoff is at the bottom of `docs/BACKLOG.md`.

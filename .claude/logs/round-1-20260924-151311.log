@@ -1,0 +1,15 @@
+F1 is finished and committed. I stopped there instead of continuing to F2, and F2–F5 are still open. The `dotnet test`, typecheck and build gate is green, but `pnpm e2e` was not run.
+
+**What changed for F1**
+- **Payout rule:** the weekly payout job now settles paid online `no_show` bookings the same way as `completed` ones. The partner is paid minus commission, the player gets no refund, and walk-ins are still excluded. The change is in `PayoutService.cs`.
+- **New SQL file:** `db/init/007_payout_no_show.sql` rebuilds the partial index for the new rule. Existing local databases need it applied by hand.
+- **Other edits:** the mock API's payout rows and the admin payouts page copy were updated to match.
+- **Tests:** `AdminPayoutsTests` now expects a `no_show` booking in the payout (800 gross, 80 commission). The "nothing eligible" test uses a cancelled booking instead.
+- **Revenue and overview take:** the existing code already counted `no_show`, so no change was needed there. I did not add a test for it.
+
+**What I didn't do**
+- **Extra tests:** I did not add a late `no_show` roll-forward test or a settle-job-to-payout test.
+- **Subagent:** the test-engineer subagent had no Bash access this round, so it could not run anything. I ran the gate myself. The gate covered `dotnet test` (33 + 622 passing), typecheck and build.
+- **Late cancellations:** late-cancelled bookings with no refund are still never paid out.
+
+The backlog item is ticked, and I added a handoff section at the bottom of `docs/BACKLOG.md`. There are two commits: `116db25` for the feature and `aa60a68` for the handoff. Nothing is pushed.
