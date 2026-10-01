@@ -1,0 +1,20 @@
+Background tasks still running after 600s; terminating. Set CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS=0 to wait indefinitely.
+C3 is committed as `1517cda`. C4 is implemented but not committed. test-engineer is still writing its tests, so C4 is not yet tested or through the full gate.
+
+**C3 (walk-in and block).**
+- Full gate green before commit: 284 backend integration tests plus 33 unit tests, typecheck, build, and 10 Playwright e2e.
+- The commit adds the ClubOS walk-in and block dialogs, unblock from the block panel, and live refresh through SignalR.
+- Follow-up: `VENUE_ID` is still hard-coded in `SchedulePage.vue`.
+- test-engineer found and fixed a mock bug where blocking over a seeded booking hid the booking instead of returning `block_conflict`.
+
+**C4 (check-in and no-show), written but not yet tested.**
+- **Background job:** `SettleBookingsAsync` in `BookingService` runs from the existing 30-second job.
+  - An app booking still confirmed 15 minutes after its first slot starts becomes `no_show`, with no refund.
+  - A checked-in booking becomes `completed` once its last slot ends.
+  - A walk-in is never auto no-show but becomes `completed` after it ends.
+- **ClubOS UI:** a new `CheckInDialog` looks up a booking by code and accepts a `BKKTENNIS:<code>` prefix. There are also check-in and no-show buttons in the booking detail panel.
+- **API and mock:** new client methods `getBookingByCode`, `checkIn` and `markNoShow`, with mock versions that enforce the same time windows.
+
+**Waiting on:** test-engineer to add integration tests for the settle rules and Playwright specs that move the clock. After that I'll run the full gate, commit, and tick C4 in `docs/BACKLOG.md`.
+
+**Housekeeping.** `mut_tmp.py` is still staged in the index. Removing it needed an approval this session couldn't give, so I've kept it out of commits by naming paths explicitly.
