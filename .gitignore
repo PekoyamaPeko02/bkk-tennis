@@ -1,0 +1,29 @@
+# node / quasar
+node_modules/
+dist/
+.quasar/
+*.local
+.env
+.env.*
+!.env.example
+
+# capacitor
+apps/*/src-capacitor/ios/App/Pods/
+apps/*/src-capacitor/android/.gradle/
+apps/*/src-capacitor/android/app/build/
+apps/*/src-capacitor/www/
+
+# dotnet
+bin/
+obj/
+*.user
+.vs/
+TestResults/
+
+# os / editors
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+.claude/logs/

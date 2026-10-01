@@ -1,0 +1,23 @@
+@api = http://localhost:5080/api/v1
+@venue = 20000000-0000-0000-0000-000000000001
+
+### Nearby venues (Sukhumvit 39)
+GET {{api}}/venues?lat=13.7317&lng=100.5700&radiusKm=5&from=17:00&to=22:00
+
+### Venue detail
+GET {{api}}/venues/racquet-club-sukhumvit-49
+
+### Availability
+GET {{api}}/venues/{{venue}}/availability
+
+### Request OTP (dev returns devCode)
+POST {{api}}/auth/otp/request
+Content-Type: application/json
+
+{ "phone": "0812345678" }
+
+### Verify OTP -> copy accessToken
+POST {{api}}/auth/otp/verify
+Content-Type: application/json
+
+{ "phone": "0812345678", "code": "000000" }

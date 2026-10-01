@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+
+<html class="light" lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BKK Tennis Platform Admin Dashboard</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary-fixed-dim": "#95d3ba",
+            "surface-container-highest": "#dae2fd",
+            "inverse-surface": "#283044",
+            "inverse-primary": "#95d3ba",
+            "background": "#faf8ff",
+            "on-tertiary-fixed": "#370e00",
+            "on-primary": "#ffffff",
+            "tertiary": "#561a00",
+            "surface-container": "#eaedff",
+            "on-secondary-fixed": "#102000",
+            "surface-container-high": "#e2e7ff",
+            "primary": "#003527",
+            "inverse-on-surface": "#eef0ff",
+            "secondary-container": "#acf847",
+            "outline-variant": "#bfc9c3",
+            "outline": "#707974",
+            "on-surface-variant": "#404944",
+            "tertiary-fixed-dim": "#ffb599",
+            "secondary-fixed": "#acf847",
+            "on-secondary-container": "#457000",
+            "surface-container-lowest": "#ffffff",
+            "surface-tint": "#2b6954",
+            "on-surface": "#131b2e",
+            "surface-dim": "#d2d9f4",
+            "surface-variant": "#dae2fd",
+            "on-secondary-fixed-variant": "#304f00",
+            "on-primary-fixed": "#002117",
+            "surface": "#faf8ff",
+            "on-tertiary": "#ffffff",
+            "on-tertiary-fixed-variant": "#7f2b00",
+            "secondary": "#416900",
+            "on-error": "#ffffff",
+            "on-secondary": "#ffffff",
+            "secondary-fixed-dim": "#91db2a",
+            "on-primary-container": "#80bea6",
+            "tertiary-fixed": "#ffdbce",
+            "primary-container": "#064e3b",
+            "surface-container-low": "#f2f3ff",
+            "error": "#ba1a1a",
+            "surface-bright": "#faf8ff",
+            "on-error-container": "#93000a",
+            "primary-fixed": "#b0f0d6",
+            "on-primary-fixed-variant": "#0b513d",
+            "error-container": "#ffdad6",
+            "tertiary-container": "#7b2900",
+            "on-tertiary-container": "#ff966c",
+            "on-background": "#131b2e"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter-mobile": "0.75rem",
+            "space-xl": "2.5rem",
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem",
+            "space-lg": "1.5rem",
+            "margin": "2rem",
+            "margin-mobile": "1rem",
+            "space-md": "1rem",
+            "gutter": "1.5rem"
+          },
+          "fontFamily": {
+            "headline-xl": ["Space Grotesk"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "metric-num": ["Space Grotesk"],
+            "display-hero": ["Space Grotesk"],
+            "headline-lg-mobile": ["Space Grotesk"],
+            "headline-md": ["Space Grotesk"],
+            "headline-lg": ["Space Grotesk"],
+            "display-hero-mobile": ["Space Grotesk"],
+            "headline-xl-mobile": ["Space Grotesk"],
+            "body-md": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "label-lg": ["Plus Jakarta Sans"],
+            "body-sm": ["Plus Jakarta Sans"],
+            "headline-sm": ["Space Grotesk"]
+          },
+          "fontSize": {
+            "headline-xl": ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+            "metric-num": ["20px", { lineHeight: "24px", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "display-hero": ["56px", { lineHeight: "64px", letterSpacing: "-0.03em", fontWeight: "700" }],
+            "headline-lg-mobile": ["24px", { lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "headline-md": ["22px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "display-hero-mobile": ["36px", { lineHeight: "44px", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "headline-xl-mobile": ["28px", { lineHeight: "36px", letterSpacing: "-0.01em", fontWeight: "700" }],
+            "body-md": ["15px", { lineHeight: "22px", fontWeight: "400" }],
+            "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.02em", fontWeight: "600" }],
+            "label-sm": ["10px", { lineHeight: "14px", letterSpacing: "0.04em", fontWeight: "700" }],
+            "label-lg": ["14px", { lineHeight: "20px", letterSpacing: "0.01em", fontWeight: "600" }],
+            "body-sm": ["13px", { lineHeight: "18px", fontWeight: "400" }],
+            "headline-sm": ["18px", { lineHeight: "24px", letterSpacing: "0em", fontWeight: "600" }]
+          }
+        },
+      },
+    }
+  </script>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md text-body-md antialiased selection:bg-secondary-fixed selection:text-on-secondary-fixed">
+<!-- ==================== HEADER (TopNavBar Shared Component Execution) ==================== -->
+<header class="bg-surface-container-lowest dark:bg-inverse-surface border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none sticky top-0 z-50">
+<div class="flex justify-between items-center w-full px-6 md:px-12 max-w-7xl mx-auto h-20">
+<!-- Brand & Left Cluster -->
+<div class="flex items-center space-x-8">
+<div class="flex items-center space-x-3">
+<div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-secondary-fixed shadow-inner">
+<span class="material-symbols-outlined text-2xl" data-icon="sports_tennis">sports_tennis</span>
+</div>
+<div>
+<div class="text-headline-md font-headline-md font-bold text-primary dark:text-inverse-primary tracking-tight leading-none">
+              BKK Tennis
+            </div>
+<span class="text-label-sm font-label-sm uppercase tracking-widest text-primary font-bold">Platform Master Admin</span>
+</div>
+</div>
+<!-- Search Input Bar on Left -->
+<div class="hidden xl:flex items-center bg-surface-container-low rounded-lg px-3 py-2 w-72 border border-outline-variant/40 focus-within:border-primary-container">
+<span class="material-symbols-outlined text-outline text-lg mr-2" data-icon="search">search</span>
+<input class="bg-transparent text-body-sm font-body-sm text-on-surface focus:outline-none w-full placeholder:text-outline-variant" placeholder="ค้นหารายชื่อสนาม, คอร์ด, Booking ID..." type="text"/>
+</div>
+</div>
+<!-- Navigation Links from Master Spec -->
+<nav class="hidden lg:flex items-center space-x-6 h-full">
+<!-- Links defined in shared component + Admin sub-tabs -->
+<a class="border-b-2 border-primary dark:border-secondary-fixed text-primary dark:text-secondary-fixed font-bold pb-1 text-label-lg font-label-lg flex items-center gap-1.5 h-full" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="dashboard">dashboard</span>
+          ภาพรวมระบบ (Overview)
+        </a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-inverse-primary transition-colors pb-1 text-label-lg font-label-lg flex items-center gap-1.5" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="stadium">stadium</span>
+          สนามพันธมิตร (Court Partners &amp; Onboarding)
+        </a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-inverse-primary transition-colors pb-1 text-label-lg font-label-lg flex items-center gap-1.5" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="book_online">book_online</span>
+          รายการจองทั้งหมด (Global Bookings)
+        </a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-inverse-primary transition-colors pb-1 text-label-lg font-label-lg flex items-center gap-1.5" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="payments">payments</span>
+          การเงิน &amp; คอมมิชชั่น (Payouts &amp; Fees)
+        </a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-inverse-primary transition-colors pb-1 text-label-lg font-label-lg flex items-center gap-1.5" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="near_me">near_me</span>
+          ระบบ GPS Engine
+        </a>
+</nav>
+<!-- Trailing Action Cluster -->
+<div class="flex items-center space-x-3">
+<!-- Location Indicator badge -->
+<div class="hidden sm:flex items-center bg-surface-container px-3 py-1.5 rounded-full text-label-md font-label-md text-primary">
+<span class="material-symbols-outlined text-sm mr-1 text-primary" data-icon="my_location">my_location</span>
+          Sukhumvit, BKK
+        </div>
+<!-- Trailing Icon Action: Notifications -->
+<button class="relative p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors" title="Notifications">
+<span class="material-symbols-outlined text-xl" data-icon="notifications">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-error rounded-full ring-2 ring-surface-container-lowest"></span>
+</button>
+<!-- Trailing Primary Action button -->
+<button class="hidden sm:inline-flex items-center justify-center bg-secondary-fixed text-on-secondary-fixed hover:bg-secondary-fixed-dim px-4 py-2 rounded-lg text-label-lg font-label-lg font-semibold shadow-sm transition-all duration-150 active:scale-95">
+          Quick Book
+        </button>
+<!-- Player Profile Avatar -->
+<div class="w-10 h-10 rounded-full ring-2 ring-primary/20 overflow-hidden ml-1 flex-shrink-0 bg-primary-fixed flex items-center justify-center">
+<img alt="Player Profile Avatar" class="w-full h-full object-cover" data-alt="A refined professional athletic club platform administrator avatar portrait in modern activewear, neutral studio lighting with soft Bangkok country club green ambience, ultra-sharp detail and warm approachable aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoDJK13UBO5TY_0yMivF-wVbjb_eNO8rHemGSkGpl4XVpu919nrUQnYP5ex3Y1RyWE3fhGbGjVroieSeQN5Czq_OZsJPbZ2FZuxh_wcEbVyW_1jcM0TYQimE-U5-dEYrAyWd76BRNmuVDVhWIFw8j5uifcIIMFERlkMQRX1Vj72dBdxEGbjttad1v5Qe9N09R2HWd0GACaaUnaNcnr6K2s_9fDm92mPwOhYmvqCUwmeo3uKVuyYLIg_Q"/>
+</div>
+</div>
+</div>
+</header>
+<!-- ==================== SUB-BAR / STATUS BANNER ==================== -->
+<div class="bg-primary text-on-primary py-2.5 px-6 md:px-12">
+<div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between text-body-sm font-body-sm gap-2">
+<div class="flex items-center space-x-3">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-label-sm font-label-sm bg-secondary-fixed text-on-secondary-fixed font-bold tracking-wider">
+          LIVE ENGINE
+        </span>
+<span class="text-on-primary-container">ระบบผู้ดูแลระบบส่วนกลาง BKK Tennis · Bangkok Multi-Zone Central Dispatch</span>
+</div>
+<div class="flex items-center space-x-4 text-label-md font-label-md">
+<div class="flex items-center text-primary-fixed">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed mr-1.5 animate-ping"></span>
+          GPS Socket: 186 คอร์ทออนไลน์
+        </div>
+<span class="text-outline-variant">|</span>
+<div class="text-primary-fixed">15 ม.ค. 2025 · 18:42 น. (GMT+7)</div>
+</div>
+</div>
+</div>
+<!-- ==================== MAIN CONTENT CONTAINER ==================== -->
+<main class="flex-grow w-full max-w-7xl mx-auto px-6 md:px-12 py-8 space-y-8">
+<!-- Top Headline Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-outline-variant/30 pb-6">
+<div>
+<div class="flex items-center space-x-2 text-label-lg font-label-lg text-primary font-bold">
+<span class="material-symbols-outlined text-lg" data-icon="admin_panel_settings">admin_panel_settings</span>
+<span>Central Executive Control Center</span>
+</div>
+<h1 class="text-headline-xl font-headline-xl text-primary font-bold tracking-tight mt-1">
+          ระบบผู้ดูแลระบบส่วนกลาง BKK Tennis
+        </h1>
+<p class="text-body-md font-body-md text-on-surface-variant mt-1">
+          การบริหารจัดการสนามพันธมิตร ตรวจจับพิกัด Geofence และวิเคราะห์กระแสเงินสดแบบเรียลไทม์
+        </p>
+</div>
+<div class="flex items-center space-x-3">
+<button class="inline-flex items-center bg-surface-container-lowest text-primary border border-outline-variant px-4 py-2.5 rounded-lg text-label-lg font-label-lg font-semibold hover:bg-surface-container-low transition-colors shadow-sm">
+<span class="material-symbols-outlined text-lg mr-2" data-icon="download">download</span>
+          ดาวน์โหลดรายงานประจำเดือน
+        </button>
+<button class="inline-flex items-center bg-primary-container text-on-primary hover:bg-primary px-4 py-2.5 rounded-lg text-label-lg font-label-lg font-semibold shadow transition-all active:scale-95">
+<span class="material-symbols-outlined text-lg mr-2 text-secondary-fixed" data-icon="add_circle">add_circle</span>
+          ลงทะเบียนสนามใหม่ (Direct Add)
+        </button>
+</div>
+</div>
+<!-- ==================== TOP KPI ROW ==================== -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+<!-- KPI 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/50 shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="absolute top-0 right-0 w-24 h-24 bg-primary-fixed/20 rounded-bl-full pointer-events-none"></div>
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
+            ยอดจองรวมทั้งแพลตฟอร์ม
+          </span>
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-lg" data-icon="confirmation_number">confirmation_number</span>
+</div>
+</div>
+<div class="mt-3">
+<div class="text-headline-lg font-headline-lg text-primary font-bold">
+            4,820 <span class="text-headline-sm font-headline-sm font-normal text-on-surface-variant">รายการ</span>
+</div>
+<div class="flex items-center justify-between mt-2 pt-2 border-t border-outline-variant/30 text-label-sm font-label-sm">
+<span class="text-on-surface-variant">Gross Booking Value:</span>
+<span class="font-metric-num text-metric-num text-primary font-bold">฿3,240,000</span>
+</div>
+</div>
+<div class="mt-3 flex items-center text-label-sm font-label-sm text-secondary font-bold">
+<span class="material-symbols-outlined text-sm mr-1" data-icon="trending_up">trending_up</span>
+          +18.4% เทียบกับเดือนที่ผ่านมา
+        </div>
+</div>
+<!-- KPI 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/50 shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="absolute top-0 right-0 w-24 h-24 bg-secondary-container/20 rounded-bl-full pointer-events-none"></div>
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
+            สนามพันธมิตรที่เปิดใช้งาน
+          </span>
+<div class="w-8 h-8 rounded-lg bg-secondary-container/40 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-lg" data-icon="stadium">stadium</span>
+</div>
+</div>
+<div class="mt-3">
+<div class="text-headline-lg font-headline-lg text-primary font-bold">
+            48 <span class="text-headline-sm font-headline-sm font-normal text-on-surface-variant">สนาม</span>
+</div>
+<div class="flex items-center justify-between mt-2 pt-2 border-t border-outline-variant/30 text-label-sm font-label-sm">
+<span class="text-on-surface-variant">ครอบคลุมคอร์ท:</span>
+<span class="font-metric-num text-metric-num text-primary font-bold">186 คอร์ททั่ว กทม.</span>
+</div>
+</div>
+<div class="mt-3 text-label-sm font-label-sm text-on-surface-variant flex items-center">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary mr-1.5"></span>
+          สุขุมวิท, สาทร, อารีย์, บางนา
+        </div>
+</div>
+<!-- KPI 3 -->
+<div class="bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/50 shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="absolute top-0 right-0 w-24 h-24 bg-primary-fixed-dim/20 rounded-bl-full pointer-events-none"></div>
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
+            อัตรา Matching ผ่าน GPS สำเร็จ
+          </span>
+<div class="w-8 h-8 rounded-lg bg-primary-fixed-dim/40 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-lg" data-icon="explore">explore</span>
+</div>
+</div>
+<div class="mt-3">
+<div class="text-headline-lg font-headline-lg text-primary font-bold">
+            94.2%
+          </div>
+<div class="flex items-center justify-between mt-2 pt-2 border-t border-outline-variant/30 text-label-sm font-label-sm">
+<span class="text-on-surface-variant">ความใกล้เคียง:</span>
+<span class="font-semibold text-primary">ผู้ใช้จองสนามในรัศมี &lt; 5 กม.</span>
+</div>
+</div>
+<div class="mt-3 flex items-center text-label-sm font-label-sm text-secondary font-bold">
+<span class="material-symbols-outlined text-sm mr-1" data-icon="gps_fixed">gps_fixed</span>
+          Geofencing Dispatch ทำงานปกติ
+        </div>
+</div>
+<!-- KPI 4 -->
+<div class="bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/50 shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="absolute top-0 right-0 w-24 h-24 bg-tertiary-fixed/30 rounded-bl-full pointer-events-none"></div>
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md uppercase tracking-wider text-on-surface-variant font-semibold">
+            รายได้ค่าธรรมเนียมแพลตฟอร์ม
+          </span>
+<div class="w-8 h-8 rounded-lg bg-tertiary-fixed/40 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-lg" data-icon="account_balance_wallet">account_balance_wallet</span>
+</div>
+</div>
+<div class="mt-3">
+<div class="text-headline-lg font-headline-lg text-primary font-bold">
+            ฿324,000
+          </div>
+<div class="flex items-center justify-between mt-2 pt-2 border-t border-outline-variant/30 text-label-sm font-label-sm">
+<span class="text-on-surface-variant">มาตรฐานส่วนแบ่ง:</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded bg-surface-container text-primary font-bold text-label-sm font-label-sm">10% Take Rate</span>
+</div>
+</div>
+<div class="mt-3 flex items-center text-label-sm font-label-sm text-tertiary-container font-bold">
+<span class="material-symbols-outlined text-sm mr-1" data-icon="payments">payments</span>
+          พร้อมรอบเคลียริ่งวันศุกร์นี้
+        </div>
+</div>
+</div>
+<!-- ==================== MAIN 2-COLUMN LAYOUT ==================== -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- ==================== LEFT COLUMN (2/3 WIDTH: 8 Cols) ==================== -->
+<div class="lg:col-span-8 space-y-8">
+<!-- SECTION 1: Pending Partner Onboarding -->
+<section class="bg-surface-container-lowest rounded-xl border border-outline-variant/50 shadow-sm overflow-hidden">
+<div class="p-6 border-b border-outline-variant/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div class="flex items-center space-x-3">
+<div class="w-9 h-9 rounded-lg bg-primary-container text-secondary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-xl" data-icon="approval_delegation">approval_delegation</span>
+</div>
+<div>
+<h2 class="text-headline-md font-headline-md font-bold text-primary">
+                  ใบสมัครและคำขอเข้าร่วมแพลตฟอร์มใหม่
+                </h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant">
+                  Pending Partner Onboarding &amp; Verification Pipeline
+                </p>
+</div>
+</div>
+<div class="flex items-center space-x-2">
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-label-md font-label-md bg-tertiary-fixed text-on-tertiary-fixed font-bold">
+<span class="w-2 h-2 rounded-full bg-tertiary mr-1.5"></span>
+                รอตรวจสอบ 3 รายการ
+              </span>
+</div>
+</div>
+<!-- Onboarding Applications Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant text-label-md font-label-md border-b border-outline-variant/40">
+<th class="py-3 px-5 font-semibold">ชื่อสโมสร / ย่านที่ตั้ง</th>
+<th class="py-3 px-4 font-semibold">ประเภทสนาม</th>
+<th class="py-3 px-4 font-semibold">สถานะเอกสาร &amp; พิกัด</th>
+<th class="py-3 px-5 text-right font-semibold">การดำเนินการ</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30 text-body-sm font-body-sm">
+<!-- Row 1: Pridi Banomyong Tennis Club -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-4 px-5">
+<div class="font-bold text-primary text-label-lg font-label-lg">Pridi Banomyong Tennis Club</div>
+<div class="text-body-sm font-body-sm text-on-surface-variant flex items-center mt-0.5">
+<span class="material-symbols-outlined text-sm mr-1 text-primary" data-icon="location_on">location_on</span>
+                      สุขุมวิท 71 (วัฒนา / Watthana)
+                    </div>
+</td>
+<td class="py-4 px-4">
+<div class="inline-flex items-center px-2.5 py-1 rounded-md text-label-md font-label-md bg-tertiary-fixed/30 text-tertiary border border-tertiary-fixed font-semibold">
+<span class="material-symbols-outlined text-sm mr-1" data-icon="sports_tennis">sports_tennis</span>
+                      4 Clay Courts
+                    </div>
+</td>
+<td class="py-4 px-4">
+<div class="inline-flex items-center px-2.5 py-1 rounded-full text-label-md font-label-md bg-emerald-50 text-emerald-800 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600 mr-1.5"></span>
+                      เอกสารครบ - ตรวจสอบพิกัด GPS
+                    </div>
+<div class="text-label-sm font-label-sm text-on-surface-variant mt-1">Lat: 13.7142, Long: 100.5928</div>
+</td>
+<td class="py-4 px-5 text-right space-x-2 whitespace-nowrap">
+<button class="inline-flex items-center bg-secondary-fixed text-on-secondary-fixed hover:bg-secondary-fixed-dim px-3 py-1.5 rounded-lg text-label-md font-label-md font-bold transition-all shadow-sm active:scale-95">
+<span class="material-symbols-outlined text-sm mr-1" data-icon="check_circle">check_circle</span>
+                      อนุมัติสนาม
+                    </button>
+<button class="inline-flex items-center bg-surface-container-lowest text-primary border border-outline-variant hover:bg-surface-container-low px-3 py-1.5 rounded-lg text-label-md font-label-md font-semibold transition-colors">
+                      ดูรายละเอียด
+                    </button>
+</td>
+</tr>
+<!-- Row 2: Rama 9 Racquet & Fitness -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-4 px-5">
+<div class="font-bold text-primary text-label-lg font-label-lg">Rama 9 Racquet &amp; Fitness</div>
+<div class="text-body-sm font-body-sm text-on-surface-variant flex items-center mt-0.5">
+<span class="material-symbols-outlined text-sm mr-1 text-primary" data-icon="location_on">location_on</span>
+                      พระราม 9 ซอย 15 (ห้วยขวาง)
+                    </div>
+</td>
+<td class="py-4 px-4">
+<div class="inline-flex items-center px-2.5 py-1 rounded-md text-label-md font-label-md bg-surface-container-high text-primary border border-outline-variant font-semibold">
+<span class="material-symbols-outlined text-sm mr-1" data-icon="roofing">roofing</span>
+                      2 Covered Courts
+                    </div>
+</td>
+<td class="py-4 px-4">
+<div class="inline-flex items-center px-2.5 py-1 rounded-full text-label-md font-label-md bg-amber-50 text-amber-800 border border-amber-200">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5"></span>
+                      รอส่งใบอนุญาตประกอบการ
+                    </div>
+<div class="text-label-sm font-label-sm text-on-surface-variant mt-1">ส่งหนังสือแจ้งเตือนแล้ว 1 ครั้ง</div>
+</td>
+<td class="py-4 px-5 text-right space-x-2 whitespace-nowrap">
+<button class="inline-flex items-center bg-surface-container-low text-outline hover:bg-surface-container-high px-3 py-1.5 rounded-lg text-label-md font-label-md font-semibold transition-colors">
+<span class="material-symbols-outlined text-sm mr-1" data-icon="mail">mail</span>
+                      ทวงเอกสาร
+                    </button>
+<button class="inline-flex items-center bg-surface-container-lowest text-primary border border-outline-variant hover:bg-surface-container-low px-3 py-1.5 rounded-lg text-label-md font-label-md font-semibold transition-colors">
+                      ดูรายละเอียด
+                    </button>
+</td>
+</tr>
+<!-- Row 3: Ari Tennis Community Space -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-4 px-5">
+<div class="font-bold text-primary text-label-lg font-label-lg">Ari Tennis Community Space</div>
+<div class="text-body-sm font-body-sm text-on-surface-variant flex items-center mt-0.5">
+<span class="material-symbols-outlined text-sm mr-1 text-primary" data-icon="location_on">location_on</span>
+                      อารีย์สัมพันธ์ ซอย 3 (พญาไท)
+                    </div>
+</td>
+<td class="py-4 px-4">
+<div class="inline-flex items-center px-2.5 py-1 rounded-md text-label-md font-label-md bg-surface-container-high text-primary border border-outline-variant font-semibold">
+<span class="material-symbols-outlined text-sm mr-1" data-icon="layers">layers</span>
+                      3 Hard Courts
+                    </div>
+</td>
+<td class="py-4 px-4">
+<div class="inline-flex items-center px-2.5 py-1 rounded-full text-label-md font-label-md bg-secondary-container/40 text-on-secondary-container border border-secondary-fixed">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary mr-1.5"></span>
+                      อนุมัติแล้ว รอเปิดระบบ
+                    </div>
+<div class="text-label-sm font-label-sm text-on-surface-variant mt-1">กำหนดเปิด Slot: 16 ม.ค. 06:00 น.</div>
+</td>
+<td class="py-4 px-5 text-right space-x-2 whitespace-nowrap">
+<button class="inline-flex items-center bg-primary-container text-on-primary hover:bg-primary px-3 py-1.5 rounded-lg text-label-md font-label-md font-semibold transition-all shadow-sm">
+<span class="material-symbols-outlined text-sm mr-1 text-secondary-fixed" data-icon="toggle_on">toggle_on</span>
+                      เริ่มการจองจริง
+                    </button>
+<button class="inline-flex items-center bg-surface-container-lowest text-primary border border-outline-variant hover:bg-surface-container-low px-3 py-1.5 rounded-lg text-label-md font-label-md font-semibold transition-colors">
+                      ดูรายละเอียด
+                    </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 bg-surface-container-low/40 border-t border-outline-variant/30 flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>แสดง 3 จาก 12 รายการคำขอทั้งสัปดาห์</span>
+<a class="text-label-md font-label-md text-primary font-bold hover:underline inline-flex items-center" href="#">
+              ดูคำขอทั้งหมดในระบบ <span class="material-symbols-outlined text-sm ml-1" data-icon="chevron_right">chevron_right</span>
+</a>
+</div>
+</section>
+<!-- SECTION 2: Real-Time GPS Booking Feed -->
+<section class="bg-surface-container-lowest rounded-xl border border-outline-variant/50 shadow-sm p-6">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-outline-variant/30">
+<div class="flex items-center space-x-3">
+<div class="w-9 h-9 rounded-lg bg-secondary-fixed/30 text-on-secondary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-xl" data-icon="radar">radar</span>
+</div>
+<div>
+<h2 class="text-headline-md font-headline-md font-bold text-primary">
+                  Real-Time GPS Booking Feed
+                </h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant">รายการจองสดล่าสุดผ่านโครงข่ายระบุพิกัดอัจฉริยะ</p>
+</div>
+</div>
+<div class="flex items-center space-x-2 text-label-sm font-label-sm text-primary bg-surface-container px-3 py-1.5 rounded-full font-semibold">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+              Live Geofence Stream Active
+            </div>
+</div>
+<!-- Feed Items Stack -->
+<div class="divide-y divide-outline-variant/20 mt-2">
+<!-- Feed Item 1 -->
+<div class="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-start space-x-3.5">
+<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary font-bold font-headline-sm flex-shrink-0 mt-0.5">
+                  ธ
+                </div>
+<div>
+<div class="flex items-center space-x-2">
+<span class="font-bold text-primary text-body-md font-body-md">คุณธนภัทร ว.</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-label-sm font-label-sm bg-surface-container text-on-surface-variant">ID: #BK-9481</span>
+<span class="text-label-sm font-label-sm text-outline">เมื่อ 2 นาทีที่แล้ว</span>
+</div>
+<div class="text-body-sm font-body-sm text-on-surface mt-1 flex flex-wrap items-center gap-2">
+<span class="font-semibold text-primary">The Racquet Club (สุขุมวิท 49)</span>
+<span class="text-outline">·</span>
+<span>Court 2 (Hard Court, Floodlit)</span>
+<span class="text-outline">·</span>
+<span class="text-on-surface-variant">วันนี้ 19:00 - 20:00 (1 ชม.)</span>
+</div>
+<div class="flex items-center gap-3 mt-2">
+<!-- GPS Tag -->
+<span class="inline-flex items-center text-label-sm font-label-sm text-secondary font-bold bg-secondary-fixed/20 px-2 py-0.5 rounded">
+<span class="material-symbols-outlined text-xs mr-1" data-icon="near_me">near_me</span>
+                      ห่างจากจุดค้นหา 1.2 กม.
+                    </span>
+<!-- Payment Status -->
+<span class="inline-flex items-center text-label-sm font-label-sm text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-semibold">
+<span class="material-symbols-outlined text-xs mr-1" data-icon="check_circle">check_circle</span>
+                      ชำระเงินสำเร็จผ่าน PromptPay
+                    </span>
+</div>
+</div>
+</div>
+<div class="text-right flex md:flex-col justify-between items-end pl-12 md:pl-0">
+<div class="font-metric-num text-metric-num text-primary font-bold">฿850.00</div>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Fee: ฿85.00</span>
+</div>
+</div>
+<!-- Feed Item 2 -->
+<div class="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-start space-x-3.5">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed font-bold font-headline-sm flex-shrink-0 mt-0.5">
+                  ศ
+                </div>
+<div>
+<div class="flex items-center space-x-2">
+<span class="font-bold text-primary text-body-md font-body-md">คุณศศิธร พ.</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-label-sm font-label-sm bg-surface-container text-on-surface-variant">ID: #BK-9480</span>
+<span class="text-label-sm font-label-sm text-outline">เมื่อ 5 นาทีที่แล้ว</span>
+</div>
+<div class="text-body-sm font-body-sm text-on-surface mt-1 flex flex-wrap items-center gap-2">
+<span class="font-semibold text-primary">Asoke Sports Club (อโศก-ดินแดง)</span>
+<span class="text-outline">·</span>
+<span>Court 1 (Clay Court)</span>
+<span class="text-outline">·</span>
+<span class="text-on-surface-variant">พรุ่งนี้ 07:00 - 09:00 (2 ชม.)</span>
+</div>
+<div class="flex items-center gap-3 mt-2">
+<!-- GPS Tag -->
+<span class="inline-flex items-center text-label-sm font-label-sm text-secondary font-bold bg-secondary-fixed/20 px-2 py-0.5 rounded">
+<span class="material-symbols-outlined text-xs mr-1" data-icon="near_me">near_me</span>
+                      ห่าง 2.4 กม.
+                    </span>
+<!-- Payment Status -->
+<span class="inline-flex items-center text-label-sm font-label-sm text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-semibold">
+<span class="material-symbols-outlined text-xs mr-1" data-icon="check_circle">check_circle</span>
+                      ชำระเงินสำเร็จผ่าน PromptPay
+                    </span>
+</div>
+</div>
+</div>
+<div class="text-right flex md:flex-col justify-between items-end pl-12 md:pl-0">
+<div class="font-metric-num text-metric-num text-primary font-bold">฿1,400.00</div>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Fee: ฿140.00</span>
+</div>
+</div>
+<!-- Feed Item 3 -->
+<div class="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-start space-x-3.5">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold font-headline-sm flex-shrink-0 mt-0.5">
+                  M
+                </div>
+<div>
+<div class="flex items-center space-x-2">
+<span class="font-bold text-primary text-body-md font-body-md">Marcus Lindqvist</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-label-sm font-label-sm bg-surface-container text-on-surface-variant">ID: #BK-9479</span>
+<span class="text-label-sm font-label-sm text-outline">เมื่อ 9 นาทีที่แล้ว</span>
+</div>
+<div class="text-body-sm font-body-sm text-on-surface mt-1 flex flex-wrap items-center gap-2">
+<span class="font-semibold text-primary">Sathorn Tennis Centre</span>
+<span class="text-outline">·</span>
+<span>Court 4 (Indoor Hard)</span>
+<span class="text-outline">·</span>
+<span class="text-on-surface-variant">วันนี้ 20:00 - 21:00 (1 ชม.)</span>
+</div>
+<div class="flex items-center gap-3 mt-2">
+<!-- GPS Tag -->
+<span class="inline-flex items-center text-label-sm font-label-sm text-secondary font-bold bg-secondary-fixed/20 px-2 py-0.5 rounded">
+<span class="material-symbols-outlined text-xs mr-1" data-icon="near_me">near_me</span>
+                      ห่างจากจุดค้นหา 0.8 กม.
+                    </span>
+<!-- Payment Status -->
+<span class="inline-flex items-center text-label-sm font-label-sm text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-semibold">
+<span class="material-symbols-outlined text-xs mr-1" data-icon="credit_card">credit_card</span>
+                      บัตรเครดิต Visa/Mastercard
+                    </span>
+</div>
+</div>
+</div>
+<div class="text-right flex md:flex-col justify-between items-end pl-12 md:pl-0">
+<div class="font-metric-num text-metric-num text-primary font-bold">฿1,100.00</div>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Fee: ฿110.00</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- ==================== RIGHT COLUMN (1/3 WIDTH: 4 Cols) ==================== -->
+<div class="lg:col-span-4 space-y-8">
+<!-- SECTION 1: Bangkok Demand Heatmap -->
+<section class="bg-surface-container-lowest rounded-xl border border-outline-variant/50 shadow-sm p-6">
+<div class="flex items-center justify-between pb-4 border-b border-outline-variant/30">
+<div class="flex items-center space-x-2.5">
+<div class="w-8 h-8 rounded-lg bg-tertiary/10 text-tertiary flex items-center justify-center">
+<span class="material-symbols-outlined text-lg" data-icon="local_fire_department">local_fire_department</span>
+</div>
+<div>
+<h2 class="text-headline-sm font-headline-sm font-bold text-primary">
+                  Bangkok Demand Heatmap
+                </h2>
+<p class="text-label-sm font-label-sm text-on-surface-variant">โซนที่มีความต้องการจองสูงสุด</p>
+</div>
+</div>
+<span class="text-label-sm font-label-sm font-bold text-tertiary-container bg-tertiary-fixed px-2 py-0.5 rounded">
+              PEAK HOURS
+            </span>
+</div>
+<!-- Heatmap Visual Graphic / Map Container -->
+<div class="mt-4 rounded-xl overflow-hidden border border-outline-variant/40 relative h-48 bg-inverse-surface">
+<!-- Simulated Map Canvas with GPS pins -->
+<div class="absolute inset-0 bg-gradient-to-br from-primary via-primary-container to-inverse-surface opacity-95"></div>
+<!-- Map Grid Lines Pattern -->
+<div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#acf847 1px, transparent 1px); background-size: 16px 16px;"></div>
+<!-- Heat Glows for Bangkok Zones -->
+<!-- Sukhumvit Node -->
+<div class="absolute top-1/2 left-1/2 -translate-x-6 -translate-y-4 flex flex-col items-center">
+<div class="w-12 h-12 rounded-full bg-error/30 animate-ping absolute"></div>
+<div class="w-6 h-6 rounded-full bg-error flex items-center justify-center text-on-error shadow-lg shadow-error/50 z-10">
+<span class="material-symbols-outlined text-xs" data-icon="fireplace">fireplace</span>
+</div>
+<span class="mt-1 px-1.5 py-0.5 rounded text-label-sm font-label-sm bg-inverse-surface text-secondary-fixed font-bold border border-secondary-fixed/40">
+                สุขุมวิท (96%)
+              </span>
+</div>
+<!-- Sathorn Node -->
+<div class="absolute top-2/3 left-1/4 flex flex-col items-center">
+<div class="w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center text-inverse-surface shadow z-10">
+<span class="text-label-sm font-label-sm font-bold">89</span>
+</div>
+<span class="mt-1 px-1 py-0.2 rounded text-label-sm font-label-sm bg-inverse-surface/80 text-inverse-on-surface">
+                สาทร-สีลม
+              </span>
+</div>
+<!-- Ari Node -->
+<div class="absolute top-1/4 right-1/3 flex flex-col items-center">
+<div class="w-5 h-5 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed shadow z-10">
+<span class="text-label-sm font-label-sm font-bold">84</span>
+</div>
+<span class="mt-1 px-1 py-0.2 rounded text-label-sm font-label-sm bg-inverse-surface/80 text-inverse-on-surface">
+                อารีย์
+              </span>
+</div>
+<div class="absolute bottom-2 right-2 px-2 py-1 rounded bg-inverse-surface/90 text-label-sm font-label-sm text-outline-variant backdrop-blur">
+              Data: Bangkok Grid v2
+            </div>
+</div>
+<!-- Zone Breakdown List -->
+<div class="mt-5 space-y-4">
+<!-- Zone 1: Sukhumvit -->
+<div>
+<div class="flex justify-between items-center text-label-md font-label-md">
+<span class="font-bold text-primary">สุขุมวิท (พร้อมพงษ์-ทองหล่อ)</span>
+<span class="font-metric-num text-metric-num font-bold text-error">96%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2.5 mt-1.5 overflow-hidden">
+<div class="bg-error h-2.5 rounded-full" style="width: 96%"></div>
+</div>
+<div class="flex items-center justify-between text-label-sm font-label-sm text-tertiary font-semibold mt-1">
+<span>คอร์ทไม่พอช่วง 18:00 - 20:00 น.</span>
+<span class="text-outline">Waiting list: 34 คน</span>
+</div>
+</div>
+<!-- Zone 2: Sathorn-Silom -->
+<div>
+<div class="flex justify-between items-center text-label-md font-label-md">
+<span class="font-bold text-primary">สาทร-สีลม</span>
+<span class="font-metric-num text-metric-num font-bold text-primary">89%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2.5 mt-1.5 overflow-hidden">
+<div class="bg-secondary-fixed-dim h-2.5 rounded-full" style="width: 89%"></div>
+</div>
+<div class="flex items-center justify-between text-label-sm font-label-sm text-on-surface-variant mt-1">
+<span>คอร์ทเริ่มหนาแน่นช่วงค่ำ</span>
+<span class="text-outline">Available: 8 คอร์ท</span>
+</div>
+</div>
+<!-- Zone 3: Ari-Phaya Thai -->
+<div>
+<div class="flex justify-between items-center text-label-md font-label-md">
+<span class="font-bold text-primary">อารีย์-พญาไท</span>
+<span class="font-metric-num text-metric-num font-bold text-primary">84%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2.5 mt-1.5 overflow-hidden">
+<div class="bg-primary-fixed-dim h-2.5 rounded-full" style="width: 84%"></div>
+</div>
+<div class="flex items-center justify-between text-label-sm font-label-sm text-on-surface-variant mt-1">
+<span>ความต้องการขยายตัวต่อเนื่อง</span>
+<span class="text-outline">Available: 11 คอร์ท</span>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 2: สถานะระบบ GPS & Geofencing Gateway -->
+<section class="bg-surface-container-lowest rounded-xl border border-outline-variant/50 shadow-sm p-6">
+<div class="flex items-center space-x-2.5 pb-4 border-b border-outline-variant/30">
+<div class="w-8 h-8 rounded-lg bg-primary-container text-secondary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-lg" data-icon="hub">hub</span>
+</div>
+<div>
+<h2 class="text-headline-sm font-headline-sm font-bold text-primary">
+                สถานะระบบ GPS &amp; Geofencing Gateway
+              </h2>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Core Infrastructure Health Status</p>
+</div>
+</div>
+<div class="mt-4 space-y-4">
+<!-- GPS Precision Engine -->
+<div class="p-3.5 bg-surface-container-low rounded-lg border border-outline-variant/30 flex items-start justify-between">
+<div>
+<div class="flex items-center space-x-2">
+<span class="font-bold text-primary text-label-lg font-label-lg">GPS Precision Engine v3.4</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-emerald-100 text-emerald-800 font-bold">
+                    ONLINE
+                  </span>
+</div>
+<div class="text-body-sm font-body-sm text-on-surface-variant mt-1">
+                  ค่าความคลาดเคลื่อนเฉลี่ย: <span class="font-semibold text-primary">12.4 เมตร</span>ทั่วกรุงเทพฯ
+                </div>
+<div class="flex items-center text-label-sm font-label-sm text-outline mt-1.5">
+<span class="material-symbols-outlined text-xs mr-1" data-icon="satellite_alt">satellite_alt</span>
+                  ดาวเทียมที่จับคู่: 18 Nodes · Latency: 32ms
+                </div>
+</div>
+<div class="w-3 h-3 rounded-full bg-emerald-500 ring-4 ring-emerald-100 mt-1"></div>
+</div>
+<!-- Webhook & Payment Gateway -->
+<div class="p-3.5 bg-surface-container-low rounded-lg border border-outline-variant/30 flex items-start justify-between">
+<div>
+<div class="flex items-center space-x-2">
+<span class="font-bold text-primary text-label-lg font-label-lg">Webhook &amp; Payment Gateway</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-emerald-100 text-emerald-800 font-bold">
+                    100% UPTIME
+                  </span>
+</div>
+<div class="text-body-sm font-body-sm text-on-surface-variant mt-1">
+                  PromptPay Fast-Settle &amp; Multi-Bank Switch
+                </div>
+<div class="flex items-center text-label-sm font-label-sm text-outline mt-1.5">
+<span class="material-symbols-outlined text-xs mr-1" data-icon="sync">sync</span>
+                  Successful handshakes: 4,820 / 4,820
+                </div>
+</div>
+<div class="w-3 h-3 rounded-full bg-emerald-500 ring-4 ring-emerald-100 mt-1"></div>
+</div>
+<!-- Server Cluster Specs -->
+<div class="pt-2 border-t border-outline-variant/30 grid grid-cols-2 gap-3 text-label-sm font-label-sm">
+<div class="bg-surface-container px-3 py-2 rounded">
+<div class="text-on-surface-variant">Cloud Node:</div>
+<div class="font-bold text-primary">BKK-Central-01 (Equinix)</div>
+</div>
+<div class="bg-surface-container px-3 py-2 rounded">
+<div class="text-on-surface-variant">Geofence Radius:</div>
+<div class="font-bold text-primary">Adaptive (3km - 15km)</div>
+</div>
+</div>
+<button class="w-full mt-2 inline-flex items-center justify-center bg-surface-container-lowest text-primary border border-outline-variant hover:bg-surface-container-low py-2 rounded-lg text-label-md font-label-md font-semibold transition-colors">
+<span class="material-symbols-outlined text-base mr-1.5" data-icon="terminal">terminal</span>
+              เปิดดู Geofence Diagnostics Log
+            </button>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- ==================== FOOTER (Footer Shared Component Execution) ==================== -->
+<footer class="bg-primary dark:bg-inverse-surface border-t border-primary-container dark:border-outline text-on-primary dark:text-inverse-on-surface mt-16">
+<div class="w-full px-6 md:px-12 py-12 max-w-7xl mx-auto">
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 pb-8 border-b border-primary-container">
+<!-- Brand Block -->
+<div>
+<div class="text-headline-sm font-headline-sm font-bold text-secondary-fixed tracking-tight">
+            BKK Tennis
+          </div>
+<p class="text-body-sm font-body-sm text-on-primary-container mt-1">
+            แพลตฟอร์มค้นหาและจองสนามเทนนิสชั้นนำระดับมหานครกรุงเทพฯ
+          </p>
+</div>
+<!-- Master Links -->
+<div class="flex flex-wrap items-center gap-y-3 gap-x-6 text-label-sm font-label-sm">
+<a class="text-on-primary-container dark:text-outline-variant hover:text-on-primary dark:hover:text-inverse-on-surface transition-colors hover:text-secondary-fixed" href="#">
+            Explore Sukhumvit
+          </a>
+<a class="text-on-primary-container dark:text-outline-variant hover:text-on-primary dark:hover:text-inverse-on-surface transition-colors hover:text-secondary-fixed" href="#">
+            Silom &amp; Sathorn Courts
+          </a>
+<a class="text-on-primary-container dark:text-outline-variant hover:text-on-primary dark:hover:text-inverse-on-surface transition-colors hover:text-secondary-fixed" href="#">
+            Thong Lo Venues
+          </a>
+<a class="text-secondary-fixed font-semibold underline" href="#">
+            Court Partner Portal
+          </a>
+<a class="text-on-primary-container dark:text-outline-variant hover:text-on-primary dark:hover:text-inverse-on-surface transition-colors hover:text-secondary-fixed" href="#">
+            Privacy &amp; Terms
+          </a>
+<a class="text-on-primary-container dark:text-outline-variant hover:text-on-primary dark:hover:text-inverse-on-surface transition-colors hover:text-secondary-fixed" href="#">
+            Support Hotline
+          </a>
+</div>
+</div>
+<!-- Bottom Copyright Row -->
+<div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-body-sm font-body-sm text-on-primary-container">
+<div>
+          © 2025 BKK Tennis Inc. Bangkok Court Discovery &amp; Booking Platform. All rights reserved.
+        </div>
+<div class="flex items-center space-x-4 text-label-sm font-label-sm">
+<span class="inline-flex items-center text-secondary-fixed font-bold">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed mr-1.5"></span>
+            System Status: Healthy 99.98%
+          </span>
+<span class="text-primary-container">|</span>
+<span>BKK Admin Build 2.14-prod</span>
+</div>
+</div>
+</div>
+</footer>
+</body></html>

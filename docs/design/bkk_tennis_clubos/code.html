@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+
+<html class="light" lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BKK Tennis ClubOS - Court Partner Portal</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;family=Sarabun:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS with custom configuration -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary-fixed-dim": "#95d3ba",
+            "surface-container-highest": "#dae2fd",
+            "inverse-surface": "#283044",
+            "inverse-primary": "#95d3ba",
+            "background": "#faf8ff",
+            "on-tertiary-fixed": "#370e00",
+            "on-primary": "#ffffff",
+            "tertiary": "#561a00",
+            "surface-container": "#eaedff",
+            "on-secondary-fixed": "#102000",
+            "surface-container-high": "#e2e7ff",
+            "primary": "#003527",
+            "inverse-on-surface": "#eef0ff",
+            "secondary-container": "#acf847",
+            "outline-variant": "#bfc9c3",
+            "outline": "#707974",
+            "on-surface-variant": "#404944",
+            "tertiary-fixed-dim": "#ffb599",
+            "secondary-fixed": "#acf847",
+            "on-secondary-container": "#457000",
+            "surface-container-lowest": "#ffffff",
+            "surface-tint": "#2b6954",
+            "on-surface": "#131b2e",
+            "surface-dim": "#d2d9f4",
+            "surface-variant": "#dae2fd",
+            "on-secondary-fixed-variant": "#304f00",
+            "on-primary-fixed": "#002117",
+            "surface": "#faf8ff",
+            "on-tertiary": "#ffffff",
+            "on-tertiary-fixed-variant": "#7f2b00",
+            "secondary": "#416900",
+            "on-error": "#ffffff",
+            "on-secondary": "#ffffff",
+            "secondary-fixed-dim": "#91db2a",
+            "on-primary-container": "#80bea6",
+            "tertiary-fixed": "#ffdbce",
+            "primary-container": "#064e3b",
+            "surface-container-low": "#f2f3ff",
+            "error": "#ba1a1a",
+            "surface-bright": "#faf8ff",
+            "on-error-container": "#93000a",
+            "primary-fixed": "#b0f0d6",
+            "on-primary-fixed-variant": "#0b513d",
+            "error-container": "#ffdad6",
+            "tertiary-container": "#7b2900",
+            "on-tertiary-container": "#ff966c",
+            "on-background": "#131b2e"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter-mobile": "0.75rem",
+            "space-xl": "2.5rem",
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem",
+            "space-lg": "1.5rem",
+            "margin": "2rem",
+            "margin-mobile": "1rem",
+            "space-md": "1rem",
+            "gutter": "1.5rem"
+          },
+          "fontFamily": {
+            "headline-xl": ["Space Grotesk", "Sarabun", "sans-serif"],
+            "body-lg": ["Plus Jakarta Sans", "Sarabun", "sans-serif"],
+            "metric-num": ["Space Grotesk", "sans-serif"],
+            "display-hero": ["Space Grotesk", "sans-serif"],
+            "headline-md": ["Space Grotesk", "Sarabun", "sans-serif"],
+            "headline-lg": ["Space Grotesk", "Sarabun", "sans-serif"],
+            "body-md": ["Plus Jakarta Sans", "Sarabun", "sans-serif"],
+            "label-md": ["Plus Jakarta Sans", "Sarabun", "sans-serif"],
+            "label-sm": ["Plus Jakarta Sans", "Sarabun", "sans-serif"],
+            "label-lg": ["Plus Jakarta Sans", "Sarabun", "sans-serif"],
+            "body-sm": ["Plus Jakarta Sans", "Sarabun", "sans-serif"],
+            "headline-sm": ["Space Grotesk", "Sarabun", "sans-serif"]
+          },
+          "fontSize": {
+            "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+            "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+            "metric-num": ["20px", {"lineHeight": "24px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+            "display-hero": ["56px", {"lineHeight": "64px", "letterSpacing": "-0.03em", "fontWeight": "700"}],
+            "headline-md": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+            "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+            "body-md": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+            "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+            "label-sm": ["10px", {"lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "700"}],
+            "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+            "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+            "headline-sm": ["18px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "600"}]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .maintenance-hatch {
+      background: repeating-linear-gradient(
+        45deg,
+        #f1f5f9,
+        #f1f5f9 8px,
+        #e2e8f0 8px,
+        #e2e8f0 16px
+      );
+    }
+    /* Custom subtle scrollbars for schedule grid */
+    .schedule-scroll::-webkit-scrollbar {
+      height: 8px;
+      width: 8px;
+    }
+    .schedule-scroll::-webkit-scrollbar-track {
+      background: #f8fafc;
+    }
+    .schedule-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased min-h-screen flex flex-col font-body-md text-body-md selection:bg-secondary-fixed selection:text-on-secondary-fixed">
+<!-- Top Navigation Header (Derived from Shared Components: TopNavBar) -->
+<header class="bg-surface-container-lowest dark:bg-inverse-surface border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none sticky top-0 z-40">
+<div class="flex justify-between items-center w-full px-6 md:px-12 max-w-7xl mx-auto h-20">
+<!-- Brand & Product Identity -->
+<div class="flex items-center space-x-6">
+<a class="flex items-center space-x-3" href="#">
+<div class="w-10 h-10 rounded-lg bg-primary-container text-secondary-fixed flex items-center justify-center font-bold text-xl shadow-inner">
+<span class="material-symbols-outlined" data-icon="sports_tennis">sports_tennis</span>
+</div>
+<div>
+<span class="text-headline-md font-headline-md font-bold text-primary dark:text-inverse-primary tracking-tight">BKK Tennis</span>
+<span class="ml-1 text-label-sm font-label-sm px-2 py-0.5 rounded bg-primary-fixed text-on-primary-fixed font-bold uppercase tracking-wider">ClubOS</span>
+</div>
+</a>
+<!-- Venue Switcher Selector -->
+<div class="hidden lg:flex items-center bg-surface-container-low px-3 py-1.5 rounded-lg border border-outline-variant">
+<span class="material-symbols-outlined text-primary text-base mr-2" data-icon="stadium">stadium</span>
+<div class="text-left">
+<div class="flex items-center space-x-1.5">
+<span class="text-label-md font-label-lg font-bold text-on-surface">The Racquet Club Sukhumvit 49</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm cursor-pointer" data-icon="expand_more">expand_more</span>
+</div>
+<p class="text-label-sm font-label-sm text-on-surface-variant">3 Indoor Courts, 2 Outdoor Courts</p>
+</div>
+</div>
+</div>
+<!-- Navigation Links from Shared Components -->
+<nav class="hidden md:flex items-center space-x-8 text-label-lg font-label-lg">
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-inverse-primary transition-colors pb-1" href="#">Discover Courts</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-inverse-primary transition-colors pb-1" href="#">Clubs &amp; Venues</a>
+<a class="border-b-2 border-primary dark:border-secondary-fixed text-primary dark:text-secondary-fixed font-bold pb-1 flex items-center gap-1.5" href="#">
+<span class="material-symbols-outlined text-base" data-icon="dashboard">dashboard</span>
+          Partner Portal
+        </a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-inverse-primary transition-colors pb-1" href="#">Tournaments</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-inverse-primary transition-colors pb-1" href="#">Community</a>
+</nav>
+<!-- Trailing Action Cluster -->
+<div class="flex items-center space-x-3">
+<!-- Location Indicator -->
+<div class="hidden xl:flex items-center space-x-1 text-label-md font-label-md text-on-surface-variant px-2.5 py-1.5 rounded-full bg-surface-container-low">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="my_location">my_location</span>
+<span>Sukhumvit, BKK</span>
+</div>
+<!-- Quick Notifications -->
+<button class="relative p-2 rounded-full hover:bg-surface-container-low text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<!-- Quick Book / Action Modal Trigger -->
+<button class="bg-secondary-fixed hover:bg-secondary-fixed-dim text-on-secondary-fixed font-headline-sm text-label-md px-3.5 py-2 rounded-lg flex items-center space-x-1.5 shadow-sm transition active:scale-95 font-semibold" onclick="openWalkinModal()">
+<span class="material-symbols-outlined text-base" data-icon="add_circle">add_circle</span>
+<span>Quick Book</span>
+</button>
+<!-- Profile Avatar -->
+<div class="w-9 h-9 rounded-full bg-primary-container text-white flex items-center justify-center font-bold text-sm ring-2 ring-secondary-fixed/50 cursor-pointer overflow-hidden">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Sub-Header Toolbar: Control Hub & Operational Buttons -->
+<section class="bg-surface-container-lowest border-b border-outline-variant/60 py-3.5 px-6 md:px-12">
+<div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center space-x-4">
+<div class="flex items-center space-x-2 text-on-surface">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="calendar_today">calendar_today</span>
+<span class="font-headline-sm text-headline-sm text-primary">ตารางจองประจำวัน (Daily Schedule)</span>
+</div>
+<div class="flex items-center bg-surface-container-low px-3 py-1 rounded-md text-label-md text-on-surface-variant border border-outline-variant/40">
+<button class="hover:text-primary px-1">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_left">chevron_left</span>
+</button>
+<span class="font-semibold mx-2 text-on-surface">วันนี้: วันพฤหัสบดีที่ 24 ต.ค. 2025</span>
+<button class="hover:text-primary px-1">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+<div class="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-emerald-50 text-emerald-900 border border-emerald-200">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed mr-1.5 animate-pulse"></span>
+          ซิงค์สดทุก 30 วินาที
+        </div>
+</div>
+<!-- Quick Action Buttons -->
+<div class="flex items-center space-x-2.5">
+<button class="bg-primary hover:bg-[#04392b] text-on-primary font-headline-sm text-label-lg px-4 py-2 rounded-lg flex items-center space-x-2 shadow-sm transition active:scale-95 focus:ring-2 focus:ring-secondary-fixed" onclick="openWalkinModal()">
+<span class="material-symbols-outlined text-base" data-icon="person_add">person_add</span>
+<span>+ เพิ่มการจอง Walk-in</span>
+</button>
+<button class="bg-surface-container-lowest border-2 border-outline-variant text-on-surface-variant hover:text-primary hover:border-primary font-headline-sm text-label-lg px-3.5 py-2 rounded-lg flex items-center space-x-1.5 transition active:scale-95" onclick="toggleMaintenanceBlock()">
+<span class="material-symbols-outlined text-base text-tertiary-container" data-icon="block">block</span>
+<span>บล็อกคอร์ทชั่วคราว (ซ่อมบำรุง)</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Main Canvas Container -->
+<main class="max-w-7xl w-full mx-auto px-6 md:px-12 py-6 flex-grow flex flex-col space-y-6">
+<!-- Top KPI Cards Row -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- KPI 1: Occupancy Rate -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/60 shadow-sm relative overflow-hidden group hover:border-primary transition">
+<div class="flex justify-between items-start">
+<div>
+<p class="text-label-md font-label-md text-on-surface-variant">อัตราครองคอร์ทวันนี้</p>
+<p class="text-label-sm text-on-surface-variant/80">Court Occupancy Rate</p>
+<h3 class="text-display-hero-mobile font-headline-xl text-primary mt-2">88%</h3>
+</div>
+<div class="w-10 h-10 rounded-lg bg-emerald-50 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-xl" data-icon="pie_chart">pie_chart</span>
+</div>
+</div>
+<div class="mt-3 flex items-center text-label-md font-semibold text-emerald-800">
+<span class="material-symbols-outlined text-sm mr-1" data-icon="trending_up">trending_up</span>
+<span>↑ 12% vs สัปดาห์ก่อน</span>
+<span class="text-on-surface-variant/70 font-normal ml-1.5">(Off-peak เต็ม 80%)</span>
+</div>
+<div class="w-full bg-surface-container-low h-1.5 rounded-full mt-3 overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 88%"></div>
+</div>
+</div>
+<!-- KPI 2: Today's Revenue -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/60 shadow-sm relative overflow-hidden group hover:border-primary transition">
+<div class="flex justify-between items-start">
+<div>
+<p class="text-label-md font-label-md text-on-surface-variant">รายได้ประจำวัน</p>
+<p class="text-label-sm text-on-surface-variant/80">Today's Total Revenue</p>
+<h3 class="text-headline-lg font-headline-xl text-on-surface mt-2 font-bold tracking-tight">฿24,850</h3>
+</div>
+<div class="w-10 h-10 rounded-lg bg-secondary-fixed/30 text-on-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-xl" data-icon="payments">payments</span>
+</div>
+</div>
+<div class="mt-3 flex flex-wrap gap-2 text-label-sm font-label-sm">
+<span class="bg-emerald-100/70 text-emerald-900 px-2 py-0.5 rounded font-medium">จองออนไลน์ 18 รายการ</span>
+<span class="bg-sky-100 text-sky-900 px-2 py-0.5 rounded font-medium">Walk-in 4 รายการ</span>
+</div>
+<div class="mt-2 text-label-sm text-on-surface-variant flex items-center">
+<span class="material-symbols-outlined text-xs mr-1 text-emerald-700" data-icon="check_circle">check_circle</span>
+          PromptPay ยืนยันแล้ว 100%
+        </div>
+</div>
+<!-- KPI 3: Active Courts -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/60 shadow-sm relative overflow-hidden group hover:border-primary transition">
+<div class="flex justify-between items-start">
+<div>
+<p class="text-label-md font-label-md text-on-surface-variant">คอร์ทเปิดให้บริการ</p>
+<p class="text-label-sm text-on-surface-variant/80">Active Operational Courts</p>
+<h3 class="text-headline-lg font-headline-xl text-primary mt-2 font-bold">5/5 คอร์ท</h3>
+</div>
+<div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">
+<span class="material-symbols-outlined text-xl" data-icon="wb_incandescent">wb_incandescent</span>
+</div>
+</div>
+<div class="mt-3 flex items-center text-label-md font-semibold text-primary">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary-fixed mr-2 animate-ping"></span>
+<span>เปิดไฟสปอร์ตไลท์พร้อม (18:00+)</span>
+</div>
+<p class="text-label-sm text-on-surface-variant mt-1.5">3 Indoor คุมแอร์ • 2 คอร์ทกลางแจ้งระบายอากาศ</p>
+</div>
+<!-- KPI 4: Next Immediate Booking -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/60 shadow-sm relative overflow-hidden group hover:border-primary transition">
+<div class="flex justify-between items-start">
+<div>
+<p class="text-label-md font-label-md text-on-surface-variant">การจองถัดไป (Upcoming Slot)</p>
+<p class="text-label-sm text-on-surface-variant/80">Next Session in 25 Mins</p>
+<h3 class="text-headline-sm font-headline-md text-tertiary-container mt-1 font-bold">17:00 • คอร์ท 1 (Indoor)</h3>
+</div>
+<div class="w-10 h-10 rounded-lg bg-emerald-100 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-xl" data-icon="sports_tennis">sports_tennis</span>
+</div>
+</div>
+<div class="mt-2 text-body-sm font-body-sm text-on-surface font-semibold flex items-center justify-between">
+<span>คุณกิตติศักดิ์ พ. (4 ท่าน)</span>
+<span class="bg-emerald-100 text-emerald-900 text-label-sm font-label-sm px-2 py-0.5 rounded font-bold">ชำระแล้ว</span>
+</div>
+<p class="text-label-sm text-on-surface-variant mt-1 flex items-center">
+<span class="material-symbols-outlined text-xs mr-1 text-primary" data-icon="qr_code_2">qr_code_2</span>
+          PromptPay Ref: #TH-90218
+        </p>
+</div>
+</div>
+<!-- Color Codes Legend Bar -->
+<div class="bg-surface-container-lowest p-3.5 rounded-xl border border-outline-variant/50 flex flex-wrap items-center justify-between gap-3 text-label-md">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="info">info</span>
+<span class="font-bold text-on-surface">สัญลักษณ์สถานะคอร์ท:</span>
+</div>
+<div class="flex flex-wrap items-center gap-4 text-body-sm">
+<div class="flex items-center space-x-1.5">
+<span class="w-3.5 h-3.5 rounded bg-primary-container border border-primary"></span>
+<span class="text-on-surface font-medium">จองแล้ว (Online)</span>
+</div>
+<div class="flex items-center space-x-1.5">
+<span class="w-3.5 h-3.5 rounded bg-sky-500 border border-sky-600"></span>
+<span class="text-on-surface font-medium">จองแล้ว (Walk-in)</span>
+</div>
+<div class="flex items-center space-x-1.5">
+<span class="w-3.5 h-3.5 rounded bg-amber-400 border border-amber-500"></span>
+<span class="text-on-surface font-medium">จองรอยืนยันสลิป</span>
+</div>
+<div class="flex items-center space-x-1.5">
+<span class="w-3.5 h-3.5 rounded bg-surface-container-lowest border-2 border-dashed border-outline-variant"></span>
+<span class="text-on-surface font-medium">ว่าง (เปิดรับจอง)</span>
+</div>
+<div class="flex items-center space-x-1.5">
+<span class="w-3.5 h-3.5 rounded maintenance-hatch border border-outline"></span>
+<span class="text-on-surface font-medium">ปิดซ่อมบำรุง / ทำความสะอาด</span>
+</div>
+</div>
+<div class="text-label-sm text-on-surface-variant font-medium">
+        *คลิกที่ช่องเวลาเพื่อดูรายละเอียดหรือแก้ไขสถานะ
+      </div>
+</div>
+<!-- MAIN INTERACTIVE SCHEDULE MATRIX & SIDE PANEL CONTAINER -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+<!-- Interactive Daily Court Schedule Matrix (8 or 9 cols) -->
+<section class="lg:col-span-8 xl:col-span-9 bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm overflow-hidden flex flex-col">
+<!-- Matrix Top Controls -->
+<div class="p-4 border-b border-outline-variant/50 flex flex-wrap items-center justify-between gap-3 bg-surface-bright">
+<div class="flex items-center space-x-3">
+<span class="font-headline-sm text-headline-sm text-primary font-bold">ตารางรายชั่วโมง (06:00 - 22:00)</span>
+<span class="text-label-sm bg-primary-fixed text-on-primary-fixed px-2 py-0.5 rounded-full font-bold">Real-time Grid</span>
+</div>
+<div class="flex items-center space-x-2">
+<button class="px-2.5 py-1 text-label-sm font-semibold rounded bg-surface-container-low border border-outline-variant text-on-surface hover:bg-surface-container">
+              มุมมองเต็มวัน
+            </button>
+<button class="px-2.5 py-1 text-label-sm font-semibold rounded bg-primary text-white">
+              ช่วงเวลานี้ (Now)
+            </button>
+</div>
+</div>
+<!-- Schedule Matrix Table -->
+<div class="overflow-x-auto schedule-scroll">
+<table class="w-full border-collapse text-left min-w-[850px]">
+<thead>
+<tr class="bg-surface-container-low text-on-surface border-b border-outline-variant">
+<th class="py-3 px-4 font-headline-sm text-label-md font-bold text-primary w-28 sticky left-0 bg-surface-container-low z-20 shadow-[1px_0_0_0_#bfc9c3]">
+                  เวลา \ คอร์ท
+                </th>
+<th class="py-3 px-3 font-headline-sm text-label-md font-bold text-on-surface">
+<div class="flex flex-col">
+<span>คอร์ท 1</span>
+<span class="text-label-sm font-normal text-on-surface-variant font-body-sm">Indoor • Hard</span>
+</div>
+</th>
+<th class="py-3 px-3 font-headline-sm text-label-md font-bold text-on-surface">
+<div class="flex flex-col">
+<span>คอร์ท 2</span>
+<span class="text-label-sm font-normal text-on-surface-variant font-body-sm">Indoor • Hard</span>
+</div>
+</th>
+<th class="py-3 px-3 font-headline-sm text-label-md font-bold text-on-surface">
+<div class="flex flex-col">
+<span>คอร์ท 3</span>
+<span class="text-label-sm font-normal text-on-surface-variant font-body-sm">Indoor • Clay</span>
+</div>
+</th>
+<th class="py-3 px-3 font-headline-sm text-label-md font-bold text-on-surface">
+<div class="flex flex-col">
+<span>คอร์ท 4</span>
+<span class="text-label-sm font-normal text-on-surface-variant font-body-sm">Outdoor • Floodlit</span>
+</div>
+</th>
+<th class="py-3 px-3 font-headline-sm text-label-md font-bold text-on-surface">
+<div class="flex flex-col">
+<span>คอร์ท 5</span>
+<span class="text-label-sm font-normal text-on-surface-variant font-body-sm">Outdoor • Hard</span>
+</div>
+</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/40 text-body-sm">
+<!-- 06:00 - 08:00 (Early Morning Off-peak) -->
+<tr class="hover:bg-surface-bright/50 transition">
+<td class="py-2.5 px-4 font-metric-num text-label-md font-bold text-on-surface-variant sticky left-0 bg-surface-container-lowest z-10 shadow-[1px_0_0_0_#bfc9c3]">
+                  06:00 - 08:00
+                </td>
+<!-- C1: Online Booked -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-primary-container text-white p-2 rounded-lg text-xs hover:ring-2 hover:ring-secondary-fixed transition" onclick="selectSlot('คุณสมชาย กิจเจริญ', '081-445-9988', 'คอร์ท 1 (Indoor Hard)', '06:00 - 08:00', 'จองออนไลน์ (Online)', 'เช่าไม้เทนนิส 1 ไม้', 'ชำระแล้ว (PromptPay QR)', '฿900')">
+<p class="font-bold truncate">คุณสมชาย ก.</p>
+<p class="text-label-sm text-secondary-fixed">Online • ฿900</p>
+</div>
+</td>
+<!-- C2: Free -->
+<td class="p-1.5">
+<div class="border border-dashed border-outline-variant hover:border-primary hover:bg-surface-container-low rounded-lg p-2 text-center text-xs text-on-surface-variant font-medium cursor-pointer transition" onclick="bookFreeSlot('คอร์ท 2', '06:00 - 08:00')">
+                    + ว่าง (฿450/ชม.)
+                  </div>
+</td>
+<!-- C3: Maintenance / Watering Clay -->
+<td class="p-1.5">
+<div class="maintenance-hatch border border-outline-variant text-on-surface-variant p-2 rounded-lg text-xs font-semibold">
+<span class="text-error font-bold">รดน้ำคอร์ทดิน</span>
+</div>
+</td>
+<!-- C4: Online Booked -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-primary-container text-white p-2 rounded-lg text-xs hover:ring-2 hover:ring-secondary-fixed transition" onclick="selectSlot('David Miller', '092-331-4400', 'คอร์ท 4 (Outdoor)', '06:00 - 08:00', 'จองออนไลน์ (Online)', 'ลูกเทนนิส 1 กระป๋อง', 'ชำระแล้ว (บัตรเครดิต)', '฿900')">
+<p class="font-bold truncate">David M. (Expat)</p>
+<p class="text-label-sm text-secondary-fixed">Online • ฿900</p>
+</div>
+</td>
+<!-- C5: Free -->
+<td class="p-1.5">
+<div class="border border-dashed border-outline-variant hover:border-primary hover:bg-surface-container-low rounded-lg p-2 text-center text-xs text-on-surface-variant font-medium cursor-pointer transition" onclick="bookFreeSlot('คอร์ท 5', '06:00 - 08:00')">
+                    + ว่าง (฿450/ชม.)
+                  </div>
+</td>
+</tr>
+<!-- 08:00 - 10:00 -->
+<tr class="hover:bg-surface-bright/50 transition">
+<td class="py-2.5 px-4 font-metric-num text-label-md font-bold text-on-surface-variant sticky left-0 bg-surface-container-lowest z-10 shadow-[1px_0_0_0_#bfc9c3]">
+                  08:00 - 10:00
+                </td>
+<!-- C1: Online -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-primary-container text-white p-2 rounded-lg text-xs hover:ring-2 hover:ring-secondary-fixed transition" onclick="selectSlot('โค้ช อาร์ต (Junior Camp)', '089-112-2334', 'คอร์ท 1 (Indoor Hard)', '08:00 - 10:00', 'สถาบัน/คอร์สเรียน', 'ลูกบอลเทรนนิ่ง 20 ลูก', 'ชำระรายเดือน (B2B)', '฿1,200')">
+<p class="font-bold truncate">BKK Academy Camp</p>
+<p class="text-label-sm text-secondary-fixed">Camp • ฿1,200</p>
+</div>
+</td>
+<!-- C2: Walk-in -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-sky-600 text-white p-2 rounded-lg text-xs hover:ring-2 hover:ring-secondary-fixed transition" onclick="selectSlot('คุณวิชัย ธนาคาร', '085-990-1234', 'คอร์ท 2 (Indoor Hard)', '08:00 - 10:00', 'Walk-in', 'ไม่มี', 'ชำระเงินสดหน้าร้าน', '฿900')">
+<p class="font-bold truncate">คุณวิชัย (Walk-in)</p>
+<p class="text-label-sm text-sky-100">Walk-in • ฿900</p>
+</div>
+</td>
+<!-- C3: Online -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-primary-container text-white p-2 rounded-lg text-xs hover:ring-2 hover:ring-secondary-fixed transition" onclick="selectSlot('คุณสิรินทร์ ชัยเวช', '086-554-1299', 'คอร์ท 3 (Indoor Clay)', '08:00 - 10:00', 'จองออนไลน์ (Online)', 'น็อคเกอร์ 1 ท่าน', 'ชำระแล้ว (PromptPay QR)', '฿1,400')">
+<p class="font-bold truncate">คุณสิรินทร์ + น็อคเกอร์</p>
+<p class="text-label-sm text-secondary-fixed">Online • ฿1,400</p>
+</div>
+</td>
+<!-- C4: Maintenance (Net adjustment) -->
+<td class="p-1.5">
+<div class="maintenance-hatch border border-outline-variant text-on-surface-variant p-2 rounded-lg text-xs font-semibold">
+<span class="text-tertiary-container">ปรับเสาตาข่าย</span>
+</div>
+</td>
+<!-- C5: Online -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-primary-container text-white p-2 rounded-lg text-xs hover:ring-2 hover:ring-secondary-fixed transition" onclick="selectSlot('Kenji Sato', '095-223-1188', 'คอร์ท 5 (Outdoor)', '08:00 - 10:00', 'จองออนไลน์ (Online)', 'เช่าไม้ 2 ไม้', 'ชำระแล้ว (PromptPay QR)', '฿900')">
+<p class="font-bold truncate">Kenji Sato</p>
+<p class="text-label-sm text-secondary-fixed">Online • ฿900</p>
+</div>
+</td>
+</tr>
+<!-- 10:00 - 12:00 -->
+<tr class="hover:bg-surface-bright/50 transition">
+<td class="py-2.5 px-4 font-metric-num text-label-md font-bold text-on-surface-variant sticky left-0 bg-surface-container-lowest z-10 shadow-[1px_0_0_0_#bfc9c3]">
+                  10:00 - 12:00
+                </td>
+<!-- C1: Online -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-primary-container text-white p-2 rounded-lg text-xs hover:ring-2 hover:ring-secondary-fixed transition" onclick="selectSlot('คุณประภัสสร เมฆา', '081-998-3321', 'คอร์ท 1 (Indoor Hard)', '10:00 - 12:00', 'จองออนไลน์ (Online)', 'เช่าลูกเทนนิส 1 กระป๋อง', 'ชำระแล้ว (PromptPay QR)', '฿900')">
+<p class="font-bold truncate">คุณประภัสสร</p>
+<p class="text-label-sm text-secondary-fixed">Online • ฿900</p>
+</div>
+</td>
+<!-- C2: Free -->
+<td class="p-1.5">
+<div class="border border-dashed border-outline-variant hover:border-primary hover:bg-surface-container-low rounded-lg p-2 text-center text-xs text-on-surface-variant font-medium cursor-pointer transition" onclick="bookFreeSlot('คอร์ท 2', '10:00 - 12:00')">
+                    + ว่าง (฿450/ชม.)
+                  </div>
+</td>
+<!-- C3: Free -->
+<td class="p-1.5">
+<div class="border border-dashed border-outline-variant hover:border-primary hover:bg-surface-container-low rounded-lg p-2 text-center text-xs text-on-surface-variant font-medium cursor-pointer transition" onclick="bookFreeSlot('คอร์ท 3', '10:00 - 12:00')">
+                    + ว่าง (฿500/ชม.)
+                  </div>
+</td>
+<!-- C4: Free (Midday Sun) -->
+<td class="p-1.5">
+<div class="border border-dashed border-outline-variant hover:border-primary hover:bg-surface-container-low rounded-lg p-2 text-center text-xs text-on-surface-variant font-medium cursor-pointer transition" onclick="bookFreeSlot('คอร์ท 4', '10:00 - 12:00')">
+                    + ว่าง (แดดจัด)
+                  </div>
+</td>
+<!-- C5: Free -->
+<td class="p-1.5">
+<div class="border border-dashed border-outline-variant hover:border-primary hover:bg-surface-container-low rounded-lg p-2 text-center text-xs text-on-surface-variant font-medium cursor-pointer transition" onclick="bookFreeSlot('คอร์ท 5', '10:00 - 12:00')">
+                    + ว่าง (แดดจัด)
+                  </div>
+</td>
+</tr>
+<!-- 12:00 - 14:00 -->
+<tr class="hover:bg-surface-bright/50 transition">
+<td class="py-2.5 px-4 font-metric-num text-label-md font-bold text-on-surface-variant sticky left-0 bg-surface-container-lowest z-10 shadow-[1px_0_0_0_#bfc9c3]">
+                  12:00 - 14:00
+                </td>
+<!-- C1: Maintenance cleaning -->
+<td class="p-1.5">
+<div class="maintenance-hatch border border-outline-variant text-on-surface-variant p-2 rounded-lg text-xs font-semibold">
+<span>ทำความสะอาดพื้น Hard</span>
+</div>
+</td>
+<!-- C2: Online -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-primary-container text-white p-2 rounded-lg text-xs hover:ring-2 hover:ring-secondary-fixed transition" onclick="selectSlot('Dr. Alan Walker', '091-888-2929', 'คอร์ท 2 (Indoor Hard)', '12:00 - 14:00', 'จองออนไลน์ (Online)', 'ผ้าขนหนู 2 ผืน', 'ชำระแล้ว (PromptPay QR)', '฿900')">
+<p class="font-bold truncate">Dr. Alan Walker</p>
+<p class="text-label-sm text-secondary-fixed">Online • ฿900</p>
+</div>
+</td>
+<!-- C3: Online -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-primary-container text-white p-2 rounded-lg text-xs hover:ring-2 hover:ring-secondary-fixed transition" onclick="selectSlot('คุณธนินทร์ เจริญผล', '084-221-9900', 'คอร์ท 3 (Indoor Clay)', '12:00 - 14:00', 'จองออนไลน์ (Online)', 'ไม่มี', 'ชำระแล้ว (PromptPay QR)', '฿1,000')">
+<p class="font-bold truncate">คุณธนินทร์ เจริญผล</p>
+<p class="text-label-sm text-secondary-fixed">Online • ฿1,000</p>
+</div>
+</td>
+<!-- C4: Free -->
+<td class="p-1.5">
+<div class="border border-dashed border-outline-variant hover:border-primary hover:bg-surface-container-low rounded-lg p-2 text-center text-xs text-on-surface-variant font-medium cursor-pointer transition" onclick="bookFreeSlot('คอร์ท 4', '12:00 - 14:00')">
+                    + ว่าง
+                  </div>
+</td>
+<!-- C5: Free -->
+<td class="p-1.5">
+<div class="border border-dashed border-outline-variant hover:border-primary hover:bg-surface-container-low rounded-lg p-2 text-center text-xs text-on-surface-variant font-medium cursor-pointer transition" onclick="bookFreeSlot('คอร์ท 5', '12:00 - 14:00')">
+                    + ว่าง
+                  </div>
+</td>
+</tr>
+<!-- 14:00 - 16:00 -->
+<tr class="hover:bg-surface-bright/50 transition">
+<td class="py-2.5 px-4 font-metric-num text-label-md font-bold text-on-surface-variant sticky left-0 bg-surface-container-lowest z-10 shadow-[1px_0_0_0_#bfc9c3]">
+                  14:00 - 16:00
+                </td>
+<!-- C1: Online -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-primary-container text-white p-2 rounded-lg text-xs hover:ring-2 hover:ring-secondary-fixed transition" onclick="selectSlot('คุณกิตติศักดิ์ พ.', '082-990-4411', 'คอร์ท 1 (Indoor Hard)', '14:00 - 16:00', 'จองออนไลน์ (Online)', 'เช่าไม้ Wilson Pro Staff 2 ไม้', 'ชำระแล้ว (PromptPay QR)', '฿900')">
+<p class="font-bold truncate">คุณกิตติศักดิ์ พ.</p>
+<p class="text-label-sm text-secondary-fixed">Online • ฿900</p>
+</div>
+</td>
+<!-- C2: Walk-in -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-sky-600 text-white p-2 rounded-lg text-xs hover:ring-2 hover:ring-secondary-fixed transition" onclick="selectSlot('คุณณัฐวุฒิ สิทธิ', '089-333-8822', 'คอร์ท 2 (Indoor Hard)', '14:00 - 16:00', 'Walk-in', 'เช่าลูกใหม่ 1 กระป๋อง', 'ชำระเงินสด', '฿900')">
+<p class="font-bold truncate">คุณณัฐวุฒิ (Walk-in)</p>
+<p class="text-label-sm text-sky-100">Walk-in • ฿900</p>
+</div>
+</td>
+<!-- C3: Pending Slip Verification -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-amber-400 text-amber-950 p-2 rounded-lg text-xs font-semibold hover:ring-2 hover:ring-amber-600 transition" onclick="selectSlot('คุณปิยะวรรณ สินธุ', '087-111-9988', 'คอร์ท 3 (Indoor Clay)', '14:00 - 16:00', 'จองรอยืนยัน (Pending)', 'ไม่มี', 'รอตรวจสอบสลิปโอนเงิน', '฿1,000')">
+<p class="font-bold truncate">คุณปิยะวรรณ (สลิปโอน)</p>
+<p class="text-label-sm text-amber-900">รอยืนยัน • ฿1,000</p>
+</div>
+</td>
+<!-- C4: Online -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-primary-container text-white p-2 rounded-lg text-xs hover:ring-2 hover:ring-secondary-fixed transition" onclick="selectSlot('Nicolas Girard', '096-778-9001', 'คอร์ท 4 (Outdoor)', '14:00 - 16:00', 'จองออนไลน์ (Online)', 'ไม่มี', 'ชำระแล้ว (PromptPay QR)', '฿900')">
+<p class="font-bold truncate">Nicolas G.</p>
+<p class="text-label-sm text-secondary-fixed">Online • ฿900</p>
+</div>
+</td>
+<!-- C5: Free -->
+<td class="p-1.5">
+<div class="border border-dashed border-outline-variant hover:border-primary hover:bg-surface-container-low rounded-lg p-2 text-center text-xs text-on-surface-variant font-medium cursor-pointer transition" onclick="bookFreeSlot('คอร์ท 5', '14:00 - 16:00')">
+                    + ว่าง
+                  </div>
+</td>
+</tr>
+<!-- 16:00 - 18:00 (Prime Twilight) -->
+<tr class="hover:bg-surface-bright/50 transition bg-emerald-50/20">
+<td class="py-2.5 px-4 font-metric-num text-label-md font-bold text-primary sticky left-0 bg-surface-container-lowest z-10 shadow-[1px_0_0_0_#bfc9c3]">
+                  16:00 - 18:00
+                </td>
+<!-- C1: Online -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-primary-container text-white p-2 rounded-lg text-xs ring-2 ring-secondary-fixed shadow transition" onclick="selectSlot('คุณกิตติศักดิ์ ชัยสิทธิ์', '082-990-4411', 'คอร์ท 1 (Indoor Hard)', '16:00 - 18:00', 'จองออนไลน์ (Online)', 'เช่าไม้เทนนิส Babolat 2 ไม้', 'ชำระแล้ว (PromptPay QR)', '฿1,200')">
+<p class="font-bold truncate">คุณกิตติศักดิ์ (ถัดไป)</p>
+<p class="text-label-sm text-secondary-fixed">Online • ฿1,200</p>
+</div>
+</td>
+<!-- C2: Online -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-primary-container text-white p-2 rounded-lg text-xs hover:ring-2 hover:ring-secondary-fixed transition" onclick="selectSlot('คุณมนัสวี ภักดี', '083-441-2300', 'คอร์ท 2 (Indoor Hard)', '16:00 - 18:00', 'จองออนไลน์ (Online)', 'ไม่มี', 'ชำระแล้ว (PromptPay QR)', '฿1,200')">
+<p class="font-bold truncate">คุณมนัสวี ภักดี</p>
+<p class="text-label-sm text-secondary-fixed">Online • ฿1,200</p>
+</div>
+</td>
+<!-- C3: Online -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-primary-container text-white p-2 rounded-lg text-xs hover:ring-2 hover:ring-secondary-fixed transition" onclick="selectSlot('คุณธีรภัทร อนันต์', '086-778-4321', 'คอร์ท 3 (Indoor Clay)', '16:00 - 18:00', 'จองออนไลน์ (Online)', 'น็อคเกอร์ 1 ท่าน', 'ชำระแล้ว (PromptPay QR)', '฿1,800')">
+<p class="font-bold truncate">คุณธีรภัทร + น็อคเกอร์</p>
+<p class="text-label-sm text-secondary-fixed">Online • ฿1,800</p>
+</div>
+</td>
+<!-- C4: Walk-in -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-sky-600 text-white p-2 rounded-lg text-xs hover:ring-2 hover:ring-secondary-fixed transition" onclick="selectSlot('คุณกฤษฎา ชื่นชอบ', '081-332-1144', 'คอร์ท 4 (Outdoor Floodlit)', '16:00 - 18:00', 'Walk-in', 'ไม่มี', 'ชำระเงินสดหน้าร้าน', '฿1,200')">
+<p class="font-bold truncate">คุณกฤษฎา (Walk-in)</p>
+<p class="text-label-sm text-sky-100">Walk-in • ฿1,200</p>
+</div>
+</td>
+<!-- C5: Online -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-primary-container text-white p-2 rounded-lg text-xs hover:ring-2 hover:ring-secondary-fixed transition" onclick="selectSlot('Sarah Jenkins', '094-112-9876', 'คอร์ท 5 (Outdoor Floodlit)', '16:00 - 18:00', 'จองออนไลน์ (Online)', 'ลูกเทนนิสใหม่ 1 กระป๋อง', 'ชำระแล้ว (PromptPay QR)', '฿1,200')">
+<p class="font-bold truncate">Sarah Jenkins</p>
+<p class="text-label-sm text-secondary-fixed">Online • ฿1,200</p>
+</div>
+</td>
+</tr>
+<!-- 18:00 - 20:00 (Peak Floodlit Evening) -->
+<tr class="hover:bg-surface-bright/50 transition bg-emerald-50/30">
+<td class="py-2.5 px-4 font-metric-num text-label-md font-bold text-primary sticky left-0 bg-surface-container-lowest z-10 shadow-[1px_0_0_0_#bfc9c3]">
+                  18:00 - 20:00
+                </td>
+<!-- C1: Online -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-primary-container text-white p-2 rounded-lg text-xs hover:ring-2 hover:ring-secondary-fixed transition" onclick="selectSlot('คุณวรวุฒิ เตชะไพศาล', '081-992-8811', 'คอร์ท 1 (Indoor Hard)', '18:00 - 20:00', 'จองออนไลน์ (Online)', 'เช่าไม้ 1 ไม้ + ผ้าขนหนู 2', 'ชำระแล้ว (PromptPay QR)', '฿1,300')">
+<p class="font-bold truncate">คุณวรวุฒิ ต.</p>
+<p class="text-label-sm text-secondary-fixed">Online • ฿1,300</p>
+</div>
+</td>
+<!-- C2: Online -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-primary-container text-white p-2 rounded-lg text-xs hover:ring-2 hover:ring-secondary-fixed transition" onclick="selectSlot('ทีม Sukhumvit Matchplay', '089-223-4455', 'คอร์ท 2 (Indoor Hard)', '18:00 - 20:00', 'จองออนไลน์ (Online)', 'ลูกแข่งขัน 2 กระป๋อง', 'ชำระแล้ว (PromptPay QR)', '฿1,300')">
+<p class="font-bold truncate">Matchplay Club</p>
+<p class="text-label-sm text-secondary-fixed">Online • ฿1,300</p>
+</div>
+</td>
+<!-- C3: Online -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-primary-container text-white p-2 rounded-lg text-xs hover:ring-2 hover:ring-secondary-fixed transition" onclick="selectSlot('คุณสลิลรัตน์ และเพื่อน', '086-443-8822', 'คอร์ท 3 (Indoor Clay)', '18:00 - 20:00', 'จองออนไลน์ (Online)', 'ไม่มี', 'ชำระแล้ว (PromptPay QR)', '฿1,500')">
+<p class="font-bold truncate">คุณสลิลรัตน์</p>
+<p class="text-label-sm text-secondary-fixed">Clay • ฿1,500</p>
+</div>
+</td>
+<!-- C4: Online -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-primary-container text-white p-2 rounded-lg text-xs hover:ring-2 hover:ring-secondary-fixed transition" onclick="selectSlot('Thonglor Tennis Group', '082-991-0022', 'คอร์ท 4 (Outdoor Floodlit)', '18:00 - 20:00', 'จองออนไลน์ (Online)', 'ลูกแข่งขัน 2 กระป๋อง', 'ชำระแล้ว (PromptPay QR)', '฿1,300')">
+<p class="font-bold truncate">Thonglor Group</p>
+<p class="text-label-sm text-secondary-fixed">Floodlit • ฿1,300</p>
+</div>
+</td>
+<!-- C5: Online -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-primary-container text-white p-2 rounded-lg text-xs hover:ring-2 hover:ring-secondary-fixed transition" onclick="selectSlot('คุณอนวัช ชัยพรหม', '085-334-1188', 'คอร์ท 5 (Outdoor Floodlit)', '18:00 - 20:00', 'จองออนไลน์ (Online)', 'ไม่มี', 'ชำระแล้ว (PromptPay QR)', '฿1,300')">
+<p class="font-bold truncate">คุณอนวัช ชัยพรหม</p>
+<p class="text-label-sm text-secondary-fixed">Floodlit • ฿1,300</p>
+</div>
+</td>
+</tr>
+<!-- 20:00 - 22:00 (Late Night Floodlit) -->
+<tr class="hover:bg-surface-bright/50 transition">
+<td class="py-2.5 px-4 font-metric-num text-label-md font-bold text-on-surface-variant sticky left-0 bg-surface-container-lowest z-10 shadow-[1px_0_0_0_#bfc9c3]">
+                  20:00 - 22:00
+                </td>
+<!-- C1: Online -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-primary-container text-white p-2 rounded-lg text-xs hover:ring-2 hover:ring-secondary-fixed transition" onclick="selectSlot('คุณธนัท พิริยะ', '081-334-9988', 'คอร์ท 1 (Indoor Hard)', '20:00 - 22:00', 'จองออนไลน์ (Online)', 'เช่าไม้ 1 ไม้', 'ชำระแล้ว (PromptPay QR)', '฿1,300')">
+<p class="font-bold truncate">คุณธนัท พิริยะ</p>
+<p class="text-label-sm text-secondary-fixed">Online • ฿1,300</p>
+</div>
+</td>
+<!-- C2: Free -->
+<td class="p-1.5">
+<div class="border border-dashed border-outline-variant hover:border-primary hover:bg-surface-container-low rounded-lg p-2 text-center text-xs text-on-surface-variant font-medium cursor-pointer transition" onclick="bookFreeSlot('คอร์ท 2', '20:00 - 22:00')">
+                    + ว่าง (฿650/ชม.)
+                  </div>
+</td>
+<!-- C3: Online -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-primary-container text-white p-2 rounded-lg text-xs hover:ring-2 hover:ring-secondary-fixed transition" onclick="selectSlot('คุณภูมินทร์ วงศ์สุวรรณ', '089-445-1234', 'คอร์ท 3 (Indoor Clay)', '20:00 - 22:00', 'จองออนไลน์ (Online)', 'ไม่มี', 'ชำระแล้ว (PromptPay QR)', '฿1,400')">
+<p class="font-bold truncate">คุณภูมินทร์ วงศ์สุวรรณ</p>
+<p class="text-label-sm text-secondary-fixed">Clay • ฿1,400</p>
+</div>
+</td>
+<!-- C4: Walk-in -->
+<td class="p-1.5">
+<div class="cursor-pointer bg-sky-600 text-white p-2 rounded-lg text-xs hover:ring-2 hover:ring-secondary-fixed transition" onclick="selectSlot('คุณชัชชัย นพรัตน์', '086-123-9977', 'คอร์ท 4 (Outdoor Floodlit)', '20:00 - 22:00', 'Walk-in', 'ไม่มี', 'ชำระเงินสด', '฿1,300')">
+<p class="font-bold truncate">คุณชัชชัย (Walk-in)</p>
+<p class="text-label-sm text-sky-100">Walk-in • ฿1,300</p>
+</div>
+</td>
+<!-- C5: Maintenance (Night Clean & Sweep) -->
+<td class="p-1.5">
+<div class="maintenance-hatch border border-outline-variant text-on-surface-variant p-2 rounded-lg text-xs font-semibold">
+<span class="text-on-surface-variant">เตรียมปิดสนาม 22:00</span>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Matrix Footer summary -->
+<div class="p-3 bg-surface-container-low border-t border-outline-variant/50 flex flex-wrap items-center justify-between text-label-sm text-on-surface-variant">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="lightbulb">lightbulb</span>
+<span>แนะนำ: เวลา Prime 18:00 - 20:00 เต็มทุกคอร์ทแล้ว แนะนำเปิด Waiting List เพื่อรับผู้เล่นสำรอง</span>
+</div>
+<div>อัปเดตสถานะล่าสุด: 16:35 น.</div>
+</div>
+</section>
+<!-- Side Panel: Dynamic Pricing & Facility Resources Stock (4 or 3 cols) -->
+<aside class="lg:col-span-4 xl:col-span-3 flex flex-col space-y-6">
+<!-- Interactive Slot Drawer / Detail Modal Preview Card -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border-2 border-primary/20 shadow-md" id="slotDetailCard">
+<div class="flex items-center justify-between border-b border-outline-variant/60 pb-3">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-primary" data-icon="badge">badge</span>
+<h4 class="font-headline-sm text-headline-sm text-primary">รายละเอียดการจอง</h4>
+</div>
+<span class="bg-emerald-100 text-emerald-900 text-label-sm font-label-sm px-2.5 py-0.5 rounded-full font-bold" id="detailBadge">ชำระแล้ว (PromptPay QR)</span>
+</div>
+<div class="space-y-3.5 mt-4 text-body-sm">
+<div>
+<p class="text-label-sm text-on-surface-variant font-label-sm">ชื่อผู้จอง / เบอร์ติดต่อ</p>
+<div class="flex items-center justify-between mt-0.5">
+<span class="font-bold text-on-surface text-body-md" id="detailName">คุณกิตติศักดิ์ ชัยสิทธิ์</span>
+<a class="text-primary font-metric-num hover:underline text-label-md" href="tel:0829904411" id="detailPhone">082-990-4411</a>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-2 bg-surface-container-low p-2.5 rounded-lg">
+<div>
+<p class="text-label-sm text-on-surface-variant">สนาม / คอร์ท</p>
+<p class="font-bold text-on-surface" id="detailCourt">คอร์ท 1 (Indoor Hard)</p>
+</div>
+<div>
+<p class="text-label-sm text-on-surface-variant">ช่วงเวลา</p>
+<p class="font-bold text-primary" id="detailTime">16:00 - 18:00</p>
+</div>
+</div>
+<div>
+<p class="text-label-sm text-on-surface-variant font-label-sm">บริการเสริม (Add-on Rental)</p>
+<div class="flex items-center space-x-2 mt-1">
+<span class="material-symbols-outlined text-primary text-base" data-icon="sports_tennis">sports_tennis</span>
+<span class="font-medium text-on-surface" id="detailAddon">เช่าไม้เทนนิส Babolat 2 ไม้</span>
+</div>
+</div>
+<div class="border-t border-outline-variant/60 pt-3 flex items-center justify-between">
+<div>
+<p class="text-label-sm text-on-surface-variant">ยอดรวมสุทธิ</p>
+<p class="font-headline-sm text-headline-sm font-bold text-primary" id="detailPrice">฿1,200</p>
+</div>
+<div class="flex space-x-2">
+<button class="px-2.5 py-1.5 rounded bg-surface-container hover:bg-surface-container-high text-on-surface text-label-sm font-semibold transition" onclick="alert('ส่ง SMS แจ้งเตือนคอร์ทพร้อมแล้ว')">
+<span class="material-symbols-outlined text-sm align-middle" data-icon="chat">chat</span> แจ้งเตือน
+                </button>
+<button class="px-2.5 py-1.5 rounded bg-primary hover:bg-[#04392b] text-white text-label-sm font-semibold transition" onclick="alert('เปิดฟอร์มแก้ไขการจอง')">
+                  แก้ไข
+                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Dynamic Pricing Management Card -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/60 shadow-sm space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-amber-700 text-lg" data-icon="currency_exchange">currency_exchange</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface">จัดการราคาตามช่วงเวลา (Dynamic Pricing)</h4>
+</div>
+<button class="text-label-sm text-primary font-bold hover:underline">แก้ไขเรท</button>
+</div>
+<div class="space-y-2.5 text-body-sm">
+<!-- Tier 1 -->
+<div class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low border border-outline-variant/40">
+<div>
+<p class="font-bold text-on-surface">Off-peak (เช้า - บ่าย)</p>
+<p class="text-label-sm text-on-surface-variant">06:00 - 16:00 น.</p>
+</div>
+<div class="text-right">
+<span class="font-metric-num font-bold text-primary text-body-md">฿450</span>
+<span class="text-label-sm text-on-surface-variant">/ชม.</span>
+</div>
+</div>
+<!-- Tier 2 -->
+<div class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low border border-outline-variant/40">
+<div>
+<p class="font-bold text-on-surface">Prime Twilight (เย็น)</p>
+<p class="text-label-sm text-on-surface-variant">16:00 - 19:00 น.</p>
+</div>
+<div class="text-right">
+<span class="font-metric-num font-bold text-primary text-body-md">฿600</span>
+<span class="text-label-sm text-on-surface-variant">/ชม.</span>
+</div>
+</div>
+<!-- Tier 3 -->
+<div class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low border border-emerald-300 bg-emerald-50/40">
+<div class="flex items-center space-x-2">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed"></span>
+<div>
+<p class="font-bold text-on-surface">Peak Floodlit (เปิดไฟ)</p>
+<p class="text-label-sm text-on-surface-variant">19:00 - 22:00 น.</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-metric-num font-bold text-primary-container text-body-md">฿650</span>
+<span class="text-label-sm text-on-surface-variant">/ชม.</span>
+</div>
+</div>
+</div>
+<p class="text-label-sm text-on-surface-variant/80 italic">*ราคารวมภาษีมูลค่าเพิ่มและไฟสปอร์ตไลท์เรียบร้อยแล้ว</p>
+</div>
+<!-- บริการเสริมพร้อมสต็อก (Facility Inventory & Staff Status) -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/60 shadow-sm space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-primary text-lg" data-icon="inventory_2">inventory_2</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface">บริการเสริม &amp; สต็อกอุปกรณ์</h4>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-base cursor-pointer hover:text-primary" data-icon="refresh">refresh</span>
+</div>
+<div class="space-y-3">
+<!-- Tennis Balls -->
+<div class="flex items-center justify-between border-b border-outline-variant/40 pb-2.5">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 rounded-md bg-secondary-fixed/30 text-on-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-sm" data-icon="sports_baseball">sports_baseball</span>
+</div>
+<div>
+<p class="text-label-md font-bold text-on-surface">ลูกเทนนิสใหม่ (กระป๋อง)</p>
+<p class="text-label-sm text-on-surface-variant">Dunlop Fort All Court</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-metric-num font-bold text-primary text-body-md">24</span>
+<span class="text-label-sm text-on-surface-variant">กระป๋อง</span>
+</div>
+</div>
+<!-- Rental Rackets -->
+<div class="flex items-center justify-between border-b border-outline-variant/40 pb-2.5">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 rounded-md bg-emerald-100 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-sm" data-icon="sports_tennis">sports_tennis</span>
+</div>
+<div>
+<p class="text-label-md font-bold text-on-surface">ไม้เทนนิสให้เช่า</p>
+<p class="text-label-sm text-on-surface-variant">Wilson / Head / Babolat</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-metric-num font-bold text-primary text-body-md">6 / 12</span>
+<span class="text-label-sm text-on-surface-variant">ไม้ว่าง</span>
+</div>
+</div>
+<!-- Court Hitters / Sparring Partners -->
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 rounded-md bg-sky-100 text-sky-800 flex items-center justify-center">
+<span class="material-symbols-outlined text-sm" data-icon="groups">groups</span>
+</div>
+<div>
+<p class="text-label-md font-bold text-on-surface">น็อคเกอร์ประจำสนาม</p>
+<p class="text-label-sm text-emerald-700 font-semibold">พร้อมลงคอร์ททันที</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-metric-num font-bold text-primary text-body-md">2 ท่าน</span>
+<span class="text-label-sm text-on-surface-variant">สแตนด์บาย</span>
+</div>
+</div>
+</div>
+<button class="w-full py-2 bg-surface-container-low hover:bg-surface-container text-primary font-headline-sm text-label-md rounded-lg transition font-semibold">
+            + เบิกอุปกรณ์ / อัปเดตเวรน็อคเกอร์
+          </button>
+</div>
+</aside>
+</div>
+</main>
+<!-- Walk-in Booking Modal (Toggled by Quick Book / Action Buttons) -->
+<div class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4" id="walkinModal">
+<div class="bg-surface-container-lowest max-w-lg w-full rounded-2xl shadow-2xl border border-outline-variant overflow-hidden animate-in fade-in duration-200">
+<!-- Modal Header -->
+<div class="bg-primary text-white p-5 flex justify-between items-center">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-secondary-fixed text-2xl" data-icon="person_add">person_add</span>
+<div>
+<h3 class="font-headline-sm text-headline-sm font-bold">บันทึกการจอง Walk-in หน้าร้าน</h3>
+<p class="text-label-sm text-on-primary-container">สร้างสลิปและล็อคคอร์ททันที</p>
+</div>
+</div>
+<button class="text-white/70 hover:text-white transition" onclick="closeWalkinModal()">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+<!-- Modal Body -->
+<form class="p-6 space-y-4 text-body-sm" id="walkinForm" onsubmit="handleWalkinSubmit(event)">
+<div>
+<label class="block text-label-md font-bold text-on-surface mb-1">ชื่อผู้เล่น / ผู้ติดต่อ *</label>
+<input class="w-full px-3.5 py-2.5 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary text-on-surface" id="walkinCustomer" placeholder="เช่น คุณธนกร หรือ Robert Fox" required="" type="text"/>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div>
+<label class="block text-label-md font-bold text-on-surface mb-1">เบอร์โทรศัพท์ *</label>
+<input class="w-full px-3.5 py-2.5 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary text-on-surface font-metric-num" id="walkinPhone" placeholder="08X-XXX-XXXX" required="" type="tel"/>
+</div>
+<div>
+<label class="block text-label-md font-bold text-on-surface mb-1">เลือกสนาม / คอร์ท</label>
+<select class="w-full px-3.5 py-2.5 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary text-on-surface" id="walkinCourtSelect">
+<option value="คอร์ท 1 (Indoor Hard)">คอร์ท 1 (Indoor Hard)</option>
+<option selected="" value="คอร์ท 2 (Indoor Hard)">คอร์ท 2 (Indoor Hard)</option>
+<option value="คอร์ท 3 (Indoor Clay)">คอร์ท 3 (Indoor Clay)</option>
+<option value="คอร์ท 4 (Outdoor Floodlit)">คอร์ท 4 (Outdoor)</option>
+<option value="คอร์ท 5 (Outdoor Hard)">คอร์ท 5 (Outdoor)</option>
+</select>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div>
+<label class="block text-label-md font-bold text-on-surface mb-1">ช่วงเวลาที่ต้องการ</label>
+<select class="w-full px-3.5 py-2.5 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary text-on-surface" id="walkinTimeSelect">
+<option>10:00 - 12:00 (Off-peak)</option>
+<option>12:00 - 14:00 (Off-peak)</option>
+<option selected="">16:00 - 18:00 (Twilight)</option>
+<option>18:00 - 20:00 (Peak)</option>
+<option>20:00 - 22:00 (Peak)</option>
+</select>
+</div>
+<div>
+<label class="block text-label-md font-bold text-on-surface mb-1">ช่องทางชำระเงิน</label>
+<select class="w-full px-3.5 py-2.5 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary text-on-surface">
+<option>PromptPay QR Code (รับเงินแล้ว)</option>
+<option>เงินสดหน้าร้าน (Cash)</option>
+<option>บัตรเครดิต EDC</option>
+</select>
+</div>
+</div>
+<div>
+<label class="block text-label-md font-bold text-on-surface mb-1">บริการเสริม (Add-ons)</label>
+<div class="grid grid-cols-2 gap-2 text-label-sm">
+<label class="flex items-center space-x-2 p-2 rounded border border-outline-variant cursor-pointer hover:bg-surface-container-low">
+<input class="rounded text-primary focus:ring-primary" type="checkbox"/>
+<span>เช่าไม้เทนนิส (+฿150)</span>
+</label>
+<label class="flex items-center space-x-2 p-2 rounded border border-outline-variant cursor-pointer hover:bg-surface-container-low">
+<input class="rounded text-primary focus:ring-primary" type="checkbox"/>
+<span>ลูกเทนนิสใหม่ (+฿280)</span>
+</label>
+</div>
+</div>
+<!-- Form Actions -->
+<div class="flex items-center justify-end space-x-3 pt-3 border-t border-outline-variant/60">
+<button class="px-4 py-2 text-on-surface-variant hover:text-on-surface font-semibold text-label-md" onclick="closeWalkinModal()" type="button">
+            ยกเลิก
+          </button>
+<button class="bg-primary hover:bg-[#04392b] text-white px-5 py-2.5 rounded-lg font-headline-sm text-label-md font-bold shadow transition flex items-center space-x-1.5" type="submit">
+<span class="material-symbols-outlined text-base" data-icon="check">check</span>
+<span>ยืนยันการเปิดคอร์ท</span>
+</button>
+</div>
+</form>
+</div>
+</div>
+<!-- Maintenance Confirmation Toast / Drawer helper -->
+<div class="fixed bottom-6 right-6 z-50 bg-primary text-white px-4 py-3 rounded-xl shadow-lg border border-secondary-fixed/30 flex items-center space-x-3 hidden transition-all duration-300" id="toastNotification">
+<span class="material-symbols-outlined text-secondary-fixed text-xl" data-icon="check_circle">check_circle</span>
+<span class="text-body-sm font-medium" id="toastMessage">บันทึกข้อมูลเรียบร้อยแล้ว</span>
+</div>
+<!-- Footer (From Shared Components: Footer) -->
+<footer class="bg-primary dark:bg-inverse-surface text-on-primary dark:text-inverse-on-surface border-t border-primary-container dark:border-outline mt-12">
+<div class="w-full px-6 md:px-12 py-12 max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+<div>
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-secondary-fixed text-2xl" data-icon="sports_tennis">sports_tennis</span>
+<span class="text-headline-sm font-headline-sm font-bold text-secondary-fixed tracking-tight">BKK Tennis ClubOS</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-primary-container mt-2 max-w-md">
+          © 2025 BKK Tennis Inc. Bangkok Court Discovery &amp; Booking Platform. All rights reserved.
+        </p>
+</div>
+<!-- Links defined in Shared Components JSON -->
+<div class="flex flex-wrap gap-x-6 gap-y-2 text-label-sm font-label-sm">
+<a class="text-on-primary-container dark:text-outline-variant hover:text-secondary-fixed transition-colors" href="#">Explore Sukhumvit</a>
+<a class="text-on-primary-container dark:text-outline-variant hover:text-secondary-fixed transition-colors" href="#">Silom &amp; Sathorn Courts</a>
+<a class="text-on-primary-container dark:text-outline-variant hover:text-secondary-fixed transition-colors" href="#">Thong Lo Venues</a>
+<a class="text-secondary-fixed font-semibold underline hover:text-secondary-fixed transition-colors" href="#">Court Partner Portal</a>
+<a class="text-on-primary-container dark:text-outline-variant hover:text-secondary-fixed transition-colors" href="#">Privacy &amp; Terms</a>
+<a class="text-on-primary-container dark:text-outline-variant hover:text-secondary-fixed transition-colors" href="#">Support Hotline</a>
+</div>
+</div>
+</footer>
+<!-- Vanilla Micro-Interactions Script -->
+<script>
+    function selectSlot(name, phone, court, time, type, addon, payment, price) {
+      document.getElementById('detailName').innerText = name;
+      document.getElementById('detailPhone').innerText = phone;
+      document.getElementById('detailPhone').href = 'tel:' + phone.replace(/[^0-9]/g, '');
+      document.getElementById('detailCourt').innerText = court;
+      document.getElementById('detailTime').innerText = time;
+      document.getElementById('detailAddon').innerText = addon;
+      document.getElementById('detailBadge').innerText = payment;
+      document.getElementById('detailPrice').innerText = price;
+
+      // Pulse highlight detail card
+      const card = document.getElementById('slotDetailCard');
+      card.classList.add('ring-2', 'ring-secondary-fixed');
+      setTimeout(() => {
+        card.classList.remove('ring-2', 'ring-secondary-fixed');
+      }, 600);
+    }
+
+    function bookFreeSlot(courtName, timeSlot) {
+      openWalkinModal();
+      document.getElementById('walkinCourtSelect').value = courtName.includes('คอร์ท 2') ? 'คอร์ท 2 (Indoor Hard)' : courtName + ' (Outdoor)';
+    }
+
+    function openWalkinModal() {
+      document.getElementById('walkinModal').classList.remove('hidden');
+    }
+
+    function closeWalkinModal() {
+      document.getElementById('walkinModal').classList.add('hidden');
+    }
+
+    function handleWalkinSubmit(e) {
+      e.preventDefault();
+      const customer = document.getElementById('walkinCustomer').value;
+      const court = document.getElementById('walkinCourtSelect').value;
+      closeWalkinModal();
+      showToast('เปิดคอร์ทสำเร็จสำหรับ: ' + customer + ' (' + court + ')');
+    }
+
+    function toggleMaintenanceBlock() {
+      showToast('เลือกคอร์ทในตารางเพื่อทำการบล็อกซ่อมบำรุง / ทำความสะอาด');
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toastNotification');
+      document.getElementById('toastMessage').innerText = message;
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3500);
+    }
+  </script>
+</body></html>
