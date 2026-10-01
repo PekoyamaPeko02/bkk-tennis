@@ -64,19 +64,19 @@
         "./../src/stores/*"
       ],
       "#q-app": [
-        "./../../../node_modules/.pnpm/@quasar+app-vite@2.6.2_@quasar+extras@1.18.0_@types+node@22.20.4_pinia@3.0.4_typescript@5.9.3_lhicqfrjido6y2pqknguvcqeq4/node_modules/@quasar/app-vite/types/index.d.ts"
+        "./../../../node_modules/.pnpm/@quasar+app-vite@2.6.2_@quasar+extras@1.18.0_@types+node@22.20.4_pinia@3.0.4_typescript@5.9.3_wgen7haxpa2hgt7tsqprcy7w4m/node_modules/@quasar/app-vite/types/index.d.ts"
       ],
       "#q-app/wrappers": [
-        "./../../../node_modules/.pnpm/@quasar+app-vite@2.6.2_@quasar+extras@1.18.0_@types+node@22.20.4_pinia@3.0.4_typescript@5.9.3_lhicqfrjido6y2pqknguvcqeq4/node_modules/@quasar/app-vite/types/app-wrappers.d.ts"
+        "./../../../node_modules/.pnpm/@quasar+app-vite@2.6.2_@quasar+extras@1.18.0_@types+node@22.20.4_pinia@3.0.4_typescript@5.9.3_wgen7haxpa2hgt7tsqprcy7w4m/node_modules/@quasar/app-vite/types/app-wrappers.d.ts"
       ],
       "#q-app/bex/background": [
-        "./../../../node_modules/.pnpm/@quasar+app-vite@2.6.2_@quasar+extras@1.18.0_@types+node@22.20.4_pinia@3.0.4_typescript@5.9.3_lhicqfrjido6y2pqknguvcqeq4/node_modules/@quasar/app-vite/types/bex/entrypoints/background.d.ts"
+        "./../../../node_modules/.pnpm/@quasar+app-vite@2.6.2_@quasar+extras@1.18.0_@types+node@22.20.4_pinia@3.0.4_typescript@5.9.3_wgen7haxpa2hgt7tsqprcy7w4m/node_modules/@quasar/app-vite/types/bex/entrypoints/background.d.ts"
       ],
       "#q-app/bex/content": [
-        "./../../../node_modules/.pnpm/@quasar+app-vite@2.6.2_@quasar+extras@1.18.0_@types+node@22.20.4_pinia@3.0.4_typescript@5.9.3_lhicqfrjido6y2pqknguvcqeq4/node_modules/@quasar/app-vite/types/bex/entrypoints/content.d.ts"
+        "./../../../node_modules/.pnpm/@quasar+app-vite@2.6.2_@quasar+extras@1.18.0_@types+node@22.20.4_pinia@3.0.4_typescript@5.9.3_wgen7haxpa2hgt7tsqprcy7w4m/node_modules/@quasar/app-vite/types/bex/entrypoints/content.d.ts"
       ],
       "#q-app/bex/private/bex-bridge": [
-        "./../../../node_modules/.pnpm/@quasar+app-vite@2.6.2_@quasar+extras@1.18.0_@types+node@22.20.4_pinia@3.0.4_typescript@5.9.3_lhicqfrjido6y2pqknguvcqeq4/node_modules/@quasar/app-vite/types/bex/bex-bridge.d.ts"
+        "./../../../node_modules/.pnpm/@quasar+app-vite@2.6.2_@quasar+extras@1.18.0_@types+node@22.20.4_pinia@3.0.4_typescript@5.9.3_wgen7haxpa2hgt7tsqprcy7w4m/node_modules/@quasar/app-vite/types/bex/bex-bridge.d.ts"
       ]
     }
   },
