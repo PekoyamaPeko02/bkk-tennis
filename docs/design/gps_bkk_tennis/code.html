@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+
+<html class="light" lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BKK Tennis - สนามเทนนิสใกล้ตัวคุณ (Nearby Bangkok Tennis Courts by GPS)</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary-fixed": "#b0f0d6",
+            "on-tertiary-fixed-variant": "#7f2b00",
+            "inverse-primary": "#95d3ba",
+            "outline-variant": "#bfc9c3",
+            "surface-bright": "#faf8ff",
+            "on-tertiary-fixed": "#370e00",
+            "on-primary-fixed-variant": "#0b513d",
+            "tertiary-fixed": "#ffdbce",
+            "on-secondary-fixed": "#102000",
+            "primary": "#003527",
+            "surface": "#faf8ff",
+            "surface-variant": "#dae2fd",
+            "surface-dim": "#d2d9f4",
+            "primary-container": "#064e3b",
+            "on-primary-container": "#80bea6",
+            "background": "#faf8ff",
+            "on-background": "#131b2e",
+            "on-primary": "#ffffff",
+            "inverse-surface": "#283044",
+            "on-primary-fixed": "#002117",
+            "on-secondary-container": "#457000",
+            "on-surface-variant": "#404944",
+            "on-secondary": "#ffffff",
+            "secondary": "#416900",
+            "on-secondary-fixed-variant": "#304f00",
+            "primary-fixed-dim": "#95d3ba",
+            "on-error": "#ffffff",
+            "surface-container-highest": "#dae2fd",
+            "on-error-container": "#93000a",
+            "secondary-fixed": "#acf847",
+            "tertiary-fixed-dim": "#ffb599",
+            "surface-container-low": "#f2f3ff",
+            "tertiary": "#561a00",
+            "tertiary-container": "#7b2900",
+            "surface-container-lowest": "#ffffff",
+            "surface-container": "#eaedff",
+            "on-tertiary-container": "#ff966c",
+            "on-surface": "#131b2e",
+            "surface-container-high": "#e2e7ff",
+            "outline": "#707974",
+            "error": "#ba1a1a",
+            "error-container": "#ffdad6",
+            "inverse-on-surface": "#eef0ff",
+            "secondary-container": "#acf847",
+            "surface-tint": "#2b6954",
+            "secondary-fixed-dim": "#91db2a",
+            "on-tertiary": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-md": "1rem",
+            "gutter": "1.5rem",
+            "margin": "2rem",
+            "gutter-mobile": "0.75rem",
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem",
+            "space-lg": "1.5rem",
+            "margin-mobile": "1rem",
+            "space-xl": "2.5rem"
+          },
+          "fontFamily": {
+            "body-md": ["Plus Jakarta Sans", "sans-serif"],
+            "body-lg": ["Plus Jakarta Sans", "sans-serif"],
+            "display-hero-mobile": ["Space Grotesk", "sans-serif"],
+            "body-sm": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-xl": ["Space Grotesk", "sans-serif"],
+            "headline-xl-mobile": ["Space Grotesk", "sans-serif"],
+            "headline-lg-mobile": ["Space Grotesk", "sans-serif"],
+            "label-lg": ["Plus Jakarta Sans", "sans-serif"],
+            "display-hero": ["Space Grotesk", "sans-serif"],
+            "headline-md": ["Space Grotesk", "sans-serif"],
+            "metric-num": ["Space Grotesk", "sans-serif"],
+            "label-md": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-sm": ["Space Grotesk", "sans-serif"],
+            "headline-lg": ["Space Grotesk", "sans-serif"],
+            "label-sm": ["Plus Jakarta Sans", "sans-serif"]
+          },
+          "fontSize": {
+            "body-md": ["15px", { "lineHeight": "22px", "fontWeight": "400" }],
+            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "display-hero-mobile": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "headline-xl-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+            "display-hero": ["56px", { "lineHeight": "64px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+            "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "metric-num": ["20px", { "lineHeight": "24px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "600" }],
+            "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "700" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.4); opacity: 0.2; }
+      100% { transform: scale(1.8); opacity: 0; }
+    }
+    .animate-pulse-ring {
+      animation: pulse-ring 2.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased min-h-screen flex flex-col selection:bg-secondary-fixed selection:text-primary">
+<!-- Top Real-time GPS Detection Floating Status Notification -->
+<div class="bg-primary-container text-on-primary-container text-body-sm font-body-sm py-2 px-6 shadow-sm flex items-center justify-between border-b border-outline-variant/30">
+<div class="max-w-7xl mx-auto w-full flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="inline-flex relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary-fixed opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-secondary-fixed"></span>
+</span>
+<span class="text-on-primary font-medium">💡 ระบบกำลังใช้พิกัดสดจากเบราว์เซอร์เพื่อคำนวณระยะทางแบบ Real-time (ความแม่นยำสูง ±15 เมตร)</span>
+</div>
+<div class="flex items-center gap-4 text-label-sm font-label-sm">
+<span class="text-secondary-fixed font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+          เชื่อมต่อสัญญาณ GPS สำเร็จ
+        </span>
+</div>
+</div>
+</div>
+<!-- Shared TopNavBar Header (From JSON Anchor Blueprint) -->
+<header class="bg-surface-container-lowest shadow-sm sticky top-0 z-50 border-b border-outline-variant">
+<div class="flex justify-between items-center w-full px-6 md:px-12 max-w-7xl mx-auto h-20">
+<!-- Brand & Search Bar Left -->
+<div class="flex items-center gap-8">
+<a class="text-headline-md font-headline-md font-bold text-primary tracking-tight flex items-center gap-2" href="#">
+<span class="w-9 h-9 rounded-xl bg-primary text-secondary-fixed flex items-center justify-center font-black text-xl shadow-inner">🎾</span>
+<span>BKK Tennis</span>
+</a>
+<!-- Live Detected GPS Pill in Header -->
+<div class="hidden lg:flex items-center gap-2 bg-surface-container-low border border-outline-variant/40 rounded-full px-3.5 py-1.5 shadow-xs">
+<span class="material-symbols-outlined text-primary text-[18px]">location_on</span>
+<span class="text-label-md font-label-md text-on-surface font-medium">📍 ตำแหน่งของคุณ: <strong class="text-primary font-bold">สุขุมวิท 39, คลองตันเหนือ, กรุงเทพฯ</strong></span>
+<button class="ml-1 text-label-sm font-label-sm bg-surface-container-lowest hover:bg-secondary-fixed text-primary px-2.5 py-0.5 rounded-full font-semibold border border-outline-variant/30 flex items-center gap-1 transition-all active:scale-95">
+<span class="material-symbols-outlined text-[14px]">refresh</span>
+            รีเฟรช GPS
+          </button>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center gap-6">
+<a class="border-b-2 border-primary text-primary font-bold pb-1 text-label-lg font-label-lg transition-colors" href="#">
+          Discover Courts
+        </a>
+<a class="text-on-surface-variant hover:text-primary transition-colors pb-1 text-label-lg font-label-lg" href="#">
+          Clubs &amp; Venues
+        </a>
+<a class="text-on-surface-variant hover:text-primary transition-colors pb-1 text-label-lg font-label-lg" href="#">
+          Tournaments
+        </a>
+<a class="text-on-surface-variant hover:text-primary transition-colors pb-1 text-label-lg font-label-lg" href="#">
+          Community
+        </a>
+</nav>
+<!-- Trailing Action Cluster -->
+<div class="flex items-center gap-3">
+<div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container text-on-surface text-label-md font-label-md">
+<span class="material-symbols-outlined text-[16px] text-primary">my_location</span>
+<span class="font-medium">Sukhumvit, BKK</span>
+</div>
+<button aria-label="Notifications" class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-full transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="hidden sm:inline-flex items-center gap-1.5 bg-secondary-fixed text-on-secondary-fixed font-label-lg text-label-lg px-4 py-2 rounded-full font-bold shadow-sm hover:brightness-105 active:scale-95 transition-all">
+<span>Quick Book</span>
+<span class="material-symbols-outlined text-[18px]">bolt</span>
+</button>
+<!-- User Profile Avatar -->
+<div class="w-10 h-10 rounded-full ring-2 ring-primary/20 overflow-hidden ml-1 cursor-pointer">
+<img class="w-full h-full object-cover" data-alt="Close up professional portrait of an athletic Thai tennis player wearing modern green sports visor in bright sunny Bangkok court setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiOEfuTdJ-7VyRxga5siHAUKmw0wUbgWr2D-mVHfWk4VhkaCO9yu5MMZS52hEHXA7F54or3ZrLV578dqq6FSnq_7HJbg5LGUtCgaIp6rAhkFS-DnL9XmnyUkLN8MEahUu5ian_yAVQIuN-YoZD15cS_1I3Hm1x6mERehF5V5qnUZ7l4nl5GCa6SdNB2unMJTJ2lC51FLj1YFqMcONmOPEQycejwwuP_sT6uvBJMCuQplSG2SEg969NcA"/>
+</div>
+</div>
+</div>
+</header>
+<!-- GPS Discovery & Filter Bar -->
+<section class="bg-surface-container-lowest border-b border-outline-variant/30 py-5">
+<div class="max-w-7xl mx-auto px-6 md:px-12 space-y-4">
+<!-- Prominent GPS Status Banner & Radius Selector Row -->
+<div class="bg-gradient-to-r from-primary via-primary-container to-primary rounded-xl p-5 text-on-primary flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 shadow-md">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-secondary-fixed text-primary flex items-center justify-center shrink-0 shadow-lg">
+<span class="material-symbols-outlined text-[28px]">near_me</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h1 class="text-headline-sm font-headline-sm font-bold text-on-primary">
+                ค้นหาสนามเทนนิสที่ใกล้ที่สุดด้วยพิกัด GPS
+              </h1>
+<span class="bg-secondary-fixed text-on-secondary-fixed text-label-sm font-label-sm px-2 py-0.5 rounded-full font-extrabold uppercase">
+                Live GPS
+              </span>
+</div>
+<p class="text-body-sm font-body-sm text-on-primary-container mt-0.5 flex items-center gap-2">
+<span>ตำแหน่งปัจจุบัน: สุขุมวิท 39 / พร้อมพงษ์ (ความแม่นยำพิกัด: 15 เมตร)</span>
+<span class="text-outline-variant">•</span>
+<span class="text-secondary-fixed font-medium">คำนวณระยะทางจากตำแหน่งของคุณ</span>
+</p>
+</div>
+</div>
+<!-- Toggle GPS Switch & Distance Chips -->
+<div class="flex flex-wrap items-center gap-3 self-stretch lg:self-auto justify-between lg:justify-end">
+<div class="flex items-center bg-primary/60 border border-on-primary-container/30 rounded-full px-3 py-1.5">
+<span class="text-label-sm font-label-sm text-on-primary mr-2 font-medium">เปิดใช้ตำแหน่งปัจจุบัน (GPS Active)</span>
+<button aria-label="Toggle GPS" class="w-9 h-5 bg-secondary-fixed rounded-full relative p-0.5 transition-colors focus:outline-none">
+<div class="w-4 h-4 bg-primary rounded-full shadow-md transform translate-x-4 transition-transform"></div>
+</button>
+</div>
+<!-- Radius Selector -->
+<div class="flex items-center bg-primary-container/80 p-1 rounded-lg border border-on-primary-container/20">
+<span class="text-label-sm font-label-sm text-on-primary-container px-2 font-medium">รัศมี:</span>
+<div class="flex items-center gap-1">
+<button class="px-2.5 py-1 rounded text-label-sm font-label-sm text-on-primary-container hover:text-on-primary transition-colors">
+                &lt; 3 กม.
+              </button>
+<button class="px-3 py-1 rounded bg-secondary-fixed text-on-secondary-fixed font-bold text-label-sm font-label-sm shadow-xs">
+                ภายใน 5 กม. (เลือกอยู่)
+              </button>
+<button class="px-2.5 py-1 rounded text-label-sm font-label-sm text-on-primary-container hover:text-on-primary transition-colors">
+                ภายใน 10 กม.
+              </button>
+<button class="px-2.5 py-1 rounded text-label-sm font-label-sm text-on-primary-container hover:text-on-primary transition-colors">
+                ทั่วกรุงเทพฯ
+              </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Filter Bar & Split View Modes -->
+<div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+<!-- Filter Controls -->
+<div class="flex flex-wrap items-center gap-2">
+<!-- Date Pill -->
+<div class="flex items-center bg-surface-container-low border border-outline-variant/60 rounded-lg px-3 py-2 text-label-sm font-label-sm text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-primary mr-1.5">calendar_month</span>
+<span class="font-bold text-primary mr-1.5">วันนี้ (24 ต.ค.)</span>
+<span class="text-outline">/ พรุ่งนี้</span>
+<span class="material-symbols-outlined text-[16px] ml-1 text-outline">arrow_drop_down</span>
+</div>
+<!-- Time Window -->
+<div class="flex items-center bg-surface-container-low border border-outline-variant/60 rounded-lg px-3 py-2 text-label-sm font-label-sm text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-primary mr-1.5">schedule</span>
+<span>ช่วงเย็น (17:00 - 22:00)</span>
+<span class="material-symbols-outlined text-[16px] ml-1 text-outline">arrow_drop_down</span>
+</div>
+<!-- Surface Type Filter Chips -->
+<div class="hidden xl:flex items-center gap-1.5">
+<button class="px-3 py-2 rounded-lg bg-primary text-on-primary text-label-sm font-label-sm font-semibold flex items-center gap-1.5">
+<span>Hard Court</span>
+<span class="material-symbols-outlined text-[14px]">check</span>
+</button>
+<button class="px-3 py-2 rounded-lg bg-surface-container-low border border-outline-variant/60 hover:border-primary text-on-surface text-label-sm font-label-sm font-medium">
+              Indoor ติดแอร์
+            </button>
+<button class="px-3 py-2 rounded-lg bg-surface-container-low border border-outline-variant/60 hover:border-primary text-on-surface text-label-sm font-label-sm font-medium">
+              มีหลังคา Covered
+            </button>
+<button class="px-3 py-2 rounded-lg bg-surface-container-low border border-outline-variant/60 hover:border-primary text-on-surface text-label-sm font-label-sm font-medium">
+              Red Clay Court
+            </button>
+</div>
+<!-- Amenities Filter Dropdown -->
+<button class="px-3 py-2 rounded-lg bg-surface-container-low border border-outline-variant/60 text-on-surface text-label-sm font-label-sm font-medium flex items-center gap-1.5 hover:bg-surface-container">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+<span>สิ่งอำนวยความสะดวก (ที่จอดรถ, ไฟ LED, อาบน้ำ)</span>
+</button>
+</div>
+<!-- View Mode Switcher -->
+<div class="flex items-center bg-surface-container-low border border-outline-variant/60 p-1 rounded-lg">
+<button class="px-3 py-1.5 rounded-md bg-primary text-on-primary text-label-sm font-label-sm font-bold flex items-center gap-1.5 shadow-sm">
+<span class="material-symbols-outlined text-[16px]">view_agenda</span>
+<span>มุมมองแผนที่คู่รายการ (Split Map &amp; List)</span>
+</button>
+<button class="px-3 py-1.5 rounded-md text-on-surface-variant hover:text-primary text-label-sm font-label-sm font-medium flex items-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-[16px]">list</span>
+<span>รายการทั้งหมด</span>
+</button>
+<button class="px-3 py-1.5 rounded-md text-on-surface-variant hover:text-primary text-label-sm font-label-sm font-medium flex items-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-[16px]">map</span>
+<span>แผนที่เต็มจอ</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Main Content: Desktop 2-Column Split View -->
+<main class="flex-1 max-w-7xl w-full mx-auto px-6 md:px-12 py-6">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- Left Column: Courts List sorted by GPS Distance (5 Columns on Desktop) -->
+<section class="lg:col-span-6 xl:col-span-6 space-y-4">
+<!-- Header & Sorting Bar -->
+<div class="flex items-center justify-between pb-2 border-b border-outline-variant/40">
+<div>
+<h2 class="text-headline-sm font-headline-sm font-bold text-primary flex items-center gap-2">
+<span>พบ 18 สนามเทนนิสใกล้คุณ</span>
+<span class="text-label-sm font-label-sm font-medium text-on-surface-variant bg-surface-container px-2.5 py-0.5 rounded-full">
+                ในรัศมี 5 กม.
+              </span>
+</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant">เรียงลำดับตามพิกัดที่ใกล้ตำแหน่งปัจจุบันที่สุด</p>
+</div>
+<div class="flex items-center gap-2 text-label-sm font-label-sm">
+<span class="text-on-surface-variant">จัดเรียง:</span>
+<select class="bg-surface-container-lowest border border-outline-variant rounded-md text-on-surface font-semibold py-1.5 px-2.5 text-label-sm font-label-sm focus:ring-1 focus:ring-primary focus:outline-none">
+<option>ระยะทาง: ใกล้ที่สุด</option>
+<option>เวลาว่างเร็วที่สุด</option>
+<option>คะแนนรีวิวสูงสุด</option>
+<option>ราคา: ต่ำไปสูง</option>
+</select>
+</div>
+</div>
+<!-- Court Cards Stack -->
+<div class="space-y-4">
+<!-- Card 1: The Racquet Club Sukhumvit 49 (Active / Closest) -->
+<article class="bg-surface-container-lowest border-2 border-primary rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 group">
+<div class="flex flex-col sm:flex-row">
+<!-- Image Container -->
+<div class="sm:w-5/12 relative aspect-[16/10] sm:aspect-auto">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Bright high end indoor tennis court in Bangkok Sukhumvit area with professional blue hard court surfaces high floodlights and crisp white sidelines." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwyQC7bauYlCGNWTFkHXCiJl4Pgj9dyiz-m7-zzL0_eFff6-pqtEf-_24D2AGDeIKV7XitPBB-ApVaZ44EU-95BKMMo7FBn_1apgg6upjDi7dDE8hfRaRoTKpGFJ3wSHTxrCQhpZ5rbSXriz1vd4YlvMvIZxdN374zsN6zzXohvAVDHEuzHXSR0jJ5NXWmg9zZE01hACOiU68AdDBbv31mH2AcPHF5uQrC8pDUVIGag2jmx2hrx-FK8g"/>
+<!-- GPS Floating Distance Badge -->
+<div class="absolute top-2.5 left-2.5 bg-inverse-surface/85 backdrop-blur-sm text-on-primary rounded-full px-2.5 py-1 text-label-sm font-label-sm flex items-center gap-1 shadow-md">
+<span class="material-symbols-outlined text-secondary-fixed text-[14px]">bolt</span>
+<span class="font-bold text-secondary-fixed">1.2 กม.</span>
+<span class="text-surface-variant/80 text-[11px]">(ขับรถ 5 นาที)</span>
+</div>
+<div class="absolute bottom-2.5 left-2.5 bg-primary-container text-on-primary px-2 py-0.5 rounded text-label-sm font-label-sm font-semibold">
+                  Hard Court • Indoor
+                </div>
+</div>
+<!-- Content Body -->
+<div class="p-4 sm:w-7/12 flex flex-col justify-between space-y-3">
+<div>
+<div class="flex items-start justify-between gap-2">
+<div>
+<span class="text-label-sm font-label-sm text-secondary font-bold uppercase tracking-wider">พร้อมพงษ์ - ทองหล่อ</span>
+<h3 class="text-headline-sm font-headline-sm font-bold text-primary hover:text-primary-container transition-colors">
+                        The Racquet Club Sukhumvit 49
+                      </h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant">สุขุมวิท 49, คลองตันเหนือ, วัฒนา</p>
+</div>
+<div class="flex items-center gap-1 bg-surface-container px-2 py-1 rounded text-label-sm font-label-sm font-bold text-primary shrink-0">
+<span class="material-symbols-outlined text-[16px] text-secondary">star</span>
+<span>4.9</span>
+<span class="text-outline font-normal">(320)</span>
+</div>
+</div>
+<!-- Quick Tags -->
+<div class="flex flex-wrap gap-1.5 mt-2.5">
+<span class="px-2 py-0.5 rounded bg-surface-container-low text-on-surface-variant text-[11px] font-medium">Indoor ติดแอร์</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-low text-on-surface-variant text-[11px] font-medium">ไฟสปอร์ตไลท์ LED</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-low text-on-surface-variant text-[11px] font-medium">ที่จอดรถสะดวก</span>
+</div>
+<!-- Availability Slots Today -->
+<div class="mt-3 pt-2 border-t border-outline-variant/30 flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="text-label-sm font-label-sm text-primary font-bold">3 คอร์ทว่างวันนี้:</span>
+<div class="flex items-center gap-1 text-label-sm font-label-sm text-on-surface-variant">
+<span class="bg-surface-container px-1.5 py-0.5 rounded font-semibold text-primary">17:00</span>
+<span class="bg-surface-container px-1.5 py-0.5 rounded font-semibold text-primary">19:00</span>
+<span class="bg-surface-container px-1.5 py-0.5 rounded font-semibold text-primary">20:00</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Price & CTA Button -->
+<div class="flex items-center justify-between pt-2 border-t border-outline-variant/30">
+<div>
+<span class="text-label-sm font-label-sm text-on-surface-variant">ราคาเริ่มต้น</span>
+<div class="text-headline-sm font-headline-sm font-bold text-primary">
+                      ฿450 - ฿650 <span class="text-body-sm font-body-sm font-normal text-on-surface-variant">/ ชม.</span>
+</div>
+</div>
+<button class="bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg px-4 py-2 rounded-lg font-bold flex items-center gap-1.5 shadow-sm active:scale-95 transition-all">
+<span>ดูตาราง &amp; จองทันที</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</article>
+<!-- Card 2: Benchasiri Park Tennis Court -->
+<article class="bg-surface-container-lowest border border-outline-variant/60 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 group">
+<div class="flex flex-col sm:flex-row">
+<div class="sm:w-5/12 relative aspect-[16/10] sm:aspect-auto">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Vibrant outdoor public tennis courts in Benchasiri Park Bangkok surrounded by tropical park greenery with clear court lines and tennis players during late afternoon." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAoFrJ5KIWvOr-jYQyIplWS-t9KljCjPTbLunvakxBJpVzn7uN8QLpykjPkUj5PpDBuzHnFJgAhC67sl9Mo56zuUM3xIjSA2KWx1Oi6sr4P55aU6M5IEJxuS9qpnusmBOjGI3PLzjUEgrYSUj5iWVDp_ECia9h--GV-K5kqzsuWYsITlL4UYOkON75bsDZnL_k8fJGja6yEV30bLXryyTcd6-ObjOaMiefUGH0v7KEp9gxl_sft45sw1A"/>
+<div class="absolute top-2.5 left-2.5 bg-inverse-surface/85 backdrop-blur-sm text-on-primary rounded-full px-2.5 py-1 text-label-sm font-label-sm flex items-center gap-1 shadow-md">
+<span class="material-symbols-outlined text-secondary-fixed text-[14px]">bolt</span>
+<span class="font-bold text-secondary-fixed">1.8 กม.</span>
+<span class="text-surface-variant/80 text-[11px]">(ขับรถ 7 นาที)</span>
+</div>
+<div class="absolute bottom-2.5 left-2.5 bg-secondary text-on-primary px-2 py-0.5 rounded text-label-sm font-label-sm font-semibold">
+                  Outdoor Hard Court
+                </div>
+</div>
+<div class="p-4 sm:w-7/12 flex flex-col justify-between space-y-3">
+<div>
+<div class="flex items-start justify-between gap-2">
+<div>
+<span class="text-label-sm font-label-sm text-secondary font-bold uppercase tracking-wider">พร้อมพงษ์ (ติด BTS)</span>
+<h3 class="text-headline-sm font-headline-sm font-bold text-primary hover:text-primary-container transition-colors">
+                        Benchasiri Park Tennis Court (สวนเบญจสิริ)
+                      </h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant">สุขุมวิท 22-24, คลองเตย</p>
+</div>
+<div class="flex items-center gap-1 bg-surface-container px-2 py-1 rounded text-label-sm font-label-sm font-bold text-primary shrink-0">
+<span class="material-symbols-outlined text-[16px] text-secondary">star</span>
+<span>4.6</span>
+<span class="text-outline font-normal">(185)</span>
+</div>
+</div>
+<div class="flex flex-wrap gap-1.5 mt-2.5">
+<span class="px-2 py-0.5 rounded bg-surface-container-low text-on-surface-variant text-[11px] font-medium">คอร์ทสาธารณะ</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-low text-on-surface-variant text-[11px] font-medium">ติดสถานีรถไฟฟ้า</span>
+<span class="px-2 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed font-semibold text-[11px]">เหลือน้อย</span>
+</div>
+<div class="mt-3 pt-2 border-t border-outline-variant/30 flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="text-label-sm font-label-sm text-error font-bold">1 คอร์ทว่างวันนี้:</span>
+<span class="bg-surface-container px-1.5 py-0.5 rounded font-semibold text-primary text-label-sm font-label-sm">18:00</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-2 border-t border-outline-variant/30">
+<div>
+<span class="text-label-sm font-label-sm text-secondary font-bold">ราคาประหยัด</span>
+<div class="text-headline-sm font-headline-sm font-bold text-primary">
+                      ฿150 <span class="text-body-sm font-body-sm font-normal text-on-surface-variant">/ ชม.</span>
+</div>
+</div>
+<button class="bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg px-4 py-2 rounded-lg font-bold flex items-center gap-1.5 shadow-sm active:scale-95 transition-all">
+<span>ดูตาราง &amp; จองทันที</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</article>
+<!-- Card 3: Asoke Sports Club & Tennis -->
+<article class="bg-surface-container-lowest border border-outline-variant/60 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 group">
+<div class="flex flex-col sm:flex-row">
+<div class="sm:w-5/12 relative aspect-[16/10] sm:aspect-auto">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Covered red clay tennis court facility in Bangkok Asoke district with high protective canopy roof sunlight filtering through and clean marked red clay tennis lines." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmSyYld7__A2_BCosA-zw-jR1T2qGUAnXui6XpucvyPOGe055JVP9vkx86oQW1U1s92nukX7kweRSNgc7ceErVaQNhryRje-Zvz_cXhK0BDq8TElEuoHN6wyBuK8kfj0vjGQAcUjHiC-8x5X9U2CeuKg_DeGW4PS9ulkkoDQjSkcmJ-0AuohER2gzdNlt_4iMqIdEOWuD4IXqGIf0jwiL3Rsq2yzvRbRAXv0Mo8_njj5X1aBRTcSCDsg"/>
+<div class="absolute top-2.5 left-2.5 bg-inverse-surface/85 backdrop-blur-sm text-on-primary rounded-full px-2.5 py-1 text-label-sm font-label-sm flex items-center gap-1 shadow-md">
+<span class="material-symbols-outlined text-secondary-fixed text-[14px]">bolt</span>
+<span class="font-bold text-secondary-fixed">2.4 กม.</span>
+<span class="text-surface-variant/80 text-[11px]">(ขับรถ 9 นาที)</span>
+</div>
+<div class="absolute bottom-2.5 left-2.5 bg-tertiary-container text-on-tertiary px-2 py-0.5 rounded text-label-sm font-label-sm font-semibold">
+                  Red Clay • Covered
+                </div>
+</div>
+<div class="p-4 sm:w-7/12 flex flex-col justify-between space-y-3">
+<div>
+<div class="flex items-start justify-between gap-2">
+<div>
+<span class="text-label-sm font-label-sm text-secondary font-bold uppercase tracking-wider">อโศก - รัชดาภิเษก</span>
+<h3 class="text-headline-sm font-headline-sm font-bold text-primary hover:text-primary-container transition-colors">
+                        Asoke Sports Club &amp; Tennis
+                      </h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant">สุขุมวิท 21 ซอย 1, คลองเตยเหนือ</p>
+</div>
+<div class="flex items-center gap-1 bg-surface-container px-2 py-1 rounded text-label-sm font-label-sm font-bold text-primary shrink-0">
+<span class="material-symbols-outlined text-[16px] text-secondary">star</span>
+<span>4.8</span>
+<span class="text-outline font-normal">(210)</span>
+</div>
+</div>
+<div class="flex flex-wrap gap-1.5 mt-2.5">
+<span class="px-2 py-0.5 rounded bg-surface-container-low text-on-surface-variant text-[11px] font-medium">หลังคาบังแดดฝน</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-low text-on-surface-variant text-[11px] font-medium">ดินคอร์ทสเปน</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-low text-on-surface-variant text-[11px] font-medium">ห้องอาบน้ำอุ่น</span>
+</div>
+<div class="mt-3 pt-2 border-t border-outline-variant/30 flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="text-label-sm font-label-sm text-secondary font-bold">ว่างหลายช่วงเวลา:</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">เช้า 07:00 / บ่าย 15:00 / ค่ำ 20:00</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-2 border-t border-outline-variant/30">
+<div>
+<span class="text-label-sm font-label-sm text-on-surface-variant">ราคาเริ่มต้น</span>
+<div class="text-headline-sm font-headline-sm font-bold text-primary">
+                      ฿500 <span class="text-body-sm font-body-sm font-normal text-on-surface-variant">/ ชม.</span>
+</div>
+</div>
+<button class="bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg px-4 py-2 rounded-lg font-bold flex items-center gap-1.5 shadow-sm active:scale-95 transition-all">
+<span>ดูตาราง &amp; จองทันที</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</article>
+<!-- Card 4: Sathorn City Tennis Club -->
+<article class="bg-surface-container-lowest border border-outline-variant/60 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 group">
+<div class="flex flex-col sm:flex-row">
+<div class="sm:w-5/12 relative aspect-[16/10] sm:aspect-auto">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Prestigious tennis club facility in Bangkok Sathorn business area with pristine hard court outdoor floodlit courts clubhouse terrace and city skyline background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLYx-VuaW5wkwjVkjnlTWKSVEwkHxstSFmHNBmbX7npzmbHm2U7V8bN-_srblGuPbn1Y0xRb0wKzfhg6A_nfPx6gD5rh9M-kyFJyYf7f62_bLCDP7N5BvktcppzJao_TqY9IXdUIS-iRShpWPadhdhBauBI696JM9xCwywSKa5fg9Tc0j2g2_zrg-Y33Zzl1KLACeSo4XkNNh8CDtGPinqt-7ihw6mq6xFidoYRA-k9QeV6On6_NK-vA"/>
+<div class="absolute top-2.5 left-2.5 bg-inverse-surface/85 backdrop-blur-sm text-on-primary rounded-full px-2.5 py-1 text-label-sm font-label-sm flex items-center gap-1 shadow-md">
+<span class="material-symbols-outlined text-secondary-fixed text-[14px]">bolt</span>
+<span class="font-bold text-secondary-fixed">4.1 กม.</span>
+<span class="text-surface-variant/80 text-[11px]">(ขับรถ 15 นาที)</span>
+</div>
+<div class="absolute bottom-2.5 left-2.5 bg-primary text-on-primary px-2 py-0.5 rounded text-label-sm font-label-sm font-semibold">
+                  Clubhouse • Hard Court
+                </div>
+</div>
+<div class="p-4 sm:w-7/12 flex flex-col justify-between space-y-3">
+<div>
+<div class="flex items-start justify-between gap-2">
+<div>
+<span class="text-label-sm font-label-sm text-secondary font-bold uppercase tracking-wider">สาทร - นราธิวาส</span>
+<h3 class="text-headline-sm font-headline-sm font-bold text-primary hover:text-primary-container transition-colors">
+                        Sathorn City Tennis Club
+                      </h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant">สาทรใต้ ซอย 1, ทุ่งมหาเมฆ</p>
+</div>
+<div class="flex items-center gap-1 bg-surface-container px-2 py-1 rounded text-label-sm font-label-sm font-bold text-primary shrink-0">
+<span class="material-symbols-outlined text-[16px] text-secondary">star</span>
+<span>4.9</span>
+<span class="text-outline font-normal">(450)</span>
+</div>
+</div>
+<div class="flex flex-wrap gap-1.5 mt-2.5">
+<span class="px-2 py-0.5 rounded bg-surface-container-low text-on-surface-variant text-[11px] font-medium">Professional Court</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-low text-on-surface-variant text-[11px] font-medium">คลับเฮาส์ &amp; Pro Shop</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-low text-on-surface-variant text-[11px] font-medium">โค้ชระดับชาติ</span>
+</div>
+<div class="mt-3 pt-2 border-t border-outline-variant/30 flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="text-label-sm font-label-sm text-primary font-bold">เปิดจอง:</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">ว่าง 4 คอร์ท (รอบ 19:00 - 22:00)</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-2 border-t border-outline-variant/30">
+<div>
+<span class="text-label-sm font-label-sm text-on-surface-variant">ราคามาตรฐานคลับ</span>
+<div class="text-headline-sm font-headline-sm font-bold text-primary">
+                      ฿600 <span class="text-body-sm font-body-sm font-normal text-on-surface-variant">/ ชม.</span>
+</div>
+</div>
+<button class="bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg px-4 py-2 rounded-lg font-bold flex items-center gap-1.5 shadow-sm active:scale-95 transition-all">
+<span>ดูตาราง &amp; จองทันที</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</article>
+</div>
+<!-- Pagination / Load More -->
+<div class="text-center pt-2">
+<button class="w-full py-3 border border-outline-variant/80 rounded-xl bg-surface-container-low hover:bg-surface-container font-label-md text-label-md text-primary font-bold flex items-center justify-center gap-2 transition-colors">
+<span>แสดงสนามเทนนิสเพิ่มเติมในระยะ 5-10 กม.</span>
+<span class="material-symbols-outlined text-[18px]">expand_more</span>
+</button>
+</div>
+</section>
+<!-- Right Column: Interactive Visual Bangkok Map UI (7 Columns on Desktop sticky) -->
+<section class="lg:col-span-6 xl:col-span-6 sticky top-28 h-[calc(100vh-140px)] min-h-[580px] rounded-2xl overflow-hidden border border-outline-variant/80 shadow-lg flex flex-col bg-surface-container-lowest">
+<!-- Interactive Map Frame / Canvas Mockup -->
+<div class="relative w-full h-full bg-[#e8ece9] overflow-hidden select-none">
+<!-- Stylized Bangkok Map Visual Layer (Vector Grid & Street Canvas simulation) -->
+<div class="absolute inset-0 opacity-40" style="background-image: radial-gradient(#064e3b 0.75px, transparent 0.75px), radial-gradient(#064e3b 0.75px, #e8ece9 0.75px); background-size: 30px 30px; background-position: 0 0,15px 15px;"></div>
+<!-- Mock Bangkok Major Arteries (Sukhumvit, Rama IV, Asoke Montri Road) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+<!-- BTS Sukhumvit Green Line -->
+<path d="M-50,220 C200,210 400,280 800,320" fill="none" opacity="0.85" stroke="#84CC16" stroke-linecap="round" stroke-width="6"></path>
+<path d="M-50,220 C200,210 400,280 800,320" fill="none" stroke="#064E3B" stroke-dasharray="8 6" stroke-width="2"></path>
+<!-- Sukhumvit Road Main -->
+<path d="M-50,235 C200,225 400,295 800,335" fill="none" stroke="#cbd5e1" stroke-width="12"></path>
+<path d="M-50,235 C200,225 400,295 800,335" fill="none" stroke="#ffffff" stroke-width="8"></path>
+<!-- Asoke Montri / Ratchadaphisek North-South -->
+<path d="M220,-20 L240,650" fill="none" stroke="#cbd5e1" stroke-width="10"></path>
+<path d="M220,-20 L240,650" fill="none" stroke="#ffffff" stroke-width="6"></path>
+<!-- Thonglor (Sukhumvit 55) & Ekkamai (Sukhumvit 63) -->
+<path d="M490,40 L450,550" fill="none" opacity="0.9" stroke="#ffffff" stroke-width="5"></path>
+<path d="M580,60 L540,580" fill="none" opacity="0.9" stroke="#ffffff" stroke-width="5"></path>
+<!-- Rama IV Expressway Curve -->
+<path d="M-30,480 C180,450 480,470 750,580" fill="none" stroke="#f1f5f9" stroke-width="14"></path>
+<path d="M-30,480 C180,450 480,470 750,580" fill="none" stroke="#cbd5e1" stroke-width="8"></path>
+<!-- 5KM Radius Circle centered at Sukhumvit 39 -->
+<circle cx="340" cy="270" fill="rgba(172, 248, 71, 0.08)" r="190" stroke="#416900" stroke-dasharray="6 4" stroke-width="2"></circle>
+</svg>
+<!-- Neighborhood Area Labels on Map -->
+<div class="absolute top-[160px] left-[130px] text-[11px] font-bold tracking-wider text-outline font-headline-md pointer-events-none uppercase">ASOKE / อโศก</div>
+<div class="absolute top-[190px] left-[310px] text-[11px] font-bold tracking-wider text-primary font-headline-md pointer-events-none uppercase">PHROM PHONG / พร้อมพงษ์</div>
+<div class="absolute top-[230px] left-[460px] text-[11px] font-bold tracking-wider text-outline font-headline-md pointer-events-none uppercase">THONGLOR / ทองหล่อ</div>
+<div class="absolute bottom-[90px] left-[180px] text-[11px] font-bold tracking-wider text-outline font-headline-md pointer-events-none uppercase">KHLONG TOEI / คลองเตย</div>
+<!-- GPS Center Node (User's Current Location) -->
+<div class="absolute top-[270px] left-[340px] -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center">
+<div class="relative flex items-center justify-center">
+<span class="absolute w-12 h-12 rounded-full bg-blue-500/20 animate-pulse-ring"></span>
+<span class="w-7 h-7 rounded-full bg-white shadow-lg flex items-center justify-center border-2 border-blue-600">
+<span class="w-3.5 h-3.5 rounded-full bg-blue-600 animate-pulse"></span>
+</span>
+</div>
+<!-- Tooltip Badge -->
+<div class="mt-1 bg-inverse-surface text-on-primary text-[11px] font-bold px-2 py-0.5 rounded-full shadow-md whitespace-nowrap flex items-center gap-1 border border-white/20">
+<span>พิกัดของคุณ (สุขุมวิท 39)</span>
+</div>
+</div>
+<!-- Interactive Court Map Pin 1: The Racquet Club (Selected with Floating Popup) -->
+<div class="absolute top-[165px] left-[400px] -translate-x-1/2 -translate-y-full z-30 cursor-pointer">
+<!-- Pin Node -->
+<div class="flex flex-col items-center group">
+<!-- Map Popup Info Card for Selected Venue -->
+<div class="mb-2 bg-surface-container-lowest rounded-xl shadow-2xl p-3 border-2 border-primary w-64 text-left animate-in fade-in zoom-in-95 duration-150">
+<div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-outline-variant/30">
+<span class="text-label-sm font-label-sm text-secondary font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">bolt</span>
+                    ใกล้ที่สุด 1.2 กม.
+                  </span>
+<span class="bg-secondary-fixed text-on-secondary-fixed text-[10px] font-extrabold px-1.5 py-0.2 rounded">
+                    ว่างวันนี้
+                  </span>
+</div>
+<h4 class="font-headline-sm text-headline-sm font-bold text-primary text-sm leading-tight">
+                  The Racquet Club สุขุมวิท 49
+                </h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant text-[11px] mt-0.5">คอร์ท Hard Court ในร่มติดแอร์ 3 คอร์ท</p>
+<div class="mt-2 flex items-center justify-between">
+<span class="font-headline-sm text-primary font-bold text-sm">฿450 - ฿650</span>
+<button class="bg-primary hover:bg-primary-container text-on-primary text-[11px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1">
+<span>จอง</span>
+<span class="material-symbols-outlined text-[12px]">calendar_today</span>
+</button>
+</div>
+<a class="mt-2 block text-center text-[10px] text-primary font-semibold hover:underline flex items-center justify-center gap-1" href="#">
+<span class="material-symbols-outlined text-[12px]">directions</span>
+<span>นำทางด้วย Google Maps (5 นาที)</span>
+</a>
+</div>
+<!-- Animated Volt Pin Indicator -->
+<div class="bg-primary text-secondary-fixed px-2.5 py-1 rounded-full font-headline-md text-xs font-bold shadow-xl border-2 border-secondary-fixed flex items-center gap-1">
+<span>฿450</span>
+<span class="text-[10px] opacity-80">• 1.2km</span>
+</div>
+<div class="w-2.5 h-2.5 bg-primary rotate-45 -mt-1.5 border-r-2 border-b-2 border-secondary-fixed"></div>
+</div>
+</div>
+<!-- Court Map Pin 2: Benchasiri Park (Public) -->
+<div class="absolute top-[280px] left-[260px] -translate-x-1/2 -translate-y-full z-20 cursor-pointer hover:scale-110 transition-transform">
+<div class="flex flex-col items-center">
+<div class="bg-surface-container-lowest text-primary px-2.5 py-1 rounded-full font-headline-md text-xs font-bold shadow-md border border-outline-variant flex items-center gap-1">
+<span class="text-secondary font-black">฿150</span>
+<span class="text-on-surface-variant text-[10px]">• 1.8km</span>
+</div>
+<div class="w-2 h-2 bg-surface-container-lowest rotate-45 -mt-1 border-r border-b border-outline-variant"></div>
+</div>
+</div>
+<!-- Court Map Pin 3: Asoke Sports Club -->
+<div class="absolute top-[180px] left-[210px] -translate-x-1/2 -translate-y-full z-20 cursor-pointer hover:scale-110 transition-transform">
+<div class="flex flex-col items-center">
+<div class="bg-surface-container-lowest text-primary px-2.5 py-1 rounded-full font-headline-md text-xs font-bold shadow-md border border-outline-variant flex items-center gap-1">
+<span>฿500</span>
+<span class="text-on-surface-variant text-[10px]">• 2.4km</span>
+</div>
+<div class="w-2 h-2 bg-surface-container-lowest rotate-45 -mt-1 border-r border-b border-outline-variant"></div>
+</div>
+</div>
+<!-- Court Map Pin 4: Sathorn City Tennis Club -->
+<div class="absolute top-[460px] left-[160px] -translate-x-1/2 -translate-y-full z-20 cursor-pointer hover:scale-110 transition-transform">
+<div class="flex flex-col items-center">
+<div class="bg-surface-container-lowest text-primary px-2.5 py-1 rounded-full font-headline-md text-xs font-bold shadow-md border border-outline-variant flex items-center gap-1">
+<span>฿600</span>
+<span class="text-on-surface-variant text-[10px]">• 4.1km</span>
+</div>
+<div class="w-2 h-2 bg-surface-container-lowest rotate-45 -mt-1 border-r border-b border-outline-variant"></div>
+</div>
+</div>
+<!-- Additional Nearby Tennis Courts Pins in 5km Radius -->
+<div class="absolute top-[340px] left-[470px] -translate-x-1/2 -translate-y-full z-10 cursor-pointer opacity-90 hover:opacity-100">
+<div class="bg-surface-container-lowest text-on-surface px-2 py-0.5 rounded-full text-[11px] font-bold shadow border border-outline-variant">
+              ฿400 • 2.9km
+            </div>
+</div>
+<div class="absolute top-[120px] left-[320px] -translate-x-1/2 -translate-y-full z-10 cursor-pointer opacity-90 hover:opacity-100">
+<div class="bg-surface-container-lowest text-on-surface px-2 py-0.5 rounded-full text-[11px] font-bold shadow border border-outline-variant">
+              ฿350 • 3.2km
+            </div>
+</div>
+<!-- Floating Map Top Control Badges -->
+<div class="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none">
+<div class="bg-surface-container-lowest/90 backdrop-blur-md rounded-lg px-3 py-1.5 shadow-sm border border-outline-variant/40 pointer-events-auto flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary-fixed border border-secondary"></span>
+<span class="text-label-sm font-label-sm text-primary font-bold">แสดงคอร์ทในรัศมี 5 กม. จากพิกัดคุณ</span>
+</div>
+<!-- Map Layer Pills -->
+<div class="flex items-center gap-1 bg-surface-container-lowest/90 backdrop-blur-md p-1 rounded-lg shadow-sm border border-outline-variant/40 pointer-events-auto">
+<button class="px-2 py-1 rounded text-[11px] font-bold bg-primary text-on-primary" title="Bangkok Street Map">แผนที่ถนน</button>
+<button class="px-2 py-1 rounded text-[11px] font-medium text-on-surface hover:text-primary" title="Satellite View">ดาวเทียม</button>
+<button class="px-2 py-1 rounded text-[11px] font-medium text-on-surface hover:text-primary flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[13px] text-error">traffic</span>
+<span>การจราจร</span>
+</button>
+</div>
+</div>
+<!-- Floating Bottom-Right Map Controls Cluster -->
+<div class="absolute bottom-6 right-6 flex flex-col gap-2 z-20">
+<!-- Re-center to my GPS button -->
+<button class="h-10 px-3.5 bg-secondary-fixed text-on-secondary-fixed font-bold text-label-sm font-label-sm rounded-lg shadow-lg hover:brightness-105 flex items-center gap-1.5 active:scale-95 transition-all border border-primary/20">
+<span class="material-symbols-outlined text-[18px]">my_location</span>
+<span>กลับมาจุดพิกัดฉัน</span>
+</button>
+<div class="bg-surface-container-lowest rounded-lg shadow-md border border-outline-variant/60 flex flex-col overflow-hidden self-end">
+<button class="w-9 h-9 flex items-center justify-center hover:bg-surface-container text-primary border-b border-outline-variant/40 transition-colors" title="Zoom In">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+<button class="w-9 h-9 flex items-center justify-center hover:bg-surface-container text-primary transition-colors" title="Zoom Out">
+<span class="material-symbols-outlined text-[20px]">remove</span>
+</button>
+</div>
+</div>
+<!-- Radius Distance Legend Bottom-Left -->
+<div class="absolute bottom-6 left-6 bg-inverse-surface/85 backdrop-blur-md text-on-primary rounded-lg px-3 py-1.5 text-[11px] font-medium border border-white/10 flex items-center gap-2">
+<span class="w-3 h-0.5 bg-secondary-fixed inline-block"></span>
+<span>มาตราส่วน 1:25,000 (กทม. โซนสุขุมวิท)</span>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Shared Web Footer (From JSON Blueprint Anchor) -->
+<footer class="bg-primary text-on-primary w-full border-t border-primary-container mt-16">
+<div class="w-full px-6 md:px-12 py-12 max-w-7xl mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-primary-container/60">
+<!-- Brand Summary Column -->
+<div class="md:col-span-1 space-y-3">
+<a class="text-headline-sm font-headline-sm font-bold text-secondary-fixed tracking-tight flex items-center gap-2" href="#">
+<span>🎾 BKK Tennis</span>
+</a>
+<p class="text-body-sm font-body-sm text-on-primary-container leading-relaxed">
+            แพลตฟอร์มค้นหาและจองสนามเทนนิสชั้นนำทั่วกรุงเทพฯ ด้วยระบบพิกัด GPS อัจฉริยะ ตรวจสอบตารางว่างแบบเรียลไทม์ และชำระเงินสะดวกทันที
+          </p>
+<div class="flex items-center gap-2 pt-2">
+<span class="inline-block w-2.5 h-2.5 rounded-full bg-secondary-fixed"></span>
+<span class="text-label-sm font-label-sm text-on-primary-container">ระบบตรวจจับพิกัด GPS ใช้งานได้ตามปกติ</span>
+</div>
+</div>
+<!-- Links Column 1: Bangkok Districts -->
+<div class="space-y-2">
+<h4 class="text-label-lg font-label-lg font-bold text-on-primary">ย่านยอดนิยม</h4>
+<ul class="space-y-1.5 text-body-sm font-body-sm">
+<li><a class="text-on-primary-container hover:text-secondary-fixed transition-colors" href="#">Explore Sukhumvit</a></li>
+<li><a class="text-on-primary-container hover:text-secondary-fixed transition-colors" href="#">Silom &amp; Sathorn Courts</a></li>
+<li><a class="text-on-primary-container hover:text-secondary-fixed transition-colors" href="#">Thong Lo Venues</a></li>
+<li><a class="text-on-primary-container hover:text-secondary-fixed transition-colors" href="#">Ari &amp; Phaholyothin Courts</a></li>
+</ul>
+</div>
+<!-- Links Column 2: Platform & Partners -->
+<div class="space-y-2">
+<h4 class="text-label-lg font-label-lg font-bold text-on-primary">พาร์ทเนอร์ &amp; ผู้ประกอบการ</h4>
+<ul class="space-y-1.5 text-body-sm font-body-sm">
+<li><a class="text-on-primary-container hover:text-secondary-fixed transition-colors" href="#">Court Partner Portal</a></li>
+<li><a class="text-on-primary-container hover:text-secondary-fixed transition-colors" href="#">ลงทะเบียนเพิ่มสนามเทนนิสของคุณ</a></li>
+<li><a class="text-on-primary-container hover:text-secondary-fixed transition-colors" href="#">ระบบบริหารจัดการคอร์ท BKK ClubOS</a></li>
+<li><a class="text-on-primary-container hover:text-secondary-fixed transition-colors" href="#">ผู้สนับสนุนทัวร์นาเมนต์</a></li>
+</ul>
+</div>
+<!-- Links Column 3: Help & Legal -->
+<div class="space-y-2">
+<h4 class="text-label-lg font-label-lg font-bold text-on-primary">ช่วยเหลือ &amp; ติดต่อ</h4>
+<ul class="space-y-1.5 text-body-sm font-body-sm">
+<li><a class="text-on-primary-container hover:text-secondary-fixed transition-colors" href="#">Privacy &amp; Terms</a></li>
+<li><a class="text-on-primary-container hover:text-secondary-fixed transition-colors" href="#">Support Hotline</a></li>
+<li><a class="text-on-primary-container hover:text-secondary-fixed transition-colors" href="#">นโยบายยกเลิกและคืนเงิน</a></li>
+<li><a class="text-on-primary-container hover:text-secondary-fixed transition-colors" href="#">ศูนย์บริการลูกค้าสัมพันธ์ LINE: @BKKtennis</a></li>
+</ul>
+</div>
+</div>
+<!-- Copyright Bar -->
+<div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-body-sm font-body-sm text-on-primary-container">
+<p>© 2025 BKK Tennis Inc. Bangkok Court Discovery &amp; Booking Platform. All rights reserved.</p>
+<div class="flex items-center gap-6 text-label-sm font-label-sm">
+<span class="text-on-primary-container">GPS Precision Engine v3.4</span>
+<span class="text-on-primary-container">Bangkok, Thailand</span>
+</div>
+</div>
+</div>
+</footer>
+</body></html>

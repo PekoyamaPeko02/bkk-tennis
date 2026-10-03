@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+
+<html class="light" lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Racquet Club Sukhumvit 49 - จองคอร์ทเทนนิส | BKK Tennis</title>
+<!-- Google Fonts & Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Theme Configuration verbatim -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary-fixed-dim": "#95d3ba",
+            "surface-container-highest": "#dae2fd",
+            "inverse-surface": "#283044",
+            "inverse-primary": "#95d3ba",
+            "background": "#faf8ff",
+            "on-tertiary-fixed": "#370e00",
+            "on-primary": "#ffffff",
+            "tertiary": "#561a00",
+            "surface-container": "#eaedff",
+            "on-secondary-fixed": "#102000",
+            "surface-container-high": "#e2e7ff",
+            "primary": "#003527",
+            "inverse-on-surface": "#eef0ff",
+            "secondary-container": "#acf847",
+            "outline-variant": "#bfc9c3",
+            "outline": "#707974",
+            "on-surface-variant": "#404944",
+            "tertiary-fixed-dim": "#ffb599",
+            "secondary-fixed": "#acf847",
+            "on-secondary-container": "#457000",
+            "surface-container-lowest": "#ffffff",
+            "surface-tint": "#2b6954",
+            "on-surface": "#131b2e",
+            "surface-dim": "#d2d9f4",
+            "surface-variant": "#dae2fd",
+            "on-secondary-fixed-variant": "#304f00",
+            "on-primary-fixed": "#002117",
+            "surface": "#faf8ff",
+            "on-tertiary": "#ffffff",
+            "on-tertiary-fixed-variant": "#7f2b00",
+            "secondary": "#416900",
+            "on-error": "#ffffff",
+            "on-secondary": "#ffffff",
+            "secondary-fixed-dim": "#91db2a",
+            "on-primary-container": "#80bea6",
+            "tertiary-fixed": "#ffdbce",
+            "primary-container": "#064e3b",
+            "surface-container-low": "#f2f3ff",
+            "error": "#ba1a1a",
+            "surface-bright": "#faf8ff",
+            "on-error-container": "#93000a",
+            "primary-fixed": "#b0f0d6",
+            "on-primary-fixed-variant": "#0b513d",
+            "error-container": "#ffdad6",
+            "tertiary-container": "#7b2900",
+            "on-tertiary-container": "#ff966c",
+            "on-background": "#131b2e"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter-mobile": "0.75rem",
+            "space-xl": "2.5rem",
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem",
+            "space-lg": "1.5rem",
+            "margin": "2rem",
+            "margin-mobile": "1rem",
+            "space-md": "1rem",
+            "gutter": "1.5rem"
+          },
+          "fontFamily": {
+            "headline-xl": ["Space Grotesk"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "metric-num": ["Space Grotesk"],
+            "display-hero": ["Space Grotesk"],
+            "headline-lg-mobile": ["Space Grotesk"],
+            "headline-md": ["Space Grotesk"],
+            "headline-lg": ["Space Grotesk"],
+            "display-hero-mobile": ["Space Grotesk"],
+            "headline-xl-mobile": ["Space Grotesk"],
+            "body-md": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "label-lg": ["Plus Jakarta Sans"],
+            "body-sm": ["Plus Jakarta Sans"],
+            "headline-sm": ["Space Grotesk"]
+          },
+          "fontSize": {
+            "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+            "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+            "metric-num": ["20px", {"lineHeight": "24px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+            "display-hero": ["56px", {"lineHeight": "64px", "letterSpacing": "-0.03em", "fontWeight": "700"}],
+            "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+            "headline-md": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+            "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+            "display-hero-mobile": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+            "headline-xl-mobile": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+            "body-md": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+            "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+            "label-sm": ["10px", {"lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "700"}],
+            "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+            "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+            "headline-sm": ["18px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "600"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface antialiased selection:bg-secondary-fixed selection:text-on-secondary-fixed min-h-screen pb-36">
+<!-- Sub-page Task Top Navigation Bar (Linear booking flow suppresses main web TopAppBar & BottomNavBar) -->
+<header class="sticky top-0 z-40 bg-surface-container-lowest/95 backdrop-blur-md border-b border-outline-variant/30 shadow-sm">
+<div class="max-w-md mx-auto px-4 h-16 flex items-center justify-between">
+<button aria-label="ย้อนกลับ" class="w-10 h-10 rounded-full flex items-center justify-center bg-surface-container-low hover:bg-surface-container transition-colors text-primary active:scale-95 duration-100" onclick="history.back()">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="flex flex-col items-center">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">จองคอร์ทออนไลน์</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold">เลือกรอบและเวลา</span>
+</div>
+<div class="flex items-center space-x-1">
+<button aria-label="แบ่งปัน" class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined">share</span>
+</button>
+<button aria-label="บันทึกรายการโปรด" class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 0;">favorite</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Mobile Screen Container -->
+<main class="max-w-md mx-auto px-4 pt-3 space-y-5">
+<!-- Hero Court Imagery Section -->
+<section class="relative rounded-xl overflow-hidden shadow-sm border border-outline-variant/30 bg-surface-container-low">
+<div class="relative aspect-[16/10] w-full">
+<img class="w-full h-full object-cover" data-alt="An immaculate indoor championship tennis court at an elite Bangkok sports club featuring premium dark green acrylic hard court flooring, crisp white line markings, high modern ceiling rafters with professional diffuse LED stadium floodlights, expansive glass viewing walls, and subtle tennis equipment in a clean luxury athletic aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfUTWvU4MNN5xBPQCIH43o0hWBkmwyKPnGRNsDGUKvZ-WLhbVaWThRZrDMETUZujjIzEyCk6QoTawDMZ4fGAA-UzTe6SsiSNkq6wgJSxFSOio-hM8B4Kobe7DSRvhh0bfBBzmyQQVd2H2KTvh-YUQXoxtO3KikfuaNtNW3cqYI_ku-8hyp18qwHAqNuF4CEo5IJPD50G1cuOveNqDdCzPcNGJe2XthbwN8vBqHIoXe_EDUN1mPmlp_jA"/>
+<!-- Ambient Gradient Overlay -->
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-black/20"></div>
+<!-- Top Badges Floating Over Hero -->
+<div class="absolute top-3 left-3 flex flex-wrap gap-2 items-center">
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-container text-white font-label-md text-label-md shadow-md border border-primary-fixed-dim/30">
+<span class="material-symbols-outlined text-[16px] text-secondary-fixed">ac_unit</span>
+<span>Indoor Hard Court ติดแอร์</span>
+</div>
+</div>
+<div class="absolute top-3 right-3">
+<div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-inverse-surface/85 backdrop-blur-md text-white font-label-md text-label-md shadow-sm border border-white/10">
+<span class="material-symbols-outlined text-secondary-fixed text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-bold">4.9</span>
+<span class="text-outline-variant text-[11px]">(320 รีวิว)</span>
+</div>
+</div>
+<!-- Hero Bottom Info -->
+<div class="absolute bottom-3 left-3 right-3 text-white">
+<div class="flex items-center gap-1 text-secondary-fixed font-label-sm text-label-sm mb-1">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+<span>สุขุมวิท 49, คลองตันเหนือ, วัฒนา</span>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold tracking-tight text-white leading-tight">
+            The Racquet Club Sukhumvit 49
+          </h1>
+</div>
+</div>
+</section>
+<!-- Facility Pills -->
+<section class="space-y-2">
+<h2 class="font-label-md text-label-md uppercase tracking-wider text-outline">สิ่งอำนวยความสะดวกมาตรฐานสโมสร</h2>
+<div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+<div class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-lowest border border-outline-variant/40 text-on-surface font-label-md text-label-md shadow-sm">
+<span class="material-symbols-outlined text-primary text-[18px]">wb_sunny</span>
+<span>ไฟ LED มาตรฐานสากล</span>
+</div>
+<div class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-lowest border border-outline-variant/40 text-on-surface font-label-md text-label-md shadow-sm">
+<span class="material-symbols-outlined text-primary text-[18px]">local_parking</span>
+<span>มีที่จอดรถสะดวก</span>
+</div>
+<div class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-lowest border border-outline-variant/40 text-on-surface font-label-md text-label-md shadow-sm">
+<span class="material-symbols-outlined text-primary text-[18px]">shower</span>
+<span>ล็อกเกอร์ &amp; ห้องอาบน้ำ</span>
+</div>
+<div class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-lowest border border-outline-variant/40 text-on-surface font-label-md text-label-md shadow-sm">
+<span class="material-symbols-outlined text-primary text-[18px]">sports_tennis</span>
+<span>Pro Shop</span>
+</div>
+</div>
+</section>
+<!-- Horizontal Date Selector Strip -->
+<section class="space-y-2.5">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-sm text-headline-sm text-primary font-bold">เลือกวันที่ (Select Date)</h2>
+<span class="font-label-md text-label-md text-secondary font-semibold flex items-center gap-0.5 cursor-pointer">
+<span class="material-symbols-outlined text-[16px]">calendar_month</span> ตุลาคม 2568
+        </span>
+</div>
+<div class="grid grid-cols-4 gap-2">
+<!-- Date Item: วันนี้ (Active) -->
+<button class="flex flex-col items-center justify-center py-3 px-1 rounded-xl bg-primary-container text-white border-2 border-secondary-fixed shadow-sm transition-all" type="button">
+<span class="font-label-sm text-label-sm text-secondary-fixed">วันนี้</span>
+<span class="font-metric-num text-metric-num font-bold">24</span>
+<span class="font-label-sm text-label-sm opacity-90">ต.ค.</span>
+</button>
+<!-- Date Item: พรุ่งนี้ -->
+<button class="flex flex-col items-center justify-center py-3 px-1 rounded-xl bg-surface-container-lowest text-on-surface border border-outline-variant/40 hover:border-primary/40 shadow-sm transition-all" type="button">
+<span class="font-label-sm text-label-sm text-on-surface-variant">พรุ่งนี้</span>
+<span class="font-metric-num text-metric-num font-bold">25</span>
+<span class="font-label-sm text-label-sm text-outline">ต.ค.</span>
+</button>
+<!-- Date Item: ส. 26 ต.ค. -->
+<button class="flex flex-col items-center justify-center py-3 px-1 rounded-xl bg-surface-container-lowest text-on-surface border border-outline-variant/40 hover:border-primary/40 shadow-sm transition-all" type="button">
+<span class="font-label-sm text-label-sm text-on-surface-variant">เสาร์</span>
+<span class="font-metric-num text-metric-num font-bold">26</span>
+<span class="font-label-sm text-label-sm text-outline">ต.ค.</span>
+</button>
+<!-- Date Item: อา. 27 ต.ค. -->
+<button class="flex flex-col items-center justify-center py-3 px-1 rounded-xl bg-surface-container-lowest text-on-surface border border-outline-variant/40 hover:border-primary/40 shadow-sm transition-all" type="button">
+<span class="font-label-sm text-label-sm text-tertiary-container font-semibold">อาทิตย์</span>
+<span class="font-metric-num text-metric-num font-bold">27</span>
+<span class="font-label-sm text-label-sm text-outline">ต.ค.</span>
+</button>
+</div>
+</section>
+<!-- Court Selection Segmented Tabs -->
+<section class="space-y-2.5">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-sm text-headline-sm text-primary font-bold">หมายเลขสนาม (Court)</h2>
+<div class="inline-flex items-center gap-1 text-[12px] font-label-md text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-secondary-container animate-pulse"></span>
+<span>สนามเปิดใช้งานปกติ</span>
+</div>
+</div>
+<div class="grid grid-cols-3 p-1 rounded-xl bg-surface-container-low border border-outline-variant/40">
+<!-- Court 1 Selected -->
+<button class="py-2.5 px-2 text-center rounded-lg bg-surface-container-lowest text-primary font-bold shadow-sm border border-outline-variant/30 flex flex-col items-center">
+<span class="font-label-lg text-label-lg">คอร์ท 1</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Hard (ติดแอร์)</span>
+</button>
+<!-- Court 2 -->
+<button class="py-2.5 px-2 text-center rounded-lg text-on-surface-variant hover:text-primary font-medium flex flex-col items-center transition-colors">
+<span class="font-label-lg text-label-lg">คอร์ท 2</span>
+<span class="font-label-sm text-label-sm text-outline">Hard Court</span>
+</button>
+<!-- Court 3 -->
+<button class="py-2.5 px-2 text-center rounded-lg text-on-surface-variant hover:text-primary font-medium flex flex-col items-center transition-colors">
+<span class="font-label-lg text-label-lg">คอร์ท 3</span>
+<span class="font-label-sm text-label-sm text-outline">Indoor</span>
+</button>
+</div>
+</section>
+<!-- Time Slot Matrix Grid -->
+<section class="space-y-3">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-primary font-bold">ตารางเวลาเปิดจอง</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">แตะเพื่อเลือกเวลาที่ต้องการ (เลือกได้หลายช่วงเวลา)</p>
+</div>
+<div class="flex items-center gap-3 text-label-sm font-label-sm">
+<div class="flex items-center gap-1">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary-fixed border border-primary"></span>
+<span>เลือกแล้ว</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-2.5 h-2.5 rounded-full bg-outline-variant"></span>
+<span>เต็ม</span>
+</div>
+</div>
+</div>
+<div class="space-y-2.5">
+<!-- Slot 1: 16:00 - 17:00 (ว่าง) -->
+<div class="flex items-center justify-between p-3.5 rounded-xl bg-surface-container-lowest border border-outline-variant/40 hover:border-primary/40 transition-all cursor-pointer shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">schedule</span>
+</div>
+<div>
+<div class="font-metric-num text-headline-sm font-bold text-on-surface">16:00 - 17:00</div>
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container text-secondary font-label-sm text-label-sm">ว่าง</span>
+<span class="font-body-sm text-body-sm text-outline">Standard Afternoon</span>
+</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-metric-num text-headline-sm font-bold text-primary">฿450</div>
+<span class="font-label-sm text-label-sm text-outline">/ 1 ชม.</span>
+</div>
+</div>
+<!-- Slot 2: 17:00 - 18:00 (ว่าง [เลือกแล้ว - ไฮไลต์เขียวสว่าง]) -->
+<div class="flex items-center justify-between p-3.5 rounded-xl bg-primary-container text-white border-2 border-secondary-fixed shadow-md relative overflow-hidden">
+<div class="absolute -right-2 -top-2 w-10 h-10 bg-secondary-fixed/20 rounded-full blur-sm"></div>
+<div class="flex items-center gap-3 relative z-10">
+<div class="w-9 h-9 rounded-lg bg-secondary-fixed text-primary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div>
+<div class="font-metric-num text-headline-sm font-bold text-white flex items-center gap-1.5">
+<span>17:00 - 18:00</span>
+<span class="px-2 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold">เลือกแล้ว</span>
+</div>
+<div class="font-body-sm text-body-sm text-primary-fixed-dim">Prime Twilight Slot</div>
+</div>
+</div>
+<div class="text-right relative z-10">
+<div class="font-metric-num text-headline-sm font-bold text-secondary-fixed">฿600</div>
+<span class="font-label-sm text-label-sm text-primary-fixed-dim">/ 1 ชม.</span>
+</div>
+</div>
+<!-- Slot 3: 18:00 - 19:00 (ว่าง [เลือกแล้ว - ไฮไลต์เขียวสว่าง]) -->
+<div class="flex items-center justify-between p-3.5 rounded-xl bg-primary-container text-white border-2 border-secondary-fixed shadow-md relative overflow-hidden">
+<div class="absolute -right-2 -top-2 w-10 h-10 bg-secondary-fixed/20 rounded-full blur-sm"></div>
+<div class="flex items-center gap-3 relative z-10">
+<div class="w-9 h-9 rounded-lg bg-secondary-fixed text-primary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div>
+<div class="font-metric-num text-headline-sm font-bold text-white flex items-center gap-1.5">
+<span>18:00 - 19:00</span>
+<span class="px-2 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold">เลือกแล้ว</span>
+</div>
+<div class="font-body-sm text-body-sm text-primary-fixed-dim">Floodlit Peak Hour</div>
+</div>
+</div>
+<div class="text-right relative z-10">
+<div class="font-metric-num text-headline-sm font-bold text-secondary-fixed">฿650</div>
+<span class="font-label-sm text-label-sm text-primary-fixed-dim">/ 1 ชม.</span>
+</div>
+</div>
+<!-- Slot 4: 19:00 - 20:00 (ไม่ว่าง) -->
+<div class="flex items-center justify-between p-3.5 rounded-xl bg-surface-container-low/70 border border-outline-variant/20 opacity-60 cursor-not-allowed">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-surface-dim/40 flex items-center justify-center text-outline">
+<span class="material-symbols-outlined text-[20px]">lock</span>
+</div>
+<div>
+<div class="font-metric-num text-headline-sm font-bold text-on-surface-variant line-through">19:00 - 20:00</div>
+<div class="font-body-sm text-body-sm text-error font-medium">ไม่ว่าง (มีผู้จองแล้ว)</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-metric-num text-headline-sm font-bold text-outline">฿650</div>
+<span class="font-label-sm text-label-sm text-outline">เต็ม</span>
+</div>
+</div>
+<!-- Slot 5: 20:00 - 21:00 (ว่าง) -->
+<div class="flex items-center justify-between p-3.5 rounded-xl bg-surface-container-lowest border border-outline-variant/40 hover:border-primary/40 transition-all cursor-pointer shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">schedule</span>
+</div>
+<div>
+<div class="font-metric-num text-headline-sm font-bold text-on-surface">20:00 - 21:00</div>
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container text-secondary font-label-sm text-label-sm">ว่าง</span>
+<span class="font-body-sm text-body-sm text-outline">Night Match</span>
+</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-metric-num text-headline-sm font-bold text-primary">฿550</div>
+<span class="font-label-sm text-label-sm text-outline">/ 1 ชม.</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Add-on Services Toggles -->
+<section class="space-y-3 pt-2">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-sm text-headline-sm text-primary font-bold">บริการเสริม (Add-on Services)</h2>
+<span class="font-label-sm text-label-sm text-outline">ออปชันพิเศษ</span>
+</div>
+<div class="space-y-2.5">
+<!-- Addon 1: เช่าไม้เทนนิส -->
+<label class="flex items-center justify-between p-3 rounded-xl bg-surface-container-lowest border border-outline-variant/40 cursor-pointer hover:bg-surface-container-low/50 transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">sports_tennis</span>
+</div>
+<div>
+<div class="font-label-lg text-label-lg font-bold text-on-surface">เช่าไม้เทนนิส Wilson / Babolat</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">เลือกกริปและน้ำหนักได้ที่หน้าคอร์ท</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-metric-num text-headline-sm font-bold text-primary">+฿100</span>
+<input checked="" class="w-5 h-5 rounded text-primary focus:ring-secondary-fixed border-outline-variant" type="checkbox"/>
+</div>
+</label>
+<!-- Addon 2: ซื้อลูกเทนนิส -->
+<label class="flex items-center justify-between p-3 rounded-xl bg-surface-container-lowest border border-outline-variant/40 cursor-pointer hover:bg-surface-container-low/50 transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">sports_baseball</span>
+</div>
+<div>
+<div class="font-label-lg text-label-lg font-bold text-on-surface">ซื้อลูกเทนนิส 1 กระป๋อง</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Dunlop Fort All Court (3 ลูก/กระป๋องใหม่)</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-metric-num text-headline-sm font-bold text-primary">+฿220</span>
+<input class="w-5 h-5 rounded text-primary focus:ring-secondary-fixed border-outline-variant" type="checkbox"/>
+</div>
+</label>
+<!-- Addon 3: Knocker ซ้อมตี -->
+<label class="flex items-center justify-between p-3 rounded-xl bg-surface-container-lowest border border-outline-variant/40 cursor-pointer hover:bg-surface-container-low/50 transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">sports</span>
+</div>
+<div>
+<div class="font-label-lg text-label-lg font-bold text-on-surface">บริการ Knocker ซ้อมตี</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">คู่ซ้อมระดับนักกีฬาคอยป้อนลูกมาตรฐาน</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-metric-num text-headline-sm font-bold text-primary">+฿350<span class="font-label-sm text-label-sm font-normal text-outline">/ชม.</span></span>
+<input class="w-5 h-5 rounded text-primary focus:ring-secondary-fixed border-outline-variant" type="checkbox"/>
+</div>
+</label>
+</div>
+</section>
+<!-- Cancellation Policy Note -->
+<div class="p-3 rounded-xl bg-surface-container-high/40 border border-outline-variant/30 flex items-start gap-2.5 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">verified_user</span>
+<p class="font-body-sm text-body-sm">
+        ยกเลิกฟรีล่วงหน้าก่อน 4 ชม. ระบบจะคืนเงินผ่านช่องทางเดิมทันที พร้อมบริการไฟสปอร์ตไลท์และห้องอาบน้ำฟรี
+      </p>
+</div>
+</main>
+<!-- Sticky Bottom Bar: รวม 2 ชม. (17:00 - 19:00) ยอดรวม ฿1,250 พร้อมปุ่มดำเนินการชำระเงิน -->
+<aside class="fixed bottom-0 inset-x-0 z-50 bg-surface-container-lowest/95 backdrop-blur-lg border-t border-outline-variant/40 shadow-2xl">
+<div class="max-w-md mx-auto px-4 py-3.5 space-y-2.5">
+<div class="flex items-center justify-between">
+<div class="space-y-0.5">
+<div class="flex items-center gap-1.5 font-label-md text-label-md text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-primary">timer</span>
+<span>รวม 2 ชม. (17:00 - 19:00)</span>
+</div>
+<div class="flex items-baseline gap-1.5">
+<span class="font-label-sm text-label-sm text-outline">ยอดชำระ:</span>
+<span class="font-metric-num text-headline-xl-mobile text-primary font-extrabold">฿1,250</span>
+<span class="font-label-sm text-label-sm text-secondary-fixed-dim bg-primary px-1.5 py-0.5 rounded font-bold">รวม VAT</span>
+</div>
+</div>
+<div class="text-right">
+<div class="inline-flex items-center gap-1 text-[11px] font-label-sm text-on-surface-variant bg-surface-container px-2 py-0.5 rounded">
+<span class="material-symbols-outlined text-[12px] text-primary">qr_code_2</span>
+<span>PromptPay / บัตร</span>
+</div>
+</div>
+</div>
+<!-- Volt Action CTA Button -->
+<button class="w-full py-3.5 px-4 rounded-xl bg-secondary-fixed hover:bg-secondary-fixed-dim active:scale-[0.98] transition-all duration-150 text-on-secondary-fixed font-headline-sm text-headline-sm font-bold shadow-lg shadow-secondary/20 flex items-center justify-center gap-2 group" type="button">
+<span>ดำเนินการชำระเงิน (PromptPay QR / บัตร)</span>
+<span class="material-symbols-outlined transition-transform duration-150 group-hover:translate-x-1">arrow_forward</span>
+</button>
+</div>
+</aside>
+</body></html>

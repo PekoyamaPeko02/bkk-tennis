@@ -1,0 +1,39 @@
+# Local dev stack: PostgreSQL + PostGIS (schema/seed auto-applied on first start) and the API.
+#   docker compose up -d db          # database only (run API with `dotnet run`)
+#   docker compose up -d             # database + API on http://localhost:5080
+# Reset the database: docker compose down -v
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    # postgis/postgis has no arm64 build; on Apple Silicon it runs under Rosetta emulation (fine for dev)
+    platform: linux/amd64
+    environment:
+      POSTGRES_DB: bkktennis
+      POSTGRES_USER: bkktennis
+      POSTGRES_PASSWORD: bkktennis
+    ports:
+      - "5433:5432"   # host 5433 to avoid clashing with a local Postgres on 5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bkktennis -d bkktennis"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: src/BkkTennis.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Default: Host=db;Port=5432;Database=bkktennis;Username=bkktennis;Password=bkktennis
+    ports:
+      - "5080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

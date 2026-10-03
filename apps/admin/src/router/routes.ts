@@ -1,0 +1,22 @@
+import type { RouteRecordRaw } from 'vue-router';
+
+const routes: RouteRecordRaw[] = [
+  {
+    path: '/',
+    component: () => import('layouts/PortalLayout.vue'),
+    meta: { auth: true },
+    children: [
+      { path: '', name: 'overview', component: () => import('pages/OverviewPage.vue') },
+      { path: 'partners', name: 'partners', component: () => import('pages/PartnersPage.vue') },
+      { path: 'bookings', name: 'bookings', component: () => import('pages/BookingsPage.vue') },
+      { path: 'payouts', name: 'payouts', component: () => import('pages/PayoutsPage.vue') },
+    ],
+  },
+  {
+    path: '/login',
+    component: () => import('layouts/BlankLayout.vue'),
+    children: [{ path: '', name: 'login', component: () => import('pages/LoginPage.vue') }],
+  },
+  { path: '/:catchAll(.*)*', redirect: '/' },
+];
+export default routes;

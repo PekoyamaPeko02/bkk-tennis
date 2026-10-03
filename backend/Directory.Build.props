@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup>
+    <!-- Target .NET 8 (LTS), but let local runs/tests roll forward to a newer runtime
+         (e.g. a Mac with only .NET 10 installed). Docker/CI still run on the 8.0 runtime. -->
+    <RollForward>Major</RollForward>
+  </PropertyGroup>
+</Project>
