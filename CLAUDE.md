@@ -6,11 +6,23 @@ Design source: Google Stitch export in `docs/design/` (DESIGN.md = tokens/typogr
 Architecture plan: Claude Docs "ระบบจองคอร์ทเทนนิส — แผนสถาปัตยกรรม".
 
 ## Stack & layout
-- pnpm 9 monorepo. `apps/player` (Quasar 2 + Vue 3 + Pinia, web/PWA, Capacitor later), `apps/clubos`, `apps/admin`,
-  `packages/api` (TS types + HTTP client + in-browser mock), `packages/ui` (tokens + shared components).
-- `backend/` .NET 8 Minimal API (EF Core + Npgsql, SignalR, JWT). Local Mac has .NET 10 too; `Directory.Build.props` sets RollForward=Major.
+- pnpm 9 monorepo (workspaces: `apps/*`, `packages/*`, `e2e`). TypeScript ~5.9 throughout.
+  - `apps/player` — Quasar 2 + Vue 3 + Pinia + vue-i18n, web/PWA + Capacitor (`src-capacitor/`).
+  - `apps/clubos` — partner portal (Quasar 2 + Vue 3 + Pinia).
+  - `apps/admin` — platform admin (Quasar 2 + Vue 3 + Pinia).
+  - `packages/api` — TS types, HTTP client, in-browser mock (`src/mock.ts`). `packages/ui` — tokens + shared components.
+  - `e2e/` — Playwright end-to-end tests (`@playwright/test`, runs the apps in mock-API mode).
+- `backend/` — .NET 8 Minimal API. Solution `backend/BkkTennis.sln`:
+  `src/BkkTennis.Api` (EF Core, SignalR, JWT, BCrypt.Net-Next, Swashbuckle), `tests/BkkTennis.Tests` (unit, xUnit),
+  `tests/BkkTennis.IntegrationTests` (xUnit against a real Postgres). Local Mac has .NET 10 too; `Directory.Build.props` sets RollForward=Major.
+- Validation: DataAnnotations plus custom attributes in `Services/Validation.cs` (`.WithValidation()`). FluentValidation is NOT used.
 - DB: PostgreSQL 16 + PostGIS via docker compose on **host port 5433** (5432 is used by another local Postgres).
+  EF provider: `Npgsql.EntityFrameworkCore.PostgreSQL` 8.0.x with `EFCore.NamingConventions` (snake_case); connection string `ConnectionStrings:Default`
+  in `backend/src/BkkTennis.Api/appsettings.json` (`Host=localhost;Port=5433;Database=bkktennis;Username=bkktennis`).
   Schema is owned by SQL in `db/init/*.sql` (NOT EF migrations). Keep `Data/AppDbContext.cs` in sync by hand.
+- Other top-level folders: `db/init/` (schema + seed SQL), `docs/` (`BACKLOG.md`, `design/` Stitch export), `scripts/autopilot.sh`,
+  `.github/workflows/ci.yml` (backend, frontend, e2e jobs).
+- Not configured: ESLint, Prettier, Vitest. Formatting follows `.editorconfig` only. There is no unit-test runner for the Vue/TS packages; their tests are the Playwright specs in `e2e/`.
 
 ## Run
 ```bash
@@ -30,6 +42,9 @@ dotnet build backend/BkkTennis.sln && dotnet test backend/BkkTennis.sln
 pnpm -r run typecheck && pnpm -r run build
 pnpm e2e            # Playwright (mock API, own dev server on :9100; first time: pnpm --filter @bkk/e2e exec playwright install chromium)
 ```
+- The integration tests need the dev DB up (`pnpm db:up`). They create their own database; they read `TEST_DB_HOST` / `TEST_DB_PORT` (default 5433) / `TEST_DB_USER` / `TEST_DB_PASSWORD` (default `bkktennis`/`bkktennis`). CI runs `dotnet build` / `dotnet test` with `-c Release` on .NET 8 and port 5432.
+- `pnpm -r run typecheck` for `apps/player` also runs `scripts/check-i18n.mjs` (TH/EN catalogue completeness).
+- No lint command exists. `pnpm -r run build` runs `quasar build` for each app.
 
 ## Invariants — don't break these
 - No double booking is enforced by the DB: `booking_slots` EXCLUDE constraint on (court_id, time_range) for status held|confirmed|checked_in.
