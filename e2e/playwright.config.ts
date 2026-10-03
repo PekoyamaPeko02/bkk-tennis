@@ -22,6 +22,7 @@ export default defineConfig({
   reporter: process.env.CI ? [['github'], ['list']] : 'list',
   use: {
     trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
     locale: 'th-TH',
     timezoneId: 'Asia/Bangkok',
   },
