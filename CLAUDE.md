@@ -72,3 +72,17 @@ Author: `Luck <152171778+Luck0332@users.noreply.github.com>`. Remote: github.com
 - Backlog: `docs/BACKLOG.md` (ordered). Command: `/next` implements the next open item on branch `dev/autopilot`.
 - Subagent `test-engineer` (`.claude/agents/test-engineer.md`) writes/runs tests for every item; the lead fixes bugs it finds.
 - Headless loop until empty or usage limit: `./scripts/autopilot.sh` (logs in `.claude/logs/`). Never push; a human reviews and pushes.
+
+## Agent team
+Ownership (edit only your folders, read anything):
+- Lead: `packages/api` types + HTTP client (the API contract), `docs/`
+- Backend: `backend/`, `db/init/*.sql` (keep `AppDbContext.cs` in sync)
+- Frontend: `apps/player`, `apps/clubos`, `apps/admin`, `packages/ui`, `packages/api/src/mock.ts` (mock must match the contract)
+- QA: `e2e/`
+
+Rules:
+- Contract changes in `packages/api` go through the Lead only.
+- One branch per agent: `<role>/<feature>`. Never commit to `main`, never push.
+- Don't delete or weaken tests to make them pass.
+- No new dependencies without telling the Lead.
+- Report to Luck before any merge.
