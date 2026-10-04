@@ -9,7 +9,7 @@
     </div>
 
     <div class="filters bkk-card">
-      <q-select v-model="f.venueId" :options="venueOptions" emit-value map-options clearable outlined dense label="สนาม" class="fi" data-testid="f-venue" />
+      <q-select v-model="f.venueId" :options="venueOptions" emit-value map-options clearable outlined dense label="สนาม" class="fi" data-testid="f-venue" :loading="venuesLoading" :data-loading="venuesLoading ? 'true' : 'false'" />
       <q-select v-model="f.status" :options="STATUS_OPTIONS" emit-value map-options clearable outlined dense label="สถานะ" class="fi" data-testid="f-status" />
       <q-select v-model="f.source" :options="SOURCE_OPTIONS" emit-value map-options clearable outlined dense label="ช่องทาง" class="fi" data-testid="f-source" />
       <q-input v-model="f.from" type="date" outlined dense label="เล่นตั้งแต่" class="fi" data-testid="f-from" />
@@ -65,6 +65,7 @@ const loading = ref(false);
 const exporting = ref(false);
 const error = ref('');
 const venueError = ref('');
+const venuesLoading = ref(true);
 const venueOptions = ref<{ value: string; label: string }[]>([]);
 const f = reactive<{ venueId: string | null; status: BookingStatus | null; source: 'app' | 'walk_in' | null; from: string; to: string; q: string | null }>({
   venueId: null, status: null, source: null, from: '', to: '', q: null,
@@ -140,6 +141,8 @@ onMounted(async () => {
     // The venue filter stays empty; say so instead of failing silently.
     console.error('[admin] loading venues for the bookings filter failed', e);
     venueError.value = `โหลดรายชื่อสนามไม่สำเร็จ (${(e as Error).message || 'unknown error'})`;
+  } finally {
+    venuesLoading.value = false;
   }
 });
 </script>
