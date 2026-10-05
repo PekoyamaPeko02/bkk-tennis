@@ -1,5 +1,5 @@
 <template>
-  <q-page class="venue-page">
+  <q-page class="venue-page" data-testid="venue-page" :data-loading="pageReady ? 'false' : 'true'">
     <!-- mobile app bar (design: bkk_tennis_mobile) -->
     <div class="appbar lt-md">
       <q-btn round flat icon="arrow_back" :aria-label="$t('venue.back')" class="round-btn" @click="back" />
@@ -156,7 +156,7 @@
             </div>
             <span class="pay-badge"><q-icon name="qr_code_2" size="16px" /> {{ $t('venue.payBadge') }}</span>
           </div>
-          <q-btn unelevated no-caps class="bkk-btn-volt pay-btn full-width" :disable="!cart.slots.length"
+          <q-btn unelevated no-caps class="bkk-btn-volt pay-btn full-width" :disable="!cart.slots.length || !pageReady"
             :loading="submitting" icon-right="arrow_forward" @click="checkout">
             {{ $t('venue.checkout') }}
           </q-btn>
@@ -205,6 +205,8 @@ const loadError = ref<string | null>(null);
 const loadingSlots = ref(false);
 const submitting = ref(false);
 const showPast = ref(false);
+// The cart (Pinia) can render before onMounted has loaded the venue; checkout needs venue.id.
+const pageReady = computed(() => !!venue.value && !!availability.value);
 const venueId = computed(() => venue.value?.summary.id ?? null);
 
 const court = computed(() => availability.value?.courts.find((c) => c.courtId === courtId.value) ?? null);
@@ -257,18 +259,21 @@ async function loadVenue() {
   }
 }
 
+let slotsSeq = 0;
 async function loadSlots() {
   if (!venueId.value) return;
+  const seq = ++slotsSeq;
   loadingSlots.value = true;
   try {
     const a = await api.getAvailability(venueId.value, date.value);
+    if (seq !== slotsSeq) return; // a newer load (e.g. another date) superseded this response
     availability.value = a;
     if (!a.courts.some((c) => c.courtId === courtId.value)) courtId.value = a.courts[0]?.courtId ?? null;
     const dropped = cart.prune((cid, start) =>
       a.courts.find((c) => c.courtId === cid)?.slots.find((s) => s.start === start)?.status === 'available');
     if (dropped) $q.notify({ type: 'warning', message: t('venue.droppedSlots', { n: dropped }), icon: 'event_busy' });
   } finally {
-    loadingSlots.value = false;
+    if (seq === slotsSeq) loadingSlots.value = false;
   }
 }
 
@@ -316,6 +321,7 @@ async function share() {
 watch(date, (d) => {
   void router.replace({ query: { ...route.query, date: d } });
   if (venueId.value) cart.reset(venueId.value, d);
+  availability.value = null; // don't leave the previous day's slots clickable while the new day loads
   void loadSlots();
 });
 

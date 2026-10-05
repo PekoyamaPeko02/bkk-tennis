@@ -31,6 +31,7 @@ const codes = (page: Page) => page.getByTestId('row-code');
 const count = (page: Page) => page.getByTestId('result-count');
 
 async function pick(page: Page, testId: string, option: string) {
+  await expect(page.getByTestId(testId)).not.toHaveAttribute('data-loading', 'true'); // venue options load async
   await page.getByTestId(testId).click();
   await page.getByRole('option', { name: option }).click();
 }
