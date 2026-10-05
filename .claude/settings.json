@@ -11,7 +11,7 @@
     ],
     "deny": [
       "Bash(git push:*)", "Bash(git reset --hard:*)", "Bash(git clean:*)", "Bash(rm -rf:*)",
-      "Bash(docker compose down -v:*)", "Bash(sudo:*)"
+      "Bash(docker compose down -v:*)", "Bash(sudo:*)", "Bash(gh pr merge:*)"
     ]
   }
 }

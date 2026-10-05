@@ -86,3 +86,4 @@ Rules:
 - Don't delete or weaken tests to make them pass.
 - No new dependencies without telling the Lead.
 - Report to Luck before any merge.
+- Portal agents run on Linux against a macOS checkout: don't run pnpm install / --force unless asked; it rewrites native binaries for the host.

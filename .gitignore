@@ -1,5 +1,6 @@
 # node / quasar
 node_modules/
+**/node_modules/
 dist/
 .quasar/
 *.local
