@@ -14,6 +14,8 @@ const routes: RouteRecordRaw[] = [
       { path: 'profile', name: 'profile', component: () => import('pages/ProfilePage.vue'), meta: { auth: true } },
     ],
   },
+  // full-screen 3D intro, outside the app shell (no header / bottom tabs)
+  { path: '/intro', name: 'intro', component: () => import('pages/IntroPage.vue') },
   { path: '/:catchAll(.*)*', component: () => import('pages/ErrorNotFound.vue') },
 ];
 

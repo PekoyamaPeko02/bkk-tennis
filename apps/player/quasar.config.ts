@@ -19,7 +19,13 @@ export default defineConfig((ctx) => ({
     },
     extendViteConf(viteConf) {
       // workspace packages ship .vue/.ts sources
-      viteConf.optimizeDeps = { ...viteConf.optimizeDeps, exclude: ['@bkk/ui', '@bkk/api'] };
+      viteConf.optimizeDeps = {
+        ...viteConf.optimizeDeps,
+        exclude: ['@bkk/ui', '@bkk/api'],
+        // only lazy pages import these (/intro: three + qrcode, booking page: qrcode). Pre-bundle them at startup, or the dev
+        // server finds them on the first visit and reloads every open page
+        include: [...(viteConf.optimizeDeps?.include ?? []), 'three', 'qrcode'],
+      };
     },
   },
 
@@ -48,6 +54,10 @@ export default defineConfig((ctx) => ({
   pwa: {
     workboxMode: 'GenerateSW',
     injectPwaMetaTags: true,
+    // /intro carries three.js (~600 KB): fetched when someone opens it, not precached with every install
+    extendGenerateSWOptions(cfg) {
+      cfg.globIgnores = [...(cfg.globIgnores ?? []), '**/IntroPage-*.js'];
+    },
   },
 
   capacitor: {
