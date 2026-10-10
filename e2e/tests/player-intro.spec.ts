@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test';
 
-// /intro is a WebGL page. Headless Chromium may render it in software or not offer WebGL at all (the page then falls back to
-// plain stacked chapters), so these checks hold in both modes: the copy, the chapter index, and the hand-over to the app.
+// /intro is a WebGL page, but it only starts the 3D scene on a real GPU. Headless Chromium (here and on CI) renders in
+// software, so these tests see the fallback: plain stacked chapters. The checks hold in both modes: the copy, the chapter
+// index, and the hand-over to the app.
 
 const index = (page: import('@playwright/test').Page) => page.getByRole('navigation', { name: 'ขั้นตอนการจอง' });
 

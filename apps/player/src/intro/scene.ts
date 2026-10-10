@@ -72,8 +72,17 @@ export const COURT_LENGTH_M = 23.77;
 /** Returns null when WebGL is unavailable; the page then stays a plain stacked document. */
 export function createIntroScene(o: IntroOptions): IntroScene | null {
   // Ask for the context ourselves: three logs console errors when it cannot get one, and "no WebGL" is an expected case here.
-  const gl = o.canvas.getContext('webgl2', { alpha: false, antialias: true, powerPreference: 'high-performance' });
+  const gl = o.canvas.getContext('webgl2', {
+    alpha: false, antialias: true, powerPreference: 'high-performance', failIfMajorPerformanceCaveat: true,
+  });
   if (!gl) return null;
+  // A CPU rasteriser counts as no WebGL too: without a GPU the scene takes seconds per frame and blocks the page (it did on
+  // the CI runners), so those machines get the stacked page. Headless Chromium ignores failIfMajorPerformanceCaveat, hence the name check.
+  const info = gl.getExtension('WEBGL_debug_renderer_info');
+  if (/swiftshader|llvmpipe|softpipe|software/i.test(String(gl.getParameter(info ? info.UNMASKED_RENDERER_WEBGL : gl.RENDERER)))) {
+    gl.getExtension('WEBGL_lose_context')?.loseContext();
+    return null;
+  }
   let renderer: WebGLRenderer;
   try {
     renderer = new WebGLRenderer({ canvas: o.canvas, context: gl, antialias: true });
