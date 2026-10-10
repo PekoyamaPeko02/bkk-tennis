@@ -260,4 +260,38 @@ export const en: MessageSchema = {
     bookFailed: 'Booking failed',
     linkCopied: 'Link copied',
   },
+  intro: {
+    navLabel: 'How booking works',
+    enter: 'Open the app',
+    cta: 'Find courts near me',
+    km: '{n} km',
+    chapters: { court: 'Lights on', nearby: 'Near me', slots: 'Pick slots', pay: 'Pay', play: 'Play' },
+    court: {
+      title: 'Tennis courts near you,\nbooked by the hour',
+      lede: 'BKK Tennis finds free courts around you by GPS. Pick the slots you want and pay with PromptPay, all in one app.',
+      hint: 'Scroll to see how booking works',
+    },
+    nearby: {
+      title: 'Start from where you stand',
+      lede: 'Turn on GPS and choose a 3, 5 or 10 km radius. Courts are listed nearest first, and you can filter by surface, indoor courts or time of day.',
+      radius: 'Search radius',
+      locating: 'Finding your location',
+    },
+    slots: {
+      title: 'Tap a free slot.\nIt is held for 10 minutes',
+      lede: 'Book up to 4 slots at a time. While you pay, nobody else can take them.',
+      picked: 'Selected',
+      none: 'Nothing selected yet',
+      hold: 'Time left to pay',
+    },
+    pay: {
+      title: 'Scan and pay with PromptPay',
+      lede: 'You get a QR code as soon as you book. Scan it with your banking app, and the booking confirms itself once the money arrives.',
+      qr: 'QR ready to scan',
+    },
+    play: {
+      title: 'All that is left is to play',
+      lede: 'At the venue, give your booking code at the counter and start playing.',
+    },
+  },
 };
