@@ -71,6 +71,7 @@ export const en: MessageSchema = {
     wrong_password: 'The current password is incorrect',
   },
   common: {
+    loading: 'Loading',
     retry: 'Try again',
     retryNew: 'Retry',
     loadFailed: 'Could not load data',
@@ -133,6 +134,8 @@ export const en: MessageSchema = {
     fallbackNote: '{error} — using a sample location instead',
     refreshGps: 'Refresh GPS',
     useMyLocation: 'Use my location',
+    searchPlaceholder: 'Search by venue name or area',
+    howItWorks: 'See how booking works',
     date: 'Date',
     timeWindow: 'Time',
     chipClay: 'Clay court',
@@ -259,6 +262,8 @@ export const en: MessageSchema = {
     droppedSlots: '{n} of your selected slots were just taken',
     bookFailed: 'Booking failed',
     linkCopied: 'Link copied',
+    photos: 'Venue photos',
+    photoN: 'Photo {n} of {total}',
   },
   intro: {
     navLabel: 'How booking works',

@@ -72,6 +72,7 @@ export const th = {
     wrong_password: 'รหัสผ่านปัจจุบันไม่ถูกต้อง',
   },
   common: {
+    loading: 'กำลังโหลด',
     retry: 'ลองอีกครั้ง',
     retryNew: 'ลองใหม่',
     loadFailed: 'โหลดข้อมูลไม่สำเร็จ',
@@ -134,6 +135,8 @@ export const th = {
     fallbackNote: '{error} — ใช้ตำแหน่งตัวอย่างแทน',
     refreshGps: 'รีเฟรช GPS',
     useMyLocation: 'ใช้ตำแหน่งของฉัน',
+    searchPlaceholder: 'ค้นหาชื่อสนามหรือย่าน',
+    howItWorks: 'ดูวิธีจอง',
     date: 'วันที่',
     timeWindow: 'ช่วงเวลา',
     chipClay: 'คอร์ทดิน (Clay)',
@@ -260,6 +263,8 @@ export const th = {
     droppedSlots: 'มีผู้จองช่วงเวลาที่คุณเลือกไปแล้ว {n} รายการ',
     bookFailed: 'จองไม่สำเร็จ',
     linkCopied: 'คัดลอกลิงก์แล้ว',
+    photos: 'รูปภาพสนาม',
+    photoN: 'รูปที่ {n} จาก {total}',
   },
   // /intro — the scroll-driven 3D walkthrough. `\n` in a title is a deliberate line break.
   intro: {

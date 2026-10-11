@@ -156,7 +156,7 @@ onBeforeUnmount(() => { scene?.destroy(); scene = null; });
 
 <style scoped>
 .intro {
-  --night: var(--intro-night, var(--bkk-forest-ink));
+  --night: var(--intro-night, var(--bkk-night));
   --fg: var(--bkk-surface);
   --fg-2: rgba(236, 253, 245, 0.78);
   --rule: rgba(236, 253, 245, 0.28);

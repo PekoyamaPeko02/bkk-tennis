@@ -1,24 +1,33 @@
 <template>
   <q-page class="discover">
-    <!-- hero / GPS status -->
+    <!-- hero: text search, with GPS still deciding what "near" means. Same floodlit-night look as /intro. -->
     <section class="hero">
+      <!-- a still of the intro's floodlit court (rendered from src/intro/scene.ts), so this page needs no WebGL -->
+      <img class="court" :src="courtImg" alt="" aria-hidden="true" />
       <div class="bkk-page hero-inner">
-        <div class="eyebrow"><q-icon name="bolt" size="16px" /> Live GPS · Bangkok</div>
+        <div class="eyebrow"><b class="bkk-num">Live</b><span>GPS</span><span>Bangkok</span></div>
         <h1 class="bkk-display title">{{ $t('discover.title') }}</h1>
+        <div class="search-row">
+          <q-input v-model="q" type="search" debounce="300" clearable outlined bg-color="white" class="search"
+            data-testid="venue-search" :placeholder="$t('discover.searchPlaceholder')" :aria-label="$t('discover.searchPlaceholder')">
+            <template #prepend><q-icon name="search" /></template>
+          </q-input>
+          <q-btn unelevated no-caps icon="my_location" :loading="location.status === 'locating'"
+            :label="$q.screen.gt.xs ? gpsLabel : undefined" :aria-label="gpsLabel" class="bkk-btn-volt gps-btn" @click="relocate" />
+        </div>
         <div class="gps">
           <span class="gps-dot" :class="`is-${location.status}`" />
           <div class="gps-text">
             <div class="gps-main">
-              <q-icon name="location_on" size="18px" /> {{ location.label }}
+              <q-icon name="location_on" size="16px" /> {{ location.label }}
               <span v-if="location.accuracy" class="bkk-muted">{{ $t('discover.accuracy', { n: location.accuracy }) }}</span>
             </div>
             <div v-if="location.status === 'fallback'" class="gps-sub">
               {{ $t('discover.fallbackNote', { error: location.error }) }}
             </div>
           </div>
-          <q-btn flat dense no-caps icon="my_location" :loading="location.status === 'locating'"
-            :label="location.status === 'gps' ? $t('discover.refreshGps') : $t('discover.useMyLocation')" class="gps-btn" @click="relocate" />
         </div>
+        <router-link :to="{ name: 'intro' }" class="how">{{ $t('discover.howItWorks') }} <q-icon name="arrow_forward" size="16px" /></router-link>
       </div>
     </section>
 
@@ -73,7 +82,7 @@
           <div v-else-if="result && !result.items.length" class="empty bkk-card">
             <q-icon name="travel_explore" size="40px" color="grey-6" />
             <div>{{ $t('discover.empty') }}</div>
-            <q-btn flat no-caps color="primary" :label="$t('discover.searchAll')" @click="radiusKm = 60" />
+            <q-btn v-if="searchRadius < 60" flat no-caps color="primary" :label="$t('discover.searchAll')" @click="radiusKm = 60" />
           </div>
           <VenueCard v-for="v in result?.items ?? []" :id="`venue-${v.id}`" :key="v.id" :venue="v" :active="v.id === activeId"
             :favorite="favorites.has(v.id)" class="q-mb-md" @hover="activeId = $event" @open="open" @toggle-favorite="toggleFavorite(v.id)" />
@@ -100,6 +109,7 @@ import { useLocationStore } from 'stores/location';
 import { useFavoritesStore } from 'stores/favorites';
 import { useFavoriteToggle } from 'src/composables/favorite';
 import VenueMap from 'components/VenueMap.vue';
+import courtImg from 'src/assets/intro-court.jpg';
 
 const favorites = useFavoritesStore();
 const toggleFavorite = useFavoriteToggle();
@@ -128,6 +138,7 @@ const location = useLocationStore();
 
 const today = bangkokToday();
 const radiusKm = ref(5);
+const q = ref<string | null>(''); // q-input's clear button sets null
 const date = ref(today);
 const timeWindow = ref('evening');
 const hard = ref(false);
@@ -148,7 +159,11 @@ const dateOptions = computed(() =>
     const name = i === 0 ? t('common.today') : i === 1 ? t('common.tomorrow') : thDay(d);
     return { value: d, label: `${name} (${thDate(d)})` };
   }));
-const radiusText = computed(() => (radiusKm.value >= 60 ? t('discover.radius.all') : t('discover.within', { n: radiusKm.value })));
+const gpsLabel = computed(() => (location.status === 'gps' ? t('discover.refreshGps') : t('discover.useMyLocation')));
+const term = computed(() => (q.value ?? '').trim());
+// A name or area search looks across Bangkok: the venue someone types is often outside the chosen radius.
+const searchRadius = computed(() => (term.value ? 60 : radiusKm.value));
+const radiusText = computed(() => (searchRadius.value >= 60 ? t('discover.radius.all') : t('discover.within', { n: radiusKm.value })));
 
 let seq = 0;
 async function search() {
@@ -159,8 +174,8 @@ async function search() {
   const surface = hard.value && !clay.value ? 'hard' : clay.value && !hard.value ? 'clay' : undefined;
   try {
     const r = await api.searchVenues({
-      ...location.coords, radiusKm: radiusKm.value, date: date.value, from: tw.from, to: tw.to,
-      surface, indoor: indoor.value || undefined, sort: sort.value,
+      ...location.coords, radiusKm: searchRadius.value, date: date.value, from: tw.from, to: tw.to,
+      surface, indoor: indoor.value || undefined, q: term.value || undefined, sort: sort.value,
     });
     if (my === seq) result.value = r;
   } catch (e) {
@@ -185,7 +200,7 @@ function onPin(v: VenueSummary) {
   else document.getElementById(`venue-${v.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
-watch([radiusKm, date, timeWindow, hard, clay, indoor, sort], search);
+watch([radiusKm, date, timeWindow, hard, clay, indoor, sort, term], search);
 watch(view, async (v) => { if (v === 'map') { await nextTick(); mapRef.value?.invalidate(); } });
 
 onMounted(async () => {
@@ -195,15 +210,33 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.hero { background: radial-gradient(1200px 300px at 80% -50%, rgba(163, 230, 53, 0.35), transparent), var(--bkk-forest); color: #fff; }
-.hero-inner { padding-top: 28px; padding-bottom: 28px; }
-.eyebrow { display: inline-flex; align-items: center; gap: 6px; color: var(--bkk-volt-bright); font-weight: 700; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
-.title { font-weight: 700; font-size: 28px; line-height: 36px; margin: 6px 0 16px; }
-@media (min-width: 1024px) { .title { font-size: 40px; line-height: 48px; } }
-.gps {
-  display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px;
-  background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); max-width: 720px;
+/* hero: the /intro night — floodlight haze over the night ground, the court off to the right */
+.hero {
+  position: relative; overflow: hidden; color: #fff;
+  background:
+    var(--bkk-night);
 }
+.hero-inner { position: relative; padding-top: 28px; padding-bottom: 64px; }
+@media (min-width: 1024px) { .hero-inner { padding-top: 44px; padding-bottom: 92px; } }
+.eyebrow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(236, 253, 245, 0.78); }
+.eyebrow b { padding: 1px 8px; border-radius: 6px; background: var(--bkk-volt-bright); color: var(--bkk-slate); font-weight: 700; letter-spacing: 0; }
+.title { font-weight: 700; font-size: 30px; line-height: 1.22; letter-spacing: -0.02em; margin: 10px 0 18px; }
+@media (min-width: 1024px) { .title { font-size: 44px; } }
+.how { display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; color: var(--bkk-volt-bright); font-weight: 600; font-size: 14px; text-underline-offset: 4px; }
+.how:focus-visible { outline: 2px solid var(--bkk-volt-bright); outline-offset: 3px; }
+/* fades into the night ground on the left, where the text sits, and along the bottom */
+.court {
+  position: absolute; right: -10%; top: 50%; height: 150%; max-width: none; transform: translateY(-50%); pointer-events: none;
+  -webkit-mask-image: radial-gradient(70% 62% at 68% 46%, #000 38%, transparent 100%);
+          mask-image: radial-gradient(70% 62% at 68% 46%, #000 38%, transparent 100%);
+}
+@media (max-width: 1023px) { .court { right: -70%; height: 120%; opacity: 0.4; } }
+.search-row { display: flex; gap: 10px; align-items: stretch; max-width: 720px; }
+.search { flex: 1; min-width: 0; }
+.search :deep(.q-field__control) { border-radius: 14px; height: 52px; }
+.search :deep(.q-field__marginal) { height: 52px; }
+.search :deep(input) { font-size: 16px; }
+.gps { display: flex; align-items: center; gap: 10px; margin-top: 12px; max-width: 720px; font-size: 14px; }
 .gps-dot { width: 10px; height: 10px; border-radius: 50%; background: #94a3b8; flex: none; }
 .gps-dot.is-gps { background: var(--bkk-volt); box-shadow: 0 0 0 4px rgba(132, 204, 22, 0.25); }
 .gps-dot.is-fallback { background: var(--bkk-clay); }
@@ -212,9 +245,10 @@ onMounted(async () => {
 .gps-main { display: flex; align-items: center; gap: 4px; font-weight: 600; flex-wrap: wrap; }
 .gps-main .bkk-muted { color: #a7f3d0; font-weight: 500; }
 .gps-sub { font-size: 12px; color: #fed7aa; }
-.gps-btn { color: var(--bkk-volt-bright); }
+.gps-btn { border-radius: 14px; padding: 0 16px; flex: none; }
 
-.filters { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+/* the filters sit across the hero's lower edge, so night and day overlap instead of meeting at a hard line */
+.filters { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 12px; margin-top: -36px; padding: 14px; background: var(--bkk-surface); border: 1px solid var(--bkk-line); border-radius: var(--bkk-r-lg); box-shadow: var(--bkk-shadow-2); }
 .row-filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 .sel { min-width: 220px; background: #fff; }
 .chips { flex: 1; }

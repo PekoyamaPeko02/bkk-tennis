@@ -2,7 +2,7 @@
   <q-page class="bkk-page booking-page">
     <q-btn flat no-caps icon="arrow_back" :label="$t('booking.back')" to="/bookings" class="q-mb-sm back" />
 
-    <q-skeleton v-if="!booking && !error" height="480px" style="border-radius: 20px" />
+    <BallLoader v-if="!booking && !error" class="page-loading" />
     <div v-else-if="error" class="empty bkk-card">{{ error }}</div>
 
     <div v-else-if="booking" class="grid">
@@ -13,13 +13,21 @@
           <div class="status-row">
             <AvailabilityPill tone="low" pulse>{{ $t('booking.awaitingPayment') }}</AvailabilityPill>
             <span class="countdown bkk-num" :class="{ urgent: remaining < 120 }">
-              <q-icon name="timer" size="18px" /> {{ mmss }}
+              <!-- the hold draining: the ring empties as the 10 minutes run out -->
+              <svg class="ring" viewBox="0 0 28 28" aria-hidden="true">
+                <circle class="track" cx="14" cy="14" r="11" /><circle class="left" cx="14" cy="14" r="11" :style="{ strokeDashoffset: ringOffset }" />
+              </svg>
+              {{ mmss }}
             </span>
           </div>
           <h1 class="bkk-h2 q-my-sm">{{ $t('booking.scanTitle') }}</h1>
           <p class="bkk-muted">{{ $t('booking.scanHint') }}</p>
           <div class="qr-box">
-            <img v-if="qrUrl" :src="qrUrl" alt="PromptPay QR" class="qr" />
+            <div class="qr-frame">
+              <img v-if="qrUrl" :src="qrUrl" alt="PromptPay QR" class="qr" />
+              <!-- waiting to be scanned -->
+              <i v-if="qrUrl" class="scan" aria-hidden="true" />
+            </div>
             <div class="qr-brand">Thai QR Payment · PromptPay</div>
             <div class="amount bkk-num">{{ baht(booking.total, { decimals: true }) }}</div>
           </div>
@@ -32,10 +40,14 @@
 
         <!-- confirmed: check-in pass -->
         <template v-else-if="['confirmed', 'checked_in', 'completed'].includes(booking.status)">
-          <div class="success-icon"><q-icon name="check" size="36px" /></div>
+          <!-- "Game": when the payment lands while you watch, the ball drops in and the tick draws itself -->
+          <div class="success-icon" :class="{ landed: justPaid }">
+            <i class="burst" aria-hidden="true" />
+            <svg viewBox="0 0 72 72" aria-hidden="true"><path class="tick" d="M22 37.5 32 47l19-21" /></svg>
+          </div>
           <h1 class="bkk-h2 text-center q-mt-md q-mb-xs">{{ $t('booking.success') }}</h1>
           <p class="text-center bkk-muted">{{ $t('booking.showQr') }}</p>
-          <div class="qr-box pass">
+          <div class="qr-box pass" :class="{ rise: justPaid }">
             <img v-if="passUrl" :src="passUrl" :alt="$t('booking.qrAlt')" class="qr" />
             <div class="code bkk-num">{{ booking.code }}</div>
           </div>
@@ -93,6 +105,7 @@ import type { Booking } from '@bkk/api';
 import { AvailabilityPill, baht, thDate } from '@bkk/ui';
 import { isMockApi, useApi } from 'boot/api';
 import { useLiveBookings } from 'src/composables/useLiveBookings';
+import BallLoader from 'components/BallLoader.vue';
 
 const { t } = useI18n();
 const $q = useQuasar();
@@ -107,9 +120,13 @@ const passUrl = ref<string | null>(null);
 const paying = ref(false);
 const now = ref(Date.now());
 const canSimulate = isMockApi || process.env.DEV;
+// true only when the booking went from held to confirmed on this screen; an already-paid booking opens without the show
+const justPaid = ref(false);
+const HOLD_SECONDS = 600, RING = 2 * Math.PI * 11;
 
 const remaining = computed(() =>
   booking.value?.holdExpiresAt ? Math.max(0, Math.floor((Date.parse(booking.value.holdExpiresAt) - now.value) / 1000)) : 0);
+const ringOffset = computed(() => RING * (1 - Math.min(1, remaining.value / HOLD_SECONDS)));
 const mmss = computed(() => `${String(Math.floor(remaining.value / 60)).padStart(2, '0')}:${String(remaining.value % 60).padStart(2, '0')}`);
 const endedTitle = computed(() => t(booking.value?.status === 'cancelled' ? 'booking.endedCancelled' : 'booking.endedExpired'));
 const endedText = computed(() => t(booking.value?.status === 'cancelled'
@@ -127,7 +144,8 @@ async function load() {
 watch(() => booking.value?.payment?.qrPayload, async (p) => {
   qrUrl.value = p ? await QRCode.toDataURL(p, { margin: 1, width: 280, color: { dark: '#0f172a' } }) : null;
 });
-watch(() => booking.value?.status, async (s) => {
+watch(() => booking.value?.status, async (s, before) => {
+  if (before === 'held' && s === 'confirmed') justPaid.value = true;
   if (s && ['confirmed', 'checked_in', 'completed'].includes(s))
     passUrl.value = await QRCode.toDataURL(`BKKTENNIS:${booking.value!.code}`, { margin: 1, width: 240, color: { dark: '#064e3b' } });
 });
@@ -185,10 +203,21 @@ onBeforeUnmount(() => { clearInterval(tick); clearInterval(poll); });
 @media (min-width: 900px) { .grid { grid-template-columns: 1.1fr 0.9fr; align-items: start; } }
 .panel { padding: 24px; }
 .status-row { display: flex; justify-content: space-between; align-items: center; }
-.countdown { display: inline-flex; align-items: center; gap: 4px; font-size: 22px; font-weight: 700; color: var(--bkk-forest); }
+.countdown { display: inline-flex; align-items: center; gap: 8px; font-size: 22px; font-weight: 700; color: var(--bkk-forest); }
+.ring { width: 28px; height: 28px; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke-width: 3; }
+.ring .track { stroke: var(--bkk-line); }
+.ring .left { stroke: currentColor; stroke-linecap: round; stroke-dasharray: 69.12; transition: stroke-dashoffset 1s linear; }
+.page-loading { color: var(--bkk-text-2); margin-top: 120px; }
 .countdown.urgent { color: var(--bkk-clay-ink); }
 .qr-box { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 16px auto; padding: 20px; border-radius: 20px; border: 1px solid var(--bkk-line); background: #fff; max-width: 340px; }
-.qr { width: 240px; height: 240px; image-rendering: pixelated; }
+.qr-frame { position: relative; width: 240px; height: 240px; overflow: hidden; }
+.qr { width: 240px; height: 240px; image-rendering: pixelated; display: block; animation: qr-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.pass .qr-frame, .pass .qr { width: 240px; height: 240px; }
+@keyframes qr-in { from { opacity: 0; transform: scale(0.94); } }
+/* a scanner line passing over the code while it waits */
+.scan { position: absolute; left: 0; right: 0; top: 0; height: 2px; background: var(--bkk-volt); box-shadow: 0 0 12px 3px rgba(132, 204, 22, 0.55); animation: scan 2.6s ease-in-out infinite alternate; }
+@keyframes scan { from { transform: translateY(8px); } to { transform: translateY(230px); } }
 .qr-brand { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; color: #1e3a8a; }
 .amount { font-size: 32px; font-weight: 700; color: var(--bkk-forest); }
 .pass { background: var(--bkk-mint); border-color: #bbf7d0; }
@@ -196,7 +225,23 @@ onBeforeUnmount(() => { clearInterval(tick); clearInterval(poll); });
 .actions { display: flex; gap: 8px; justify-content: space-between; flex-wrap: wrap; margin-top: 8px; }
 .actions.center { justify-content: center; }
 .success-icon, .fail-icon { width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; margin: 8px auto 0; }
-.success-icon { background: var(--bkk-volt); color: var(--bkk-slate); box-shadow: var(--bkk-glow); }
+.success-icon { position: relative; background: var(--bkk-volt); color: var(--bkk-slate); box-shadow: var(--bkk-glow); }
+.success-icon svg { width: 72px; height: 72px; }
+.tick { fill: none; stroke: currentColor; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 44; stroke-dashoffset: 0; }
+.burst { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--bkk-volt); opacity: 0; }
+.landed { animation: land 0.7s cubic-bezier(0.3, 0, 0.5, 1) both; }
+.landed .tick { animation: tick 0.35s ease-out 0.55s both; }
+.landed .burst { animation: burst 0.7s ease-out 0.5s both; }
+.rise { animation: rise 0.5s ease-out 0.75s both; }
+@keyframes land { 0% { transform: translateY(-90px); opacity: 0; } 45% { transform: translateY(0) scale(1.14, 0.84); opacity: 1; } 68% { transform: translateY(-16px) scale(1); } 100% { transform: translateY(0) scale(1); } }
+@keyframes tick { from { stroke-dashoffset: 44; } to { stroke-dashoffset: 0; } }
+@keyframes burst { from { transform: scale(1); opacity: 0.9; } to { transform: scale(2.1); opacity: 0; } }
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+@media (prefers-reduced-motion: reduce) {
+  .qr, .scan, .landed, .landed .tick, .landed .burst, .rise { animation: none; }
+  .scan { display: none; }
+  .ring .left { transition: none; }
+}
 .fail-icon { background: var(--bkk-surface-3); color: var(--bkk-text-2); }
 .summary .code-lg { font-size: 26px; font-weight: 700; color: var(--bkk-forest); }
 .venue { margin-top: 12px; }

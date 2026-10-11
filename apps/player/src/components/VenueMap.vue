@@ -52,7 +52,8 @@ function render() {
 function fit() {
   if (!map) return;
   const pts = [L.latLng(props.center.lat, props.center.lng), ...props.venues.map((v) => L.latLng(v.lat, v.lng))];
-  map.fitBounds(L.latLngBounds(pts).pad(0.25), { maxZoom: 15 });
+  // not animated: leaving the page mid-zoom makes Leaflet touch the removed map ("_leaflet_pos" of undefined)
+  map.fitBounds(L.latLngBounds(pts).pad(0.25), { maxZoom: 15, animate: false });
 }
 
 onMounted(() => {
