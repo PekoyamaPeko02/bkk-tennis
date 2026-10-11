@@ -52,12 +52,16 @@ const NAV: { label: string; icon: string; to?: string; soon?: boolean }[] = [
 </script>
 
 <style scoped>
-.hdr { background: var(--bkk-forest); }
-.logo { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: var(--bkk-volt); color: var(--bkk-slate); margin-left: 4px; }
-.title { font-weight: 700; font-size: 18px; }
-.ctx { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 9999px; background: rgba(255, 255, 255, 0.12); font-size: 13px; font-weight: 600; }
-.who { margin-left: 12px; font-size: 13px; opacity: 0.9; }
-.drawer { background: #fff; }
-.nav { border-radius: 10px; margin: 2px 8px; font-weight: 600; }
-.nav-on { background: var(--bkk-mint); color: var(--bkk-forest); }
+/* The shell uses the night ground of the player app's /intro; pages stay light because they are tables and numbers. */
+.hdr { background: var(--bkk-night); }
+.logo { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: var(--bkk-volt-bright); color: var(--bkk-forest-ink); margin-left: 4px; }
+.title { font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
+.ctx { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(236, 253, 245, 0.78); }
+.ctx .q-icon { color: var(--bkk-volt-bright); }
+.who { margin-left: 16px; font-size: 13px; color: rgba(236, 253, 245, 0.78); }
+/* Quasar puts this class on its own drawer element, outside this component's scope */
+:deep(.drawer) { background: var(--bkk-night); color: rgba(236, 253, 245, 0.78); border-right-color: transparent; }
+.nav { border-radius: 8px; margin: 2px 8px; font-weight: 600; color: inherit; }
+.nav :deep(.q-icon) { color: inherit; }
+.nav-on { background: var(--bkk-volt-bright); color: var(--bkk-slate); }
 </style>

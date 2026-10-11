@@ -34,7 +34,7 @@ async function fillForm(page: Page, over: Form = {}) {
 test('lists the seeded partners, filters by status and shows owner + venue status', async ({ page }) => {
   await openPartners(page);
 
-  await expect(page.getByTestId('partner-row')).toHaveCount(5);
+  await expect(page.getByTestId('partner-row')).toHaveCount(11); // 4 seeded + 6 demo venues' partners + the pending one
   const pending = row(page, 'Thonglor Tennis Co., Ltd.');
   await expect(pending.getByTestId('status-pending')).toBeVisible();
   await expect(pending).toContainText('owner@thonglor.test');
@@ -49,7 +49,7 @@ test('lists the seeded partners, filters by status and shows owner + venue statu
   await expect(page.getByTestId('status-pending')).toHaveCount(1);
 
   await page.getByTestId('filter-active').click();
-  await expect(page.getByTestId('partner-row')).toHaveCount(4);
+  await expect(page.getByTestId('partner-row')).toHaveCount(10);
   await expect(page.getByTestId('status-pending')).toHaveCount(0);
 
   await page.getByTestId('filter-suspended').click();
@@ -57,7 +57,7 @@ test('lists the seeded partners, filters by status and shows owner + venue statu
   await expect(page.getByTestId('empty')).toBeVisible();
 
   await page.getByTestId('filter-all').click();
-  await expect(page.getByTestId('partner-row')).toHaveCount(5);
+  await expect(page.getByTestId('partner-row')).toHaveCount(11);
   await expect(page.getByTestId('empty')).toHaveCount(0);
 });
 
@@ -77,7 +77,7 @@ test('approving the pending partner activates it and publishes its draft venue',
   await page.getByTestId('filter-pending').click();
   await expect(page.getByTestId('empty')).toBeVisible();
   await page.getByTestId('filter-active').click();
-  await expect(page.getByTestId('partner-row')).toHaveCount(5);
+  await expect(page.getByTestId('partner-row')).toHaveCount(11);
 });
 
 test('suspending needs a confirmation, moves the partner to the suspended filter and can be reactivated', async ({ page }) => {
@@ -100,14 +100,14 @@ test('suspending needs a confirmation, moves the partner to the suspended filter
   await expect(page.getByTestId('partner-row')).toHaveCount(1);
   await expect(page.getByTestId('partner-row')).toContainText('The Racquet Club');
   await page.getByTestId('filter-active').click();
-  await expect(page.getByTestId('partner-row')).toHaveCount(3);
+  await expect(page.getByTestId('partner-row')).toHaveCount(9);
 
   // ---- re-activate from the suspended list
   await page.getByTestId('filter-suspended').click();
   await page.getByTestId('partner-row').getByTestId('approve').click();
   await expect(page.getByTestId('empty')).toBeVisible();
   await page.getByTestId('filter-active').click();
-  await expect(page.getByTestId('partner-row')).toHaveCount(4);
+  await expect(page.getByTestId('partner-row')).toHaveCount(10);
   await expect(row(page, 'The Racquet Club').getByTestId('status-active')).toBeVisible();
 });
 
@@ -128,13 +128,13 @@ test('creating a partner adds it as pending with a draft venue, and it can then 
   await expect(created).toContainText('Sathorn Tennis');
   await expect(created).toContainText('draft');
   await expect(created).toContainText('12.5%');
-  await expect(page.getByTestId('partner-row')).toHaveCount(6);
+  await expect(page.getByTestId('partner-row')).toHaveCount(12);
   await expect(page.getByTestId('partner-row').first()).toContainText('Sathorn Tennis Co., Ltd.'); // newest first
 
   await page.getByTestId('filter-pending').click();
   await expect(page.getByTestId('partner-row')).toHaveCount(2);
   await page.getByTestId('filter-all').click();
-  await expect(page.getByTestId('partner-row')).toHaveCount(6);
+  await expect(page.getByTestId('partner-row')).toHaveCount(12);
 
   await created.getByTestId('approve').click();
   await expect(created.getByTestId('status-active')).toBeVisible();
@@ -177,7 +177,7 @@ test('a duplicate owner email shows the server message inside the dialog and cre
   await field(page, 'owner-email').fill('free@sathorn.test');
   await page.getByTestId('partner-save').click();
   await expect(page.getByTestId('partner-dialog')).toHaveCount(0);
-  await expect(page.getByTestId('partner-row')).toHaveCount(6);
+  await expect(page.getByTestId('partner-row')).toHaveCount(12);
 });
 
 test('a duplicate or malformed slug shows the server message inside the dialog and creates nothing', async ({ page }) => {
@@ -199,7 +199,7 @@ test('a duplicate or malformed slug shows the server message inside the dialog a
 
   await page.getByRole('button', { name: 'ยกเลิก' }).click();
   await expect(page.getByTestId('partner-dialog')).toHaveCount(0);
-  await expect(page.getByTestId('partner-row')).toHaveCount(5);
+  await expect(page.getByTestId('partner-row')).toHaveCount(11);
 });
 
 test('a password shorter than 10 characters is blocked before anything is sent; exactly 10 is accepted', async ({ page }) => {
@@ -211,12 +211,12 @@ test('a password shorter than 10 characters is blocked before anything is sent; 
   await expect(page.getByTestId('partner-dialog')).toContainText('อย่างน้อย 10 ตัวอักษร');
   await expect(page.getByTestId('dialog-error')).toHaveCount(0); // stopped client-side, no server round trip
   await expect(page.getByTestId('partner-dialog')).toBeVisible();
-  await expect(page.getByTestId('partner-row')).toHaveCount(5);
+  await expect(page.getByTestId('partner-row')).toHaveCount(11);
 
   await field(page, 'owner-password').fill('1234567890');
   await page.getByTestId('partner-save').click();
   await expect(page.getByTestId('partner-dialog')).toHaveCount(0);
-  await expect(page.getByTestId('partner-row')).toHaveCount(6);
+  await expect(page.getByTestId('partner-row')).toHaveCount(12);
 });
 
 test('required fields are enforced before submitting', async ({ page }) => {
@@ -227,7 +227,7 @@ test('required fields are enforced before submitting', async ({ page }) => {
 
   await expect(page.getByTestId('partner-dialog').getByText('จำเป็นต้องกรอก').first()).toBeVisible();
   await expect(page.getByTestId('partner-dialog')).toBeVisible();
-  await expect(page.getByTestId('partner-row')).toHaveCount(5);
+  await expect(page.getByTestId('partner-row')).toHaveCount(11);
 });
 
 test('a commission over 50 % is blocked by the field (native max) and nothing is created; 50 is accepted', async ({ page }) => {
@@ -240,7 +240,7 @@ test('a commission over 50 % is blocked by the field (native max) and nothing is
 
   await expect(page.getByTestId('partner-dialog')).toBeVisible();
   expect(await field(page, 'commission').evaluate((el: HTMLInputElement) => el.validity.rangeOverflow)).toBe(true);
-  await expect(page.getByTestId('partner-row')).toHaveCount(5);
+  await expect(page.getByTestId('partner-row')).toHaveCount(11);
 
   await field(page, 'commission').fill('50');
   await page.getByTestId('partner-save').click();

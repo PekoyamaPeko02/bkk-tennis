@@ -1,6 +1,6 @@
 <template>
   <q-layout view="hHh lpR fFf">
-    <q-header class="app-header" :class="{ hidden: hideHeaderOnMobile }">
+    <q-header class="app-header" :class="{ hidden: hideHeaderOnMobile, night }">
       <div class="bar">
         <router-link to="/" class="brand">
           <span class="logo"><q-icon name="sports_tennis" size="20px" /></span>
@@ -19,14 +19,14 @@
             <q-icon :name="location.status === 'gps' ? 'my_location' : 'location_searching'" size="16px" />
             <span>{{ shortLabel }}</span>
           </button>
-          <LanguageToggle class="gt-xs" />
-          <q-btn v-if="!auth.isLoggedIn" unelevated no-caps class="bkk-btn-forest" :label="$t('nav.login')" to="/login" />
+          <span v-if="isMock" class="mock-pill" :title="$t('nav.mockBanner')">Mock API</span>
+          <LanguageToggle class="gt-xs lang" />
+          <q-btn v-if="!auth.isLoggedIn" unelevated no-caps class="login" :class="night ? 'bkk-btn-volt' : 'bkk-btn-forest'" :label="$t('nav.login')" to="/login" />
           <q-btn v-else round flat class="avatar" to="/profile" :aria-label="$t('nav.profile')">
             <q-avatar size="36px" color="secondary" text-color="dark">{{ initials }}</q-avatar>
           </q-btn>
         </div>
       </div>
-      <div v-if="isMock" class="mock-banner">{{ $t('nav.mockBanner') }}</div>
       <div v-if="!online" class="offline-banner" role="status" data-testid="offline-banner">
         <q-icon name="cloud_off" size="16px" /> {{ $t('nav.offline') }}
       </div>
@@ -70,8 +70,18 @@ const isMock = isMockApi;
 // The installed app (PWA) still opens offline; say so instead of letting searches fail one by one.
 const online = ref(navigator.onLine);
 const setOnline = () => { online.value = navigator.onLine; };
-onMounted(() => { window.addEventListener('online', setOnline); window.addEventListener('offline', setOnline); });
-onBeforeUnmount(() => { window.removeEventListener('online', setOnline); window.removeEventListener('offline', setOnline); });
+// On discover and the venue page the bar continues the night band at the top (as on /intro) until the page scrolls past it.
+const scrolled = ref(false);
+const onScroll = () => { scrolled.value = window.scrollY > 220; };
+const night = computed(() => (route.name === 'discover' || route.name === 'venue') && !scrolled.value);
+onMounted(() => {
+  window.addEventListener('online', setOnline); window.addEventListener('offline', setOnline);
+  window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+});
+onBeforeUnmount(() => {
+  window.removeEventListener('online', setOnline); window.removeEventListener('offline', setOnline);
+  window.removeEventListener('scroll', onScroll);
+});
 
 const { t } = useI18n();
 const shortLabel = computed(() => (location.status === 'gps' ? t('nav.currentLocation') : 'Sukhumvit, BKK'));
@@ -83,6 +93,19 @@ const hideHeaderOnMobile = computed(() => route.name === 'venue' && $q.screen.lt
 <style scoped>
 .app-header { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(12px); color: var(--bkk-slate); border-bottom: 1px solid var(--bkk-line); }
 .app-header.hidden { display: none; }
+.app-header { transition: background-color 0.25s, border-color 0.25s, color 0.25s; }
+.app-header.night { background: var(--bkk-night); backdrop-filter: none; color: #fff; border-bottom-color: transparent; }
+.night .brand { color: #fff; }
+.night .logo { background: var(--bkk-volt-bright); color: var(--bkk-forest-ink); }
+.night .nav-link { color: rgba(236, 253, 245, 0.78); }
+.night .nav-link:hover { background: rgba(255, 255, 255, 0.08); }
+.night .nav-link.on { color: var(--bkk-slate); background: var(--bkk-volt-bright); }
+.night .nav-link.soon:hover { background: none; }
+.night .loc { background: rgba(255, 255, 255, 0.08); border-color: rgba(236, 253, 245, 0.28); color: #fff; }
+.night .lang { border-color: rgba(236, 253, 245, 0.28); }
+.night .lang :deep(.opt) { color: rgba(236, 253, 245, 0.78); }
+.night .lang :deep(.opt.on) { background: var(--bkk-volt-bright); color: var(--bkk-slate); }
+.mock-pill { padding: 3px 10px; border-radius: 9999px; background: var(--bkk-clay-surface); color: var(--bkk-clay-ink); font-size: 11px; font-weight: 700; white-space: nowrap; }
 .bar { max-width: 1200px; margin: 0 auto; height: 64px; padding: 0 16px; display: flex; align-items: center; gap: 24px; }
 .brand { display: flex; align-items: center; gap: 10px; color: var(--bkk-forest); text-decoration: none; }
 .logo { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--bkk-forest); color: var(--bkk-volt-bright); }
@@ -100,7 +123,6 @@ const hideHeaderOnMobile = computed(() => route.name === 'venue' && $q.screen.lt
   border: 1px solid var(--bkk-line); background: #fff; font: 600 13px var(--bkk-font-body); color: var(--bkk-forest); cursor: pointer;
 }
 .offline-banner { display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 12px; padding: 4px 8px; background: #fef3c7; color: #92400e; font-weight: 600; }
-.mock-banner { text-align: center; font-size: 12px; padding: 4px 8px; background: var(--bkk-clay-surface); color: var(--bkk-clay-ink); font-weight: 600; }
 .bottom-nav { background: #fff; color: var(--bkk-text-2); padding-bottom: env(safe-area-inset-bottom); }
 .tabs :deep(.q-tab__label) { font-size: 11px; font-weight: 600; }
 </style>

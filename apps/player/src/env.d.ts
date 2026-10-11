@@ -8,3 +8,9 @@ declare namespace NodeJS {
     APP_NAME: string;
   }
 }
+
+// Vite turns an imported image into its URL.
+declare module '*.jpg' {
+  const url: string;
+  export default url;
+}

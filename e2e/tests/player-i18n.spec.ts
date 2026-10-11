@@ -100,7 +100,8 @@ test('language persists across reload and navigation to the venue page (English 
   expect(await page.evaluate(() => localStorage.getItem('bkk.locale'))).toBe('en');
 
   await page.reload();
-  expect(await lang(page)).toBe('en');
+  // retried: `reload()` returns at the load event, which can be before the app has booted and set <html lang>
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   await expect(page.getByRole('heading', { name: 'Find the nearest tennis courts' })).toBeVisible();
   await expect(toggle(page, 'en')).toHaveAttribute('aria-pressed', 'true');
   await expect(toggle(page, 'th')).toHaveAttribute('aria-pressed', 'false');

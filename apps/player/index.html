@@ -11,6 +11,22 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
   </head>
   <body>
+    <!-- Boot splash: painted before any script runs, removed by App.vue once the app has mounted. Night ground and the ball
+         on the baseline, as in /intro and BallLoader.vue. -->
+    <div id="boot-splash" role="status" aria-label="BKK Tennis">
+      <style>
+        #boot-splash { position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center; background: #052421; transition: opacity .3s; }
+        #boot-splash.out { opacity: 0; pointer-events: none; }
+        #boot-splash .c { position: relative; width: 120px; height: 84px; }
+        #boot-splash .b { position: absolute; left: 50%; bottom: 10px; width: 22px; height: 22px; margin-left: -11px; border-radius: 50%; background: #a3e635; box-shadow: 0 0 16px rgba(132, 204, 22, .45); transform-origin: 50% 100%; animation: bs-b .56s cubic-bezier(.3, 0, .7, 1) infinite alternate; }
+        #boot-splash .s { position: absolute; left: 50%; bottom: 6px; width: 26px; height: 6px; margin-left: -13px; border-radius: 50%; background: rgba(0, 0, 0, .45); animation: bs-s .56s cubic-bezier(.3, 0, .7, 1) infinite alternate; }
+        #boot-splash .l { position: absolute; left: 0; right: 0; bottom: 8px; height: 2px; background: rgba(236, 253, 245, .5); }
+        @keyframes bs-b { 0% { transform: translateY(0) scale(1.18, .78); } 14% { transform: translateY(-6px) scale(1); } 100% { transform: translateY(-52px) scale(1); } }
+        @keyframes bs-s { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(.45); opacity: .35; } }
+        @media (prefers-reduced-motion: reduce) { #boot-splash .b, #boot-splash .s { animation: none; } }
+      </style>
+      <div class="c"><span class="b"></span><span class="s"></span><span class="l"></span></div>
+    </div>
     <!-- quasar:entry-point -->
   </body>
 </html>
