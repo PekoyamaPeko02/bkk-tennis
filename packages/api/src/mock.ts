@@ -95,6 +95,62 @@ const VENUES: MockVenue[] = [
   },
 ];
 
+// Six more venues for the demo, so there are ten. They are NOT in db/init/002_seed.sql. They are kept out of VENUES because
+// the mock's booking history (admin explorer, payouts, overview series) is generated from the four seeded venues; the six
+// show up in the player app and as active partners in admin, with no past bookings.
+const demo = (n: number, s: Omit<MockVenue['s'], 'id' | 'coverImageUrl'>, courts: [string, Court['surface'], boolean][], rules: Rule[], addons: Addon[] = []): MockVenue => ({
+  s: { ...s, id: `20000000-0000-0000-0000-${String(n).padStart(12, '0')}`, coverImageUrl: null },
+  courts: courts.map(([name, surface, indoor], i) => court(`30000000-0000-0000-0000-${`${n}${i + 1}`.padStart(12, '0')}`, name, surface, indoor)),
+  rules, addons, cancelFreeHours: 4,
+});
+const racket: Addon = { id: 'a5', name: 'เช่าไม้เทนนิส', description: null, icon: 'sports_tennis', price: 80, unit: 'per_booking' };
+const DEMO_VENUES: MockVenue[] = [
+  demo(5, {
+    slug: 'ekkamai-clay-courts', nameTh: 'เอกมัย เคลย์ คอร์ท', nameEn: 'Ekkamai Clay Courts',
+    district: 'วัฒนา / Watthana', address: 'เอกมัย ซอย 10, คลองตันเหนือ, วัฒนา', lat: 13.7262, lng: 100.587,
+    transitNote: 'BTS เอกมัย (วินมอเตอร์ไซค์ 4 นาที)', rating: 4.7, ratingCount: 96, amenities: ['floodlit', 'parking', 'shower'],
+  }, [['Clay 1', 'clay', false], ['Clay 2', 'clay', false], ['Clay 3', 'clay', false]],
+  [{ start: '06:00', end: '17:00', price: 480, label: 'Red Clay', priority: 0 }, { start: '17:00', end: '22:00', price: 580, label: 'Floodlit Clay', priority: 10 }], [racket]),
+  demo(6, {
+    slug: 'rama-9-indoor-tennis', nameTh: 'พระราม 9 อินดอร์ เทนนิส', nameEn: 'Rama 9 Indoor Tennis',
+    district: 'ห้วยขวาง / Huai Khwang', address: 'พระราม 9 ซอย 13, บางกะปิ, ห้วยขวาง', lat: 13.757, lng: 100.565,
+    transitNote: 'MRT พระราม 9 (เดิน 8 นาที)', rating: 4.8, ratingCount: 211, amenities: ['floodlit', 'parking', 'shower', 'air_con'],
+  }, [['คอร์ท 1', 'hard', true], ['คอร์ท 2', 'hard', true], ['คอร์ท 3', 'hard', true]],
+  [{ start: '06:00', end: '17:00', price: 600, label: 'Indoor Day', priority: 0 }, { start: '17:00', end: '22:00', price: 750, label: 'Indoor Peak', priority: 10 }], [racket]),
+  demo(7, {
+    slug: 'lumpini-tennis-centre', nameTh: 'ศูนย์เทนนิส ลุมพินี', nameEn: 'Lumpini Tennis Centre',
+    district: 'ปทุมวัน / Pathum Wan', address: 'ถนนวิทยุ, ลุมพินี, ปทุมวัน', lat: 13.7297, lng: 100.5418,
+    transitNote: 'MRT ลุมพินี (เดิน 5 นาที)', rating: 4.4, ratingCount: 264, amenities: ['floodlit'],
+  }, [['คอร์ท 1', 'hard', false], ['คอร์ท 2', 'hard', false], ['คอร์ท 3', 'hard', false], ['คอร์ท 4', 'hard', false]],
+  [{ start: '06:00', end: '22:00', price: 200, label: 'Public Court', priority: 0 }]),
+  demo(8, {
+    slug: 'sathon-sky-courts', nameTh: 'สาทร สกาย คอร์ท', nameEn: 'Sathon Sky Courts',
+    district: 'สาทร / Sathon', address: 'ถนนสาทรใต้, ยานนาวา, สาทร', lat: 13.72, lng: 100.529,
+    transitNote: 'BTS สุรศักดิ์ (เดิน 7 นาที)', rating: 4.9, ratingCount: 58, amenities: ['floodlit', 'parking', 'shower', 'pro_shop', 'air_con'],
+  }, [['Sky 1', 'hard', true], ['Sky 2', 'hard', true]],
+  [{ start: '06:00', end: '17:00', price: 800, label: 'Rooftop Day', priority: 0 }, { start: '17:00', end: '22:00', price: 950, label: 'Rooftop Night', priority: 10 }], [racket]),
+  demo(9, {
+    slug: 'lat-phrao-tennis-academy', nameTh: 'ลาดพร้าว เทนนิส อะคาเดมี', nameEn: 'Lat Phrao Tennis Academy',
+    district: 'จตุจักร / Chatuchak', address: 'ลาดพร้าว ซอย 18, จอมพล, จตุจักร', lat: 13.8165, lng: 100.561,
+    transitNote: 'MRT ลาดพร้าว (เดิน 6 นาที)', rating: 4.6, ratingCount: 133, amenities: ['floodlit', 'parking', 'pro_shop'],
+  }, [['คอร์ท 1', 'hard', false], ['คอร์ท 2', 'hard', false], ['คอร์ท 3', 'hard', false], ['คอร์ท 4', 'hard', false], ['คอร์ท 5', 'hard', false], ['คอร์ท 6', 'hard', false],
+    ['คอร์ท 7', 'hard', true], ['คอร์ท 8', 'hard', true], ['คอร์ท 9', 'clay', false], ['คอร์ท 10', 'clay', false]],
+  [{ start: '06:00', end: '17:00', price: 250, label: 'Day', priority: 0 }, { start: '17:00', end: '22:00', price: 350, label: 'Evening', priority: 10 }], [racket]),
+  demo(10, {
+    slug: 'bang-na-tennis-park', nameTh: 'บางนา เทนนิส พาร์ค', nameEn: 'Bang Na Tennis Park',
+    district: 'บางนา / Bang Na', address: 'บางนา-ตราด กม. 3, บางนาเหนือ, บางนา', lat: 13.668, lng: 100.634,
+    transitNote: 'BTS อุดมสุข (รถ 10 นาที)', rating: 4.3, ratingCount: 87, amenities: ['floodlit', 'parking', 'shower'],
+  }, [['คอร์ท 1', 'hard', false], ['คอร์ท 2', 'hard', false], ['คอร์ท 3', 'clay', false], ['คอร์ท 4', 'clay', false]],
+  [{ start: '06:00', end: '17:00', price: 280, label: 'Day', priority: 0 }, { start: '17:00', end: '22:00', price: 380, label: 'Evening', priority: 10 }]),
+];
+/** Everything a player can find. */
+const ALL_VENUES = [...VENUES, ...DEMO_VENUES];
+// Placeholder photos: stills rendered from the player app's intro court scene (apps/player/public/venue-photos). Each venue
+// gets the same five in a different order, so cards and galleries are not all identical.
+const PHOTOS = [1, 2, 3, 4, 5].map((n) => `/venue-photos/court-${n}.jpg`);
+const photosOf = (v: MockVenue) => { const k = ALL_VENUES.indexOf(v) % PHOTOS.length; return [...PHOTOS.slice(k), ...PHOTOS.slice(0, k)]; };
+for (const v of ALL_VENUES) v.s.coverImageUrl = photosOf(v)[0]!;
+
 // ---------------------------------------------------------------- helpers
 const OPEN = 6, CLOSE = 22, HOLD_MINUTES = 10;
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -264,7 +320,7 @@ function summary(v: MockVenue, loc?: { lat: number; lng: number }, date?: string
 }
 
 function findVenue(idOrSlug: string) {
-  const v = VENUES.find((x) => x.s.id === idOrSlug || x.s.slug === idOrSlug);
+  const v = ALL_VENUES.find((x) => x.s.id === idOrSlug || x.s.slug === idOrSlug);
   if (!v) throw new ApiError(404, 'venue_not_found', 'ไม่พบสนาม');
   return v;
 }
@@ -327,7 +383,7 @@ function requireAdmin() {
   if (requireUser().role !== 'platform_admin') throw new ApiError(403, 'forbidden', 'ไม่มีสิทธิ์เข้าถึง');
 }
 
-// ---- admin partners (A2): the four seed venues' partners + one waiting for approval
+// ---- admin partners (A2): the four seed venues' partners, the six demo venues' partners + one waiting for approval
 let partnerList: AdminPartner[] | null = null;
 function mockPartners(): AdminPartner[] {
   partnerList ??= [
@@ -335,6 +391,11 @@ function mockPartners(): AdminPartner[] {
       id: `partner-seed-${i + 1}`, legalName: `${v.s.nameEn} Co., Ltd.`, taxId: `01055${String(60000 + i)}1234`, bankName: 'KBank', bankAccount: `123-4-5678${i}-9`,
       commissionRate: 0.1, status: 'active', createdAt: new Date(Date.UTC(2026, 0, 5 + i)).toISOString(),
       ownerEmail: i === 0 ? 'owner@racquetclub.test' : null, ownerName: i === 0 ? 'Racquet Club Owner' : null,
+      venues: [{ id: v.s.id, slug: v.s.slug, nameTh: v.s.nameTh, nameEn: v.s.nameEn, status: 'active' }],
+    })),
+    ...DEMO_VENUES.map((v, i): AdminPartner => ({
+      id: `partner-demo-${i + 1}`, legalName: `${v.s.nameEn} Co., Ltd.`, taxId: `01055${String(61000 + i)}1234`, bankName: 'SCB', bankAccount: `234-5-6789${i}-0`,
+      commissionRate: 0.1, status: 'active', createdAt: new Date(Date.UTC(2026, 1, 10 + i)).toISOString(), ownerEmail: null, ownerName: null,
       venues: [{ id: v.s.id, slug: v.s.slug, nameTh: v.s.nameTh, nameEn: v.s.nameEn, status: 'active' }],
     })),
     {
@@ -532,7 +593,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
       await sleep(250);
       const loc = p.lat !== undefined && p.lng !== undefined ? { lat: p.lat, lng: p.lng } : undefined;
       const date = p.date ?? bangkokToday();
-      let items = VENUES
+      let items = ALL_VENUES
         .filter((v) => !p.surface || v.courts.some((c) => c.surface === p.surface))
         .filter((v) => !p.indoor || v.courts.some((c) => c.indoor))
         .filter((v) => !p.q || `${v.s.nameEn} ${v.s.nameTh} ${v.s.district}`.toLowerCase().includes(p.q.toLowerCase()))
@@ -550,7 +611,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
     async getVenue(id, loc): Promise<VenueDetail> {
       await sleep(150);
       const v = findVenue(id);
-      return { summary: summary(v, loc), cancelFreeHours: v.cancelFreeHours, courts: v.courts, addons: v.addons };
+      return { summary: summary(v, loc), cancelFreeHours: v.cancelFreeHours, courts: v.courts, addons: v.addons, photos: photosOf(v) };
     },
 
     async getAvailability(id, date) {
@@ -968,7 +1029,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
       return {
         gbv: days.reduce((t, d) => t + d.gbv, 0), takeRevenue: days.reduce((t, d) => t + d.take, 0),
         bookings: days.reduce((t, d) => t + d.bookings, 0), walkInBookings: 24,
-        activePartners: 4, activeVenues: VENUES.length, activeCourts: VENUES.reduce((t, v) => t + v.courts.length, 0), last30Days: days,
+        activePartners: ALL_VENUES.length, activeVenues: ALL_VENUES.length, activeCourts: ALL_VENUES.reduce((t, v) => t + v.courts.length, 0), last30Days: days,
       };
     },
 
@@ -1067,7 +1128,7 @@ export function createMockApi(opts: { getToken: () => string | null }): BkkApi {
       if (req.owner.password.length < 10) throw new ApiError(400, 'validation_failed', 'รหัสผ่านอย่างน้อย 10 ตัวอักษร');
       if (req.commissionRate !== null && (req.commissionRate < 0 || req.commissionRate > 0.5)) throw new ApiError(400, 'bad_commission', 'ค่าคอมมิชชั่นต้องอยู่ระหว่าง 0-50%');
       if (list.some((p) => p.ownerEmail === email) || email in MOCK_STAFF) throw new ApiError(409, 'email_taken', 'อีเมลนี้ถูกใช้แล้ว');
-      if (list.some((p) => p.venues.some((v) => v.slug === req.venue.slug)) || VENUES.some((v) => v.s.slug === req.venue.slug))
+      if (list.some((p) => p.venues.some((v) => v.slug === req.venue.slug)) || ALL_VENUES.some((v) => v.s.slug === req.venue.slug))
         throw new ApiError(409, 'slug_taken', 'slug นี้ถูกใช้แล้ว');
       const p: AdminPartner = {
         id: `partner-${settingsSeq++}`, legalName: req.legalName.trim(), taxId: req.taxId, bankName: req.bankName, bankAccount: req.bankAccount,

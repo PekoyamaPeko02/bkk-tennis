@@ -72,6 +72,8 @@ export interface VenueDetail {
   cancelFreeHours: number;
   courts: Court[];
   addons: Addon[];
+  /** Gallery image URLs, cover first. Optional: the .NET API does not send it yet (only the mock does). */
+  photos?: string[] | undefined;
 }
 
 export interface Slot {
