@@ -146,6 +146,7 @@ test('full booking flow in English: hold, QR, pay, confirmed, cancel with refund
   await expect(page).toHaveURL(/\/venues\//);
 
   await page.getByRole('radio', { name: /Tomorrow/ }).click();
+  await expect(page.getByTestId('venue-page')).toHaveAttribute('data-loading', 'false'); // tomorrow's slots, not today's stale grid
   const slots = page.locator('button.slot:not([disabled])');
   await expect(slots.first()).toBeVisible();
   await slots.nth(0).click();
@@ -162,6 +163,7 @@ test('full booking flow in English: hold, QR, pay, confirmed, cancel with refund
   await expect(page.getByRole('button', { name: /Sign in with LINE/ })).toBeVisible();
   await loginEn(page, '0812345670');
   await expect(page).toHaveURL(/\/venues\//);
+  await expect(page.getByTestId('venue-page')).toHaveAttribute('data-loading', 'false'); // venue + slots reloaded after the login redirect
   await page.getByRole('button', { name: 'Continue to payment' }).click();
 
   await expect(page).toHaveURL(/\/bookings\/[^/]+$/);
