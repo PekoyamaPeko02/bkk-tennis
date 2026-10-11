@@ -23,7 +23,7 @@ services:
   # ---------- เว็บ player ที่ต่อ API จริง ----------
   - type: web
     runtime: static
-    name: bkk-tennis-player-live
+    name: bkk-tennis-player
     buildCommand: npm install -g pnpm@9 && pnpm install --frozen-lockfile && cd apps/player && pnpm build
     staticPublishPath: apps/player/dist/spa
     envVars:
