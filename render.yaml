@@ -1,4 +1,45 @@
+# BKK Tennis - demo ฟรีทั้งหมด
+# 3 เว็บแรก = mock API (ไม่มี backend)  |  bkk-tennis-api + bkk-tennis-player-live = ต่อหลังบ้านจริง
+# ตัวแปรลับ (connection string, JWT, CORS) ไม่ใส่ในไฟล์นี้ ให้ตั้งใน Render > Environment
+
 services:
+  # ---------- Backend จริง (.NET 8, Docker, ฟรี) ----------
+  - type: web
+    runtime: docker
+    name: bkk-tennis-api
+    region: singapore
+    plan: free
+    # ใช้ Dockerfile เดิมของโปรเจกต์ (COPY อิงจากโฟลเดอร์ backend/)
+    dockerfilePath: ./backend/src/BkkTennis.Api/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      # Dockerfile เดิมฟังพอร์ต 8080 บอก Render ให้ตรงกัน
+      - key: PORT
+        value: "8080"
+      # Development = เปิด swagger, devCode ของ OTP และ /dev/simulate-payment (เหมาะกับ demo เท่านั้น)
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Development
+
+  # ---------- เว็บ player ที่ต่อ API จริง ----------
+  - type: web
+    runtime: static
+    name: bkk-tennis-player-live
+    buildCommand: npm install -g pnpm@9 && pnpm install --frozen-lockfile && cd apps/player && pnpm build
+    staticPublishPath: apps/player/dist/spa
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: API_MOCK
+        value: "false"
+      # แก้ให้ตรงกับ URL จริงของ API หลังสร้างเสร็จ (ดูในหน้า service)
+      - key: API_BASE
+        value: https://bkk-tennis-api.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  # ---------- 3 เว็บ mock เดิม (ห้ามลบ ไม่งั้น Render จะลบ service ตาม) ----------
   - type: web
     runtime: static
     name: bkk-tennis-player
