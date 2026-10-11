@@ -40,8 +40,6 @@ services:
         destination: /index.html
 
   # ---------- 3 เว็บ mock เดิม (ห้ามลบ ไม่งั้น Render จะลบ service ตาม) ----------
-  
-
   - type: web
     runtime: static
     name: bkk-tennis-clubos
